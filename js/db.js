@@ -1,131 +1,96 @@
-/*********************************
- * db.js
- * Offline Database Layer
- *********************************/
+// js/db.js
+// ===============================
+// Simple LocalStorage Database
+// ===============================
 
-// اسم التخزين
-const STORAGE_KEY = "POS_PRO_DB_V1";
-
-// الهيكل الافتراضي
-const DEFAULT_DB = {
-  meta: {
-    version: "1.0",
-    createdAt: new Date().toISOString()
-  },
-
-  settings: {
-    storeName: "",
-    storePhone: "",
-    storeLogo: "",
-    printType: "A4" // A4 | thermal
-  },
-
-  products: [],
-  customers: [],
-  suppliers: [],
-  agents: [],
-
-  invoices: [],
-  purchases: [],
-  returns: [],
-
-  expenses: [],
-  cashbox: [],
-
-  inventoryLogs: []
+const DB = {
+  products: "pos_products",
+  customers: "pos_customers",
+  suppliers: "pos_suppliers",
+  expenses: "pos_expenses",
+  sales: "pos_sales",
+  settings: "pos_settings",
+  reps: "pos_reps"
 };
 
-/*********************************
- * تحميل / حفظ
- *********************************/
-function loadDB() {
-  const data = localStorage.getItem(STORAGE_KEY);
-  if (!data) {
-    saveDB(DEFAULT_DB);
-    return structuredClone(DEFAULT_DB);
-  }
-  try {
-    return JSON.parse(data);
-  } catch (e) {
-    console.error("DB Corrupted, Resetting...");
-    saveDB(DEFAULT_DB);
-    return structuredClone(DEFAULT_DB);
-  }
+// ---------- Helpers ----------
+function getData(key) {
+  return JSON.parse(localStorage.getItem(key)) || [];
 }
 
-function saveDB(db) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+function setData(key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
 }
 
-// قاعدة البيانات في الذاكرة
-let DB = loadDB();
-
-/*********************************
- * أدوات عامة
- *********************************/
-function generateId(prefix = "ID") {
-  return (
-    prefix +
-    "_" +
-    Date.now().toString(36) +
-    Math.random().toString(36).substr(2, 5)
-  );
+function generateId() {
+  return Date.now();
 }
 
-function getNextInvoiceNumber() {
-  const last = DB.invoices.at(-1);
-  return last ? last.number + 1 : 1;
+// ---------- Products ----------
+function getProducts() {
+  return getData(DB.products);
 }
 
-function commit() {
-  saveDB(DB);
+// ---------- Customers ----------
+function getCustomers() {
+  return getData(DB.customers);
 }
 
-/*********************************
- * CRUD Helpers
- *********************************/
-function addItem(collection, item) {
-  item.id = item.id || generateId(collection.toUpperCase());
-  DB[collection].push(item);
-  commit();
-  return item;
+function addCustomer(customer) {
+  const customers = getCustomers();
+  customers.push({ id: generateId(), ...customer });
+  setData(DB.customers, customers);
 }
 
-function updateItem(collection, id, data) {
-  const index = DB[collection].findIndex(i => i.id === id);
-  if (index === -1) return false;
-  DB[collection][index] = { ...DB[collection][index], ...data };
-  commit();
-  return true;
+// ---------- Suppliers ----------
+function getSuppliers() {
+  return getData(DB.suppliers);
 }
 
-function deleteItem(collection, id) {
-  DB[collection] = DB[collection].filter(i => i.id !== id);
-  commit();
+function addSupplier(supplier) {
+  const suppliers = getSuppliers();
+  suppliers.push({ id: generateId(), ...supplier });
+  setData(DB.suppliers, suppliers);
 }
 
-function getItem(collection, id) {
-  return DB[collection].find(i => i.id === id) || null;
+// ---------- Expenses ----------
+function getExpenses() {
+  return getData(DB.expenses);
 }
 
-/*********************************
- * كشف عام (Global Access)
- *********************************/
-window.POS_DB = {
-  get DB() {
-    return DB;
-  },
-  set DB(val) {
-    DB = val;
-    commit();
-  },
+function addExpense(expense) {
+  const expenses = getExpenses();
+  expenses.push({ id: generateId(), ...expense });
+  setData(DB.expenses, expenses);
+}
 
-  addItem,
-  updateItem,
-  deleteItem,
-  getItem,
+// ---------- Sales ----------
+function getSales() {
+  return getData(DB.sales);
+}
 
-  generateId,
-  getNextInvoiceNumber,
-  commit
-};
+function saveSale(sale) {
+  const sales = getSales();
+  sales.push({ id: generateId(), date: new Date().toISOString(), ...sale });
+  setData(DB.sales, sales);
+}
+
+// ---------- Settings ----------
+function getSettings() {
+  return JSON.parse(localStorage.getItem(DB.settings)) || {};
+}
+
+function saveSettings(settings) {
+  localStorage.setItem(DB.settings, JSON.stringify(settings));
+}
+
+// ---------- Representatives ----------
+function getReps() {
+  return getData(DB.reps);
+}
+
+function addRep(name) {
+  const reps = getReps();
+  reps.push({ id: generateId(), name });
+  setData(DB.reps, reps);
+}
