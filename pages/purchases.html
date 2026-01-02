@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>المشتريات</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <div class="sidebar">
+    <h2>POS</h2>
+    <a href="sales.html">🛒 المبيعات</a>
+    <a href="purchases.html" class="active">📥 المشتريات</a>
+    <a href="products.html">📦 الأصناف</a>
+    <a href="suppliers.html">🚚 الموردين</a>
+    <a href="reports.html">📊 التقارير</a>
+  </div>
+
+  <div class="main">
+
+    <div class="header">
+      <h3>المشتريات</h3>
+    </div>
+
+    <div class="content">
+
+      <div class="card">
+        <select>
+          <option>اختر المورد</option>
+        </select>
+        <input placeholder="اسم الصنف">
+        <input type="number" placeholder="الكمية">
+        <input type="number" placeholder="سعر الشراء">
+        <button>إضافة</button>
+      </div>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>المورد</th>
+              <th>الصنف</th>
+              <th>الكمية</th>
+              <th>الإجمالي</th>
+              <th>التاريخ</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>
