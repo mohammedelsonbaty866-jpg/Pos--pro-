@@ -4,6 +4,36 @@
   <meta charset="UTF-8" />
   <title>فاتورة بيع</title>
   <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    #searchResults {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      border: 1px solid #ccc;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    #searchResults li {
+      padding: 5px;
+      cursor: pointer;
+    }
+    #searchResults li:hover {
+      background: #eee;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 15px;
+      width: 300px;
+    }
+  </style>
 </head>
 <body>
 
@@ -23,7 +53,7 @@
 
 <!-- Invoice Items -->
 <div class="card">
-  <table>
+  <table border="1" width="100%">
     <thead>
       <tr>
         <th>#</th>
@@ -38,10 +68,37 @@
   </table>
 </div>
 
+<!-- Customer & Payment -->
+<div class="card">
+  <label>العميل</label>
+  <select id="customerSelect">
+    <option value="">عميل نقدي</option>
+  </select>
+  <button id="addCustomerBtn">+ إضافة عميل</button>
+
+  <label>طريقة الدفع</label>
+  <select id="paymentType">
+    <option value="cash">نقدي</option>
+    <option value="credit">آجل</option>
+  </select>
+</div>
+
 <!-- Total -->
 <div class="card">
   <h3>الإجمالي: <span id="totalAmount">0</span></h3>
   <button id="saveInvoiceBtn">حفظ الفاتورة</button>
+  <button id="printInvoiceBtn">طباعة</button>
+</div>
+
+<!-- Add Customer Modal -->
+<div class="modal" id="customerModal">
+  <div class="modal-content">
+    <h3>إضافة عميل</h3>
+    <input type="text" id="newCustomerName" placeholder="اسم العميل" />
+    <br><br>
+    <button id="saveCustomerBtn">حفظ</button>
+    <button onclick="closeCustomerModal()">إلغاء</button>
+  </div>
 </div>
 
 <script src="../js/db.js"></script>
