@@ -1,48 +1,130 @@
-@page {
-  size: 80mm auto;
-  margin: 0;
-}
-
-body {
-  width: 80mm;
-  margin: 0;
-  padding: 6px;
-  font-family: Tahoma;
-  direction: rtl;
-  font-size: 12px;
-}
+/* =========================
+   THERMAL RECEIPT STYLE
+   ========================= */
 
 .invoice {
-  width: 100%;
+  width: 80mm;
+  margin: auto;
+  padding: 4mm;
+  font-family: Tahoma, Arial;
+  font-size: 12px;
+  color: #000;
 }
 
-.center {
+/* =========================
+   HEADER
+   ========================= */
+
+.invoice-header {
   text-align: center;
 }
 
-.row,
-.total-row {
-  display: flex;
-  justify-content: space-between;
-  margin: 4px 0;
+.invoice-header img {
+  max-width: 100%;
+  max-height: 70px;
+  margin-bottom: 5px;
 }
 
-hr {
-  border: 1px dashed #000;
+.invoice-header h2 {
+  margin: 4px 0;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.invoice-header p {
+  margin: 2px 0;
+  font-size: 11px;
+}
+
+/* =========================
+   INFO
+   ========================= */
+
+.invoice-info {
+  font-size: 11px;
+  margin: 5px 0;
+}
+
+.invoice-info p {
+  margin: 2px 0;
+}
+
+/* =========================
+   SEPARATOR
+   ========================= */
+
+.invoice hr {
+  border: none;
+  border-top: 1px dashed #000;
   margin: 6px 0;
 }
 
-table {
+/* =========================
+   TABLE
+   ========================= */
+
+.invoice table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 11px;
 }
 
-th, td {
-  text-align: center;
+.invoice th {
+  border-bottom: 1px solid #000;
   padding: 3px 0;
+  font-weight: bold;
 }
 
-.total-row {
+.invoice td {
+  padding: 3px 0;
+  border-bottom: 1px dotted #ccc;
+}
+
+.invoice th,
+.invoice td {
+  text-align: center;
+}
+
+/* =========================
+   TOTAL
+   ========================= */
+
+.invoice h3 {
+  text-align: center;
   font-size: 14px;
+  margin: 8px 0 4px;
   font-weight: bold;
+}
+
+/* =========================
+   FOOTER
+   ========================= */
+
+.invoice-footer {
+  text-align: center;
+  font-size: 11px;
+  margin-top: 6px;
+}
+
+.invoice-footer p {
+  margin: 2px 0;
+}
+
+/* =========================
+   58mm SUPPORT
+   ========================= */
+
+@media (max-width: 58mm) {
+  .invoice {
+    width: 58mm;
+    font-size: 11px;
+  }
+
+  .invoice-header h2 {
+    font-size: 14px;
+  }
+
+  .invoice h3 {
+    font-size: 13px;
+  }
 }
