@@ -47,7 +47,13 @@ function profitLossReport() {
 
       db.transaction("expenses").objectStore("expenses").getAll().onsuccess = ex => {
         ex.target.result.forEach(e => expensesTotal += e.amount);
-
+db.transaction("returns").objectStore("returns").getAll()
+.onsuccess = r => {
+  r.target.result.forEach(ret => {
+    if (ret.type === "sale") salesTotal -= ret.amount;
+    if (ret.type === "purchase") purchasesTotal -= ret.amount;
+  });
+};
         const profit = salesTotal - purchasesTotal - expensesTotal;
 
         reportResult.innerHTML = `
