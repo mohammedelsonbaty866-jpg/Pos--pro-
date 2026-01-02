@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
 <meta charset="UTF-8">
 <title>المبيعات</title>
@@ -7,20 +7,77 @@
 </head>
 <body>
 
-<h2>فاتورة بيع</h2>
+<div class="app">
 
-<select id="payment">
-  <option value="cash">نقدي</option>
-  <option value="credit">آجل</option>
-</select>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>POS</h2>
+    <a href="../dashboard.html">🏠 الرئيسية</a>
+    <a href="sales.html">🛒 المبيعات</a>
+    <a href="products.html">📦 الأصناف</a>
+    <a href="reports.html">📊 التقارير</a>
+  </div>
 
-<input id="total" placeholder="الإجمالي">
-<button onclick="saveSale()">حفظ</button>
+  <!-- Main -->
+  <div class="main">
+
+    <div class="header">
+      <h3>شاشة المبيعات</h3>
+      <span>فاتورة جديدة</span>
+    </div>
+
+    <div class="content">
+
+      <div class="card">
+
+        <!-- Top -->
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:15px">
+
+          <!-- Products -->
+          <div>
+            <input id="search" placeholder="🔍 بحث عن صنف" onkeyup="loadProducts()">
+
+            <div id="products"
+              style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:10px">
+            </div>
+          </div>
+
+          <!-- Cart -->
+          <div>
+            <h4>🧾 سلة البيع</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th>صنف</th>
+                  <th>ك</th>
+                  <th>ج</th>
+                </tr>
+              </thead>
+              <tbody id="cart"></tbody>
+            </table>
+
+            <h3>الإجمالي: <span id="total">0</span> ج</h3>
+
+            <select id="payment">
+              <option value="نقدي">نقدي</option>
+              <option value="آجل">آجل</option>
+            </select>
+
+            <button onclick="saveSale()">💾 حفظ</button>
+            <button onclick="print()">🖨️ طباعة</button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
 
 <script src="../js/db.js"></script>
-<script src="../js/sales.js"></script>  
-  <script>
-    localStorage.setItem("printInvoice", JSON.stringify(invoiceData));
-window.open("invoice-print.html");
+<script src="../js/sales.js"></script>
 </body>
 </html>
