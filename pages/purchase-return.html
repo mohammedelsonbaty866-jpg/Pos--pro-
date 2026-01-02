@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>مرتجع شراء</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div class="app">
+
+<div class="sidebar">
+  <h2>POS</h2>
+  <a href="purchase-return.html" class="active">↩️ مرتجع شراء</a>
+</div>
+
+<div class="main">
+<div class="header"><h3>مرتجع شراء</h3></div>
+
+<div class="content">
+
+<div class="card">
+  <input id="amount" type="number" placeholder="قيمة المرتجع">
+  <select id="payment">
+    <option value="نقدي">نقدي</option>
+    <option value="آجل">آجل</option>
+  </select>
+  <select id="supplier"></select>
+  <button onclick="savePurchaseReturn()">حفظ المرتجع</button>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<script src="../js/db.js"></script>
+<script src="../js/purchase-return.js"></script>
+</body>
+</html>
