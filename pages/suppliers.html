@@ -1,60 +1,82 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>الموردين</title>
-<link rel="stylesheet" href="../css/style.css">
+  <meta charset="UTF-8" />
+  <title>الموردين</title>
+
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/mobile.css" />
 </head>
 <body>
 
 <div class="app">
 
+  <!-- Sidebar -->
   <div class="sidebar">
-    <h2>POS</h2>
-    <a href="purchases.html">📥 المشتريات</a>
-    <a href="suppliers.html" class="active">🚚 الموردين</a>
+    <h2>POS PRO</h2>
+    <a href="sales.html">🛒 المبيعات</a>
+    <a href="products.html">📦 الأصناف</a>
+    <a href="customers.html">👥 العملاء</a>
+    <a href="suppliers.html" class="active">🏭 الموردين</a>
+    <a href="expenses.html">💸 المصروفات</a>
+    <a href="reports.html">📊 التقارير</a>
+    <a href="settings.html">⚙️ الإعدادات</a>
   </div>
 
+  <!-- Main -->
   <div class="main">
 
+    <!-- Header -->
     <div class="header">
-      <h3>الموردين</h3>
-      <button>➕ مورد جديد</button>
+      <h3>إدارة الموردين</h3>
     </div>
 
+    <!-- Content -->
     <div class="content">
 
+      <!-- Add Supplier -->
       <div class="card">
-<input id="supName" placeholder="اسم المورد">
-<input id="supPhone" placeholder="رقم الهاتف">
-<input id="supBalance" type="number" placeholder="رصيد افتتاحي">
-<button onclick="addSupplier()">حفظ</button>
+        <h4>إضافة مورد</h4>
 
-<tbody id="suppliersTable"></tbody>
+        <label>اسم المورد</label>
+        <input type="text" id="supName" placeholder="اسم المورد" />
 
-<script src="../js/db.js"></script>
-<script src="../js/suppliers.js"></script>
-        <button>حفظ</button>
+        <label>رقم الهاتف</label>
+        <input type="text" id="supPhone" placeholder="01xxxxxxxxx" />
+
+        <label>الرصيد الافتتاحي</label>
+        <input type="number" id="supBalance" value="0" />
+
+        <button data-action="add-supplier">➕ إضافة مورد</button>
       </div>
 
+      <!-- Suppliers Table -->
       <div class="card">
+        <h4>قائمة الموردين</h4>
+
         <table>
           <thead>
             <tr>
+              <th>#</th>
               <th>الاسم</th>
               <th>الهاتف</th>
               <th>الرصيد</th>
+              <th>حذف</th>
             </tr>
           </thead>
-          <tbody></tbody>
+          <tbody id="suppliersTable"></tbody>
         </table>
       </div>
 
     </div>
-
   </div>
-
 </div>
+
+<!-- Scripts -->
+<script src="../js/db.js"></script>
+<script src="../js/ui.js"></script>
+<script src="../js/events.js"></script>
+<script src="../js/suppliers.js"></script>
 
 </body>
 </html>
