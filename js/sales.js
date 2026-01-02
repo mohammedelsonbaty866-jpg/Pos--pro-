@@ -19,3 +19,16 @@ function saveSale() {
 
   alert("تم حفظ الفاتورة");
 }
+function saveSale() {
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  db.transaction("sales", "readwrite")
+    .objectStore("sales")
+    .add({
+      total: Number(total.value),
+      date: new Date().toLocaleString(),
+      agent: user.username
+    });
+
+  alert("تم تسجيل البيع");
+}
