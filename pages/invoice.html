@@ -2,71 +2,65 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>عرض الفاتورة</title>
+  <title>فاتورة بيع</title>
 
   <link rel="stylesheet" href="../css/style.css" />
   <link rel="stylesheet" href="../css/print.css" />
 </head>
 <body>
 
-<div class="app">
+<div class="invoice" id="invoice">
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <h2>POS PRO</h2>
-    <a href="sales.html">🛒 المبيعات</a>
-    <a href="products.html">📦 الأصناف</a>
-    <a href="customers.html">👥 العملاء</a>
-    <a href="reports.html">📊 التقارير</a>
-    <a href="settings.html">⚙️ الإعدادات</a>
+  <!-- Header -->
+  <div class="invoice-header">
+    <img id="storeLogo" style="max-height:80px; display:none;" />
+    <h2 id="storeName">اسم المتجر</h2>
+    <p>رقم المتجر: <span id="storePhone"></span></p>
   </div>
 
-  <!-- Main -->
-  <div class="main">
-    <div class="header">
-      <h3>فاتورة بيع</h3>
-    </div>
+  <hr>
 
-    <div class="content">
-
-      <!-- Invoice Info -->
-      <div class="card">
-        <p>رقم الفاتورة: <strong id="invNo"></strong></p>
-        <p>التاريخ: <strong id="invDate"></strong></p>
-        <p>العميل: <strong id="invCustomer"></strong></p>
-        <p>طريقة الدفع: <strong id="invPayment"></strong></p>
-      </div>
-
-      <!-- Items -->
-      <div class="card">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>الصنف</th>
-              <th>الكمية</th>
-              <th>السعر</th>
-              <th>الإجمالي</th>
-            </tr>
-          </thead>
-          <tbody id="items"></tbody>
-        </table>
-      </div>
-
-      <!-- Total -->
-      <div class="card">
-        <h2>الإجمالي: <span id="invTotal"></span></h2>
-        <button data-action="print-invoice">🖨 طباعة</button>
-      </div>
-
-    </div>
+  <!-- Info -->
+  <div class="invoice-info">
+    <p>رقم الفاتورة: <strong id="invNo"></strong></p>
+    <p>التاريخ: <strong id="invDate"></strong></p>
+    <p>العميل: <strong id="invCustomer"></strong></p>
+    <p>طريقة الدفع: <strong id="invPayment"></strong></p>
   </div>
+
+  <hr>
+
+  <!-- Items -->
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>الصنف</th>
+        <th>الكمية</th>
+        <th>السعر</th>
+        <th>الإجمالي</th>
+      </tr>
+    </thead>
+    <tbody id="items"></tbody>
+  </table>
+
+  <hr>
+
+  <!-- Total -->
+  <h3 style="text-align:center">
+    الإجمالي: <span id="invTotal"></span>
+  </h3>
+
+  <!-- Actions -->
+  <div class="no-print" style="text-align:center;margin-top:20px">
+    <button onclick="window.print()">🖨 طباعة</button>
+  </div>
+
 </div>
 
 <!-- Scripts -->
 <script src="../js/db.js"></script>
 <script src="../js/ui.js"></script>
-<script src="../js/events.js"></script>
 <script src="../js/invoice.js"></script>
 
 </body>
