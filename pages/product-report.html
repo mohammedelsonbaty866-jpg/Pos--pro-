@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>تقرير حسب الصنف</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <div class="sidebar">
+    <h2>POS</h2>
+    <a href="product-report.html" class="active">📊 تقرير الأصناف</a>
+  </div>
+
+  <div class="main">
+
+    <div class="header">
+      <h3>تقرير حسب الصنف</h3>
+    </div>
+
+    <div class="content">
+
+      <div class="card">
+        <button onclick="loadProductReport()">تحميل التقرير</button>
+      </div>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>الصنف</th>
+              <th>مباع (كمية)</th>
+              <th>مبيعات</th>
+              <th>مشتريات</th>
+              <th>الربح</th>
+              <th>المخزون الحالي</th>
+            </tr>
+          </thead>
+          <tbody id="reportTable"></tbody>
+        </table>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="../js/db.js"></script>
+<script src="../js/product-report.js"></script>
+</body>
+</html>
