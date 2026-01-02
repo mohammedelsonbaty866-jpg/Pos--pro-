@@ -30,9 +30,24 @@
         <select>
           <option>اختر المورد</option>
         </select>
-        <input placeholder="اسم الصنف">
-        <input type="number" placeholder="الكمية">
-        <input type="number" placeholder="سعر الشراء">
+        <select id="supplierSelect"></select>
+
+<select id="productSelect"></select>
+
+<input id="purchaseQty" type="number" placeholder="الكمية">
+<input id="purchasePrice" type="number" placeholder="سعر الشراء">
+
+<select id="purchasePayment">
+  <option value="نقدي">نقدي</option>
+  <option value="آجل">آجل</option>
+</select>
+
+<button onclick="addPurchase()">حفظ الفاتورة</button>
+
+<tbody id="purchasesTable"></tbody>
+
+<script src="../js/db.js"></script>
+<script src="../js/purchases.js"></script>
         <button>إضافة</button>
       </div>
 
