@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>الأصناف</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<h2>إضافة صنف</h2>
+
+<input id="name" placeholder="اسم الصنف">
+<input id="price" placeholder="سعر البيع">
+<input id="cost" placeholder="سعر الشراء">
+
+<select id="unit">
+  <option>قطعة</option>
+  <option>باكو</option>
+  <option>كرتونة</option>
+</select>
+
+<input id="packQty" placeholder="عدد القطع في الباكو">
+<input id="cartonQty" placeholder="عدد الباكو في الكرتونة">
+
+<button onclick="addProduct()">حفظ</button>
+
+<script src="../js/db.js"></script>
+<script src="../js/products.js"></script>
+</body>
+</html>
