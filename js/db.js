@@ -92,3 +92,10 @@ if (!db.objectStoreNames.contains("purchases")) {
     autoIncrement: true
   });
 }
+// داخل onupgradeneeded لو مش موجود
+if (!db.objectStoreNames.contains("sales")) {
+  db.createObjectStore("sales", {
+    keyPath: "id",
+    autoIncrement: true
+  });
+}
