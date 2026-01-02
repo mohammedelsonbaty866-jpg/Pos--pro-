@@ -46,3 +46,34 @@ db.transaction("inventory_logs","readwrite")
     diff,
     date: new Date().toLocaleString()
   });
+let db;
+
+const request = indexedDB.open("POS_DB", 1);
+
+request.onupgradeneeded = e => {
+  db = e.target.result;
+
+  // العملاء
+  if (!db.objectStoreNames.contains("customers")) {
+    db.createObjectStore("customers", {
+      keyPath: "id",
+      autoIncrement: true
+    });
+  }
+
+  // الموردين
+  if (!db.objectStoreNames.contains("suppliers")) {
+    db.createObjectStore("suppliers", {
+      keyPath: "id",
+      autoIncrement: true
+    });
+  }
+};
+
+request.onsuccess = e => {
+  db = e.target.result;
+};
+
+request.onerror = () => {
+  alert("خطأ في فتح قاعدة البيانات");
+};
