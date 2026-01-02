@@ -1,70 +1,45 @@
-/*********************************
- * events.js
- * Global Events Handler
- *********************************/
-
 document.addEventListener("DOMContentLoaded", () => {
-  bindActions();
+  document.body.addEventListener("click", handleActions);
 });
 
-/*********************************
- * ربط الأزرار
- *********************************/
-function bindActions() {
-  document.querySelectorAll("[data-action]").forEach(btn => {
-    btn.addEventListener("click", handleAction);
-  });
-}
+function handleActions(e) {
+  const btn = e.target.closest("[data-action]");
+  if (!btn) return;
 
-/*********************************
- * Router للأحداث
- *********************************/
-function handleAction(e) {
-  const action = e.currentTarget.dataset.action;
-
-  if (!action) return;
+  const action = btn.dataset.action;
 
   switch (action) {
-    case "add-product":
-      if (window.addProduct) addProduct();
-      break;
-
-    case "delete-product":
-      if (window.deleteProduct)
-        deleteProduct(e.currentTarget.dataset.id);
-      break;
-
-    case "add-customer":
-      if (window.addCustomer) addCustomer();
-      break;
-
-    case "delete-customer":
-      if (window.deleteCustomer)
-        deleteCustomer(e.currentTarget.dataset.id);
-      break;
-
-    case "add-supplier":
-      if (window.addSupplier) addSupplier();
-      break;
-
-    case "delete-supplier":
-      if (window.deleteSupplier)
-        deleteSupplier(e.currentTarget.dataset.id);
+    case "add-to-cart":
+      if (typeof addItemToInvoice === "function") {
+        addItemToInvoice();
+      }
       break;
 
     case "save-invoice":
-      if (window.saveInvoice) saveInvoice();
+      if (typeof saveInvoice === "function") {
+        saveInvoice();
+      }
       break;
 
-    case "print-invoice":
-      window.print();
+    case "add-customer":
+      if (typeof addCustomer === "function") {
+        addCustomer();
+      }
       break;
 
-    case "save-settings":
-      if (window.saveSettings) saveSettings();
+    case "add-supplier":
+      if (typeof addSupplier === "function") {
+        addSupplier();
+      }
+      break;
+
+    case "add-expense":
+      if (typeof addExpense === "function") {
+        addExpense();
+      }
       break;
 
     default:
-      console.warn("Unhandled action:", action);
+      console.warn("Unknown action:", action);
   }
 }
