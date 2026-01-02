@@ -1,34 +1,96 @@
-function saveSale() {
-  const tx = db.transaction("sales", "readwrite");
-  tx.objectStore("sales").add({
-    date: new Date().toLocaleDateString(),
-    total: Number(total.value),
-    payment: payment.value
-  });
-  alert("تم تسجيل البيع");
+let cart = [];
+let grandTotal = 0;
+
+// تحميل المنتجات
+function loadProducts() {
+  const keyword = search.value || "";
+  const tx = db.transaction("products", "readonly");
+  tx.objectStore("products").getAll().onsuccess = e => {
+    products.innerHTML = "";
+    e.target.result
+      .filter(p => p.name.includes(keyword))
+      .forEach(p => {
+        products.innerHTML += `
+          <button onclick="addToCart(${p.id})">
+            ${p.name}<br>${p.price} ج
+          </button>
+        `;
+      });
+  };
 }
-function saveSale() {
-  const tx = db.transaction("sales", "readwrite");
-  tx.objectStore("sales").add({
-    invoiceNo: invoiceNo.value,
-    customer: customer.value,
-    payment: payment.value,
-    total: Number(total.value),
-    date: new Date().toLocaleString()
+
+// إضافة للسلة
+function addToCart(id) {
+  const tx = db.transaction("products", "readonly");
+  tx.objectStore("products").get(id).onsuccess = e => {
+    const p = e.target.result;
+    const item = cart.find(i => i.id === id);
+
+    if (item) {
+      item.qty++;
+    } else {
+      cart.push({ ...p, qty: 1 });
+    }
+    renderCart();
+  };
+}
+
+// عرض السلة
+function renderCart() {
+  cart.innerHTML = "";
+  grandTotal = 0;
+
+  cart.forEach(i => {
+    const total = i.qty * i.price;
+    grandTotal += total;
+
+    cartEl.innerHTML += `
+      <tr>
+        <td>${i.name}</td>
+        <td>${i.qty}</td>
+        <td>${total}</td>
+      </tr>
+    `;
   });
 
-  alert("تم حفظ الفاتورة");
+  total.innerText = grandTotal;
 }
+
+// حفظ الفاتورة
 function saveSale() {
+  if (!cart.length) {
+    alert("السلة فارغة");
+    return;
+  }
+
   const user = JSON.parse(localStorage.getItem("user"));
 
   db.transaction("sales", "readwrite")
     .objectStore("sales")
     .add({
-      total: Number(total.value),
       date: new Date().toLocaleString(),
-      agent: user.username
+      items: cart,
+      total: grandTotal,
+      payment: payment.value,
+      agent: user?.username || "admin"
     });
 
-  alert("تم تسجيل البيع");
+  // تحديث المخزون
+  const tx = db.transaction("products", "readwrite");
+  const store = tx.objectStore("products");
+
+  cart.forEach(i => {
+    store.get(i.id).onsuccess = e => {
+      const p = e.target.result;
+      p.stock -= i.qty;
+      store.put(p);
+    };
+  });
+
+  alert("تم حفظ الفاتورة");
+  cart = [];
+  renderCart();
 }
+
+// تحميل أولي
+setTimeout(loadProducts, 500);
