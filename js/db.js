@@ -1,5 +1,5 @@
 let db;
-const request = indexedDB.open("POS_DB", 1);
+const request = indexedDB.open("POS_DB", 2);
 
 request.onupgradeneeded = e => {
   db = e.target.result;
