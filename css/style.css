@@ -1,15 +1,23 @@
+/* =========================
+   GLOBAL
+   ========================= */
+
 * {
   box-sizing: border-box;
-  font-family: "Segoe UI", Tahoma;
+  font-family: "Segoe UI", Tahoma, Arial;
 }
 
 body {
   margin: 0;
   background: #f4f6f9;
   direction: rtl;
+  color: #1f2937;
 }
 
-/* ===== Layout ===== */
+/* =========================
+   LAYOUT
+   ========================= */
+
 .app {
   display: flex;
   min-height: 100vh;
@@ -25,6 +33,7 @@ body {
 .sidebar h2 {
   text-align: center;
   margin-bottom: 20px;
+  font-size: 20px;
 }
 
 .sidebar a {
@@ -34,22 +43,29 @@ body {
   padding: 10px;
   margin-bottom: 5px;
   border-radius: 6px;
+  transition: .2s;
 }
 
-.sidebar a:hover {
+.sidebar a:hover,
+.sidebar a.active {
   background: #334155;
   color: #fff;
 }
 
-/* ===== Header ===== */
+/* =========================
+   MAIN
+   ========================= */
+
 .main {
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
   background: #fff;
-  padding: 15px;
-  border-bottom: 1px solid #ddd;
+  padding: 15px 20px;
+  border-bottom: 1px solid #e5e7eb;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -57,61 +73,113 @@ body {
 
 .header h3 {
   margin: 0;
+  font-size: 18px;
 }
 
-/* ===== Content ===== */
 .content {
   padding: 20px;
 }
+
+/* =========================
+   CARDS
+   ========================= */
 
 .card {
   background: #fff;
   padding: 20px;
   border-radius: 10px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 5px rgba(0,0,0,.05);
+  box-shadow: 0 2px 6px rgba(0,0,0,.06);
 }
 
-/* ===== Forms ===== */
-input, select, button {
+.card h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+/* =========================
+   FORMS
+   ========================= */
+
+label {
+  display: block;
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+input,
+select,
+button {
   width: 100%;
   padding: 10px;
-  margin: 8px 0;
+  margin-top: 6px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #2563eb;
 }
 
 button {
+  margin-top: 15px;
   background: #2563eb;
   border: none;
   color: #fff;
-  border-radius: 6px;
   cursor: pointer;
+  font-weight: 600;
 }
 
 button:hover {
   background: #1d4ed8;
 }
 
-/* ===== Tables ===== */
+button.danger {
+  background: #dc2626;
+}
+
+button.danger:hover {
+  background: #b91c1c;
+}
+
+/* =========================
+   TABLES
+   ========================= */
+
 table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 10px;
 }
 
-th, td {
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-  text-align: center;
-}
-
-th {
+thead {
   background: #f1f5f9;
 }
 
-/* ===== Stats ===== */
+th,
+td {
+  padding: 10px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
+  font-size: 14px;
+}
+
+th {
+  font-weight: 600;
+}
+
+/* =========================
+   STATS
+   ========================= */
+
 .stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
   gap: 15px;
+  margin-bottom: 20px;
 }
 
 .stat {
@@ -120,13 +188,80 @@ th {
   padding: 15px;
   border-radius: 10px;
 }
-.sidebar a.active {
-  background: #2563eb;
-  color: #fff;
+
+.stat h4 {
+  margin: 0;
+  font-size: 15px;
 }
-/* ===== Mobile ===== */
+
+.stat p {
+  margin: 8px 0 0;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* =========================
+   INVOICE (SCREEN)
+   ========================= */
+
+.invoice {
+  background: #fff;
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.invoice-header {
+  text-align: center;
+}
+
+.invoice-info p {
+  margin: 4px 0;
+}
+
+/* =========================
+   ALERTS (UI)
+   ========================= */
+
+.alert {
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+}
+
+.alert.success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.alert.error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* =========================
+   UTILITIES
+   ========================= */
+
+.no-print {
+  display: block;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
 @media (max-width: 768px) {
   .sidebar {
     display: none;
+  }
+
+  .content {
+    padding: 15px;
+  }
+
+  table {
+    font-size: 13px;
   }
 }
