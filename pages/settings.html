@@ -1,69 +1,93 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>الإعدادات</title>
-<link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="../css/buttons.css">
-<link rel="stylesheet" href="../css/mobile.css">
+  <meta charset="UTF-8" />
+  <title>الإعدادات</title>
+
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/mobile.css" />
 </head>
 <body>
 
 <div class="app">
 
-<div class="sidebar">
-  <h2>POS</h2>
-  <a href="settings.html" class="active">⚙️ الإعدادات</a>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>POS PRO</h2>
+    <a href="sales.html">🛒 المبيعات</a>
+    <a href="products.html">📦 الأصناف</a>
+    <a href="customers.html">👥 العملاء</a>
+    <a href="suppliers.html">🏭 الموردين</a>
+    <a href="expenses.html">💸 المصروفات</a>
+    <a href="reports.html">📊 التقارير</a>
+    <a href="settings.html" class="active">⚙️ الإعدادات</a>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <div class="header">
+      <h3>إعدادات النظام</h3>
+    </div>
+
+    <div class="content">
+
+      <!-- Store Info -->
+      <div class="card">
+        <h4>بيانات المتجر</h4>
+
+        <label>اسم المتجر</label>
+        <input type="text" id="setStoreName" />
+
+        <label>رقم المتجر</label>
+        <input type="text" id="setStorePhone" />
+
+        <label>لوجو المتجر</label>
+        <input type="file" id="setStoreLogo" accept="image/*" />
+
+        <button data-action="save-settings">💾 حفظ الإعدادات</button>
+      </div>
+
+      <!-- Agents -->
+      <div class="card">
+        <h4>إضافة مندوب</h4>
+
+        <label>اسم المندوب</label>
+        <input type="text" id="agentName" />
+
+        <button data-action="add-agent">➕ إضافة مندوب</button>
+
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>الاسم</th>
+              <th>حذف</th>
+            </tr>
+          </thead>
+          <tbody id="agentsTable"></tbody>
+        </table>
+      </div>
+
+      <!-- Print -->
+      <div class="card">
+        <h4>إعدادات الطباعة</h4>
+
+        <label>
+          <input type="checkbox" id="printAuto" />
+          طباعة تلقائية بعد البيع
+        </label>
+      </div>
+
+    </div>
+  </div>
 </div>
 
-<div class="main">
-<div class="header">
-  <h3>إعدادات النظام</h3>
-</div>
-
-<div class="content">
-
-<!-- إعدادات المتجر -->
-<div class="card">
-  <h4>🏪 بيانات المتجر</h4>
-  <input id="storeName" placeholder="اسم المتجر">
-  <input id="storePhone" placeholder="رقم المتجر">
-  <input type="file" id="storeLogo">
-</div>
-
-<!-- المندوبين -->
-<div class="card">
-  <h4>👤 المندوبين</h4>
-  <input id="repName" placeholder="اسم المندوب">
-  <button class="btn btn-success" id="btnAddRep">➕ إضافة مندوب</button>
-
-  <ul id="repsList"></ul>
-</div>
-
-<!-- إعدادات الطباعة -->
-<div class="card">
-  <h4>🖨️ إعدادات الطباعة</h4>
-  <select id="printSize">
-    <option value="80">80mm</option>
-    <option value="58">58mm</option>
-  </select>
-
-  <select id="printLang">
-    <option value="ar">عربي</option>
-    <option value="en">English</option>
-  </select>
-</div>
-
-<button class="btn btn-primary" id="btnSaveSettings">
-💾 حفظ الإعدادات
-</button>
-
-</div>
-</div>
-
-</div>
-
+<!-- Scripts -->
 <script src="../js/db.js"></script>
+<script src="../js/ui.js"></script>
+<script src="../js/events.js"></script>
 <script src="../js/settings.js"></script>
+
 </body>
 </html>
