@@ -1,76 +1,78 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>المشتريات</title>
-<link rel="stylesheet" href="../css/style.css">
+  <meta charset="UTF-8">
+  <title>المشتريات</title>
+  <link rel="stylesheet" href="../css/style.css">
 </head>
+
 <body>
 
-<div class="app">
+<h2>شاشة المشتريات</h2>
 
-  <div class="sidebar">
-    <h2>POS</h2>
-    <a href="sales.html">🛒 المبيعات</a>
-    <a href="purchases.html" class="active">📥 المشتريات</a>
-    <a href="products.html">📦 الأصناف</a>
-    <a href="suppliers.html">🚚 الموردين</a>
-    <a href="reports.html">📊 التقارير</a>
-  </div>
+<!-- ============ المورد ============ -->
+<div class="card">
+  <label>اسم المورد (بحث سريع)</label>
+  <input list="suppliersList" id="purchaseSupplier" placeholder="اختر المورد">
+  <datalist id="suppliersList"></datalist>
 
-  <div class="main">
+  <button onclick="window.location.href='suppliers.html'">
+    + إضافة مورد جديد
+  </button>
+</div>
 
-    <div class="header">
-      <h3>المشتريات</h3>
-    </div>
+<!-- ============ الصنف ============ -->
+<div class="card">
+  <label>الصنف (بحث سريع)</label>
+  <input list="productsList" id="purchaseProduct" placeholder="اكتب اسم الصنف">
+  <datalist id="productsList"></datalist>
 
-    <div class="content">
+  <label>وحدة القياس</label>
+  <select id="purchaseUnit">
+    <option value="كجم">كجم</option>
+    <option value="علبة">علبة</option>
+    <option value="كرتونة">كرتونة</option>
+    <option value="باكيت">باكيت</option>
+  </select>
 
-      <div class="card">
-        <select>
-          <option>اختر المورد</option>
-        </select>
-        <select id="supplierSelect"></select>
+  <label>الكمية</label>
+  <input type="number" id="purchaseQty" value="1" min="1">
 
-<select id="productSelect"></select>
+  <label>سعر الشراء</label>
+  <input type="number" id="purchasePrice" min="0">
 
-<input id="purchaseQty" type="number" placeholder="الكمية">
-<input id="purchasePrice" type="number" placeholder="سعر الشراء">
+  <button id="addToPurchaseBtn">
+    إضافة للفاتورة
+  </button>
+</div>
 
-<select id="purchasePayment">
-  <option value="نقدي">نقدي</option>
-  <option value="آجل">آجل</option>
-</select>
+<!-- ============ فاتورة المشتريات ============ -->
+<div class="card">
+  <h3>فاتورة مشتريات</h3>
 
-<button onclick="addPurchase()">حفظ الفاتورة</button>
+  <table width="100%" border="1">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>الصنف</th>
+        <th>الوحدة</th>
+        <th>الكمية</th>
+        <th>سعر الشراء</th>
+        <th>الإجمالي</th>
+        <th>حذف</th>
+      </tr>
+    </thead>
+    <tbody id="purchaseItems"></tbody>
+  </table>
 
-<tbody id="purchasesTable"></tbody>
+  <h3>الإجمالي: <span id="purchaseTotal">0</span></h3>
 
+  <button id="savePurchaseBtn">حفظ المشتريات</button>
+</div>
+
+<!-- ============ Scripts ============ -->
 <script src="../js/db.js"></script>
 <script src="../js/purchases.js"></script>
-        <button>إضافة</button>
-      </div>
-
-      <div class="card">
-        <table>
-          <thead>
-            <tr>
-              <th>المورد</th>
-              <th>الصنف</th>
-              <th>الكمية</th>
-              <th>الإجمالي</th>
-              <th>التاريخ</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
 
 </body>
 </html>
