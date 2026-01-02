@@ -29,6 +29,19 @@ if (!db.objectStoreNames.contains("purchaseReturns")) {
     autoIncrement: true
   });
 }
+      if (!db.objectStoreNames.contains("cashbox")) {
+  db.createObjectStore("cashbox", {
+    keyPath: "id",
+    autoIncrement: true
+  });
+}
+
+if (!db.objectStoreNames.contains("dayClose")) {
+  db.createObjectStore("dayClose", {
+    keyPath: "id",
+    autoIncrement: true
+  });
+}
   const tx = db.transaction("users", "readwrite");
   const store = tx.objectStore("users");
 
