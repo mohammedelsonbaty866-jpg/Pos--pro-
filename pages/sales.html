@@ -83,4 +83,11 @@ function setPayment(type) {
 </script>
 
 </body>
+  <script>
+  fetch("../partials/menu.html")
+    .then(res => res.text())
+    .then(html => {
+      document.body.insertAdjacentHTML("afterbegin", html);
+    });
+</script>
 </html>
