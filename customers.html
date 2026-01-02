@@ -1,60 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-<meta charset="UTF-8">
-<title>العملاء</title>
-<link rel="stylesheet" href="../css/style.css">
-</head>
-<body>
-
-<div class="app">
-
-  <div class="sidebar">
-    <h2>POS</h2>
-    <a href="sales.html">🛒 المبيعات</a>
-    <a href="customers.html" class="active">👥 العملاء</a>
-    <a href="reports.html">📊 التقارير</a>
-  </div>
-
-  <div class="main">
-
-    <div class="header">
-      <h3>إدارة العملاء</h3>
-      <button>➕ عميل جديد</button>
-    </div>
-
-    <div class="content">
-
-      <div class="card">
-       <input id="custName" placeholder="اسم العميل">
-<input id="custPhone" placeholder="رقم الهاتف">
-<input id="custBalance" type="number" placeholder="رصيد افتتاحي">
-<button onclick="addCustomer()">حفظ</button>
-
-<tbody id="customersTable"></tbody>
-
-<script src="../js/db.js"></script>
-<script src="../js/customers.js"></script>
-      </div>
-
-      <div class="card">
-        <table>
-          <thead>
-            <tr>
-              <th>الاسم</th>
-              <th>الهاتف</th>
-              <th>الرصيد</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
-
-</body>
-</html>
