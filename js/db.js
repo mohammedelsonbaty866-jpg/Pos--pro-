@@ -1,137 +1,131 @@
-let db;
-const request = indexedDB.open("POS_DB", 7);
+/*********************************
+ * db.js
+ * Offline Database Layer
+ *********************************/
 
-request.onupgradeneeded = e => {
-  db = e.target.result;
-db.createObjectStore("returns", {
-  keyPath: "id",
-  autoIncrement: true
-  db.createObjectStore("users", {
-  keyPath: "id",
-  autoIncrement: true
-    request.onsuccess = e => {
-  db = e.target.result;
-if (!db.objectStoreNames.contains("salesReturns")) {
-  db.createObjectStore("salesReturns", {
-    keyPath: "id",
-    autoIncrement: true
-  });
-}
-if (!db.objectStoreNames.contains("inventoryCounts")) {
-  db.createObjectStore("inventoryCounts", {
-    keyPath: "id",
-    autoIncrement: true
-  });
-}
-if (!db.objectStoreNames.contains("purchaseReturns")) {
-  db.createObjectStore("purchaseReturns", {
-    keyPath: "id",
-    autoIncrement: true
-  });
-}
-      if (!db.objectStoreNames.contains("cashbox")) {
-  db.createObjectStore("cashbox", {
-    keyPath: "id",
-    autoIncrement: true
-  });
-}
+// اسم التخزين
+const STORAGE_KEY = "POS_PRO_DB_V1";
 
-if (!db.objectStoreNames.contains("dayClose")) {
-  db.createObjectStore("dayClose", {
-    keyPath: "id",
-    autoIncrement: true
-  });
-}
-   if (!db.objectStoreNames.contains("expenses")) {
-  db.createObjectStore("expenses", {
-    keyPath: "id",
-    autoIncrement: true
-  });
-}   
-  const tx = db.transaction("users", "readwrite");
-  const store = tx.objectStore("users");
+// الهيكل الافتراضي
+const DEFAULT_DB = {
+  meta: {
+    version: "1.0",
+    createdAt: new Date().toISOString()
+  },
 
-  store.add({
-    username: "admin",
-    password: "1234",
-    role: "admin"
-  });
-};
-});
-});
-  db.createObjectStore("products", { keyPath: "id", autoIncrement: true });
-  db.createObjectStore("customers", { keyPath: "id", autoIncrement: true });
-  db.createObjectStore("suppliers", { keyPath: "id", autoIncrement: true });
-  db.createObjectStore("sales", { keyPath: "id", autoIncrement: true });
-  db.createObjectStore("purchases", { keyPath: "id", autoIncrement: true });
-  db.createObjectStore("expenses", { keyPath: "id", autoIncrement: true });
-  db.createObjectStore("agents", { keyPath: "id", autoIncrement: true });
+  settings: {
+    storeName: "",
+    storePhone: "",
+    storeLogo: "",
+    printType: "A4" // A4 | thermal
+  },
+
+  products: [],
+  customers: [],
+  suppliers: [],
+  agents: [],
+
+  invoices: [],
+  purchases: [],
+  returns: [],
+
+  expenses: [],
+  cashbox: [],
+
+  inventoryLogs: []
 };
 
-request.onsuccess = e => db = e.target.result;
-db.createObjectStore("inventory_logs", {
-  keyPath: "id",
-  autoIncrement: true
-});
-db.transaction("inventory_logs","readwrite")
-  .objectStore("inventory_logs")
-  .add({
-    productId: id,
-    bookStock,
-    actualStock,
-    diff,
-    date: new Date().toLocaleString()
-  });
-let db;
-
-const request = indexedDB.open("POS_DB", 1);
-
-request.onupgradeneeded = e => {
-  db = e.target.result;
-
-  // العملاء
-  if (!db.objectStoreNames.contains("customers")) {
-    db.createObjectStore("customers", {
-      keyPath: "id",
-      autoIncrement: true
-    });
+/*********************************
+ * تحميل / حفظ
+ *********************************/
+function loadDB() {
+  const data = localStorage.getItem(STORAGE_KEY);
+  if (!data) {
+    saveDB(DEFAULT_DB);
+    return structuredClone(DEFAULT_DB);
   }
-
-  // الموردين
-  if (!db.objectStoreNames.contains("suppliers")) {
-    db.createObjectStore("suppliers", {
-      keyPath: "id",
-      autoIncrement: true
-    });
+  try {
+    return JSON.parse(data);
+  } catch (e) {
+    console.error("DB Corrupted, Resetting...");
+    saveDB(DEFAULT_DB);
+    return structuredClone(DEFAULT_DB);
   }
-};
-
-request.onsuccess = e => {
-  db = e.target.result;
-};
-
-request.onerror = () => {
-  alert("خطأ في فتح قاعدة البيانات");
-};
-// الأصناف
-if (!db.objectStoreNames.contains("products")) {
-  db.createObjectStore("products", {
-    keyPath: "id",
-    autoIncrement: true
-  });
 }
 
-// المشتريات
-if (!db.objectStoreNames.contains("purchases")) {
-  db.createObjectStore("purchases", {
-    keyPath: "id",
-    autoIncrement: true
-  });
+function saveDB(db) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
 }
-// داخل onupgradeneeded لو مش موجود
-if (!db.objectStoreNames.contains("sales")) {
-  db.createObjectStore("sales", {
-    keyPath: "id",
-    autoIncrement: true
-  });
+
+// قاعدة البيانات في الذاكرة
+let DB = loadDB();
+
+/*********************************
+ * أدوات عامة
+ *********************************/
+function generateId(prefix = "ID") {
+  return (
+    prefix +
+    "_" +
+    Date.now().toString(36) +
+    Math.random().toString(36).substr(2, 5)
+  );
 }
+
+function getNextInvoiceNumber() {
+  const last = DB.invoices.at(-1);
+  return last ? last.number + 1 : 1;
+}
+
+function commit() {
+  saveDB(DB);
+}
+
+/*********************************
+ * CRUD Helpers
+ *********************************/
+function addItem(collection, item) {
+  item.id = item.id || generateId(collection.toUpperCase());
+  DB[collection].push(item);
+  commit();
+  return item;
+}
+
+function updateItem(collection, id, data) {
+  const index = DB[collection].findIndex(i => i.id === id);
+  if (index === -1) return false;
+  DB[collection][index] = { ...DB[collection][index], ...data };
+  commit();
+  return true;
+}
+
+function deleteItem(collection, id) {
+  DB[collection] = DB[collection].filter(i => i.id !== id);
+  commit();
+}
+
+function getItem(collection, id) {
+  return DB[collection].find(i => i.id === id) || null;
+}
+
+/*********************************
+ * كشف عام (Global Access)
+ *********************************/
+window.POS_DB = {
+  get DB() {
+    return DB;
+  },
+  set DB(val) {
+    DB = val;
+    commit();
+  },
+
+  addItem,
+  updateItem,
+  deleteItem,
+  getItem,
+
+  generateId,
+  getNextInvoiceNumber,
+  commit
+};
