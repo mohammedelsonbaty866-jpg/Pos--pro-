@@ -2,10 +2,11 @@
 
 let invoiceItems = [];
 let totalAmount = 0;
+let currentPayment = "نقدي";
 
 document.addEventListener("DOMContentLoaded", () => {
-  loadCustomersToSales();
-  loadProductsToSales();
+  loadCustomers();
+  loadProducts();
 
   document
     .getElementById("addToInvoiceBtn")
@@ -20,60 +21,65 @@ document.addEventListener("DOMContentLoaded", () => {
     .addEventListener("click", printInvoice);
 });
 
-/* ================= العملاء ================= */
+/* ============ العملاء (بحث سريع) ============ */
+function loadCustomers() {
+  const list = document.getElementById("customersList");
+  list.innerHTML = "";
 
-function loadCustomersToSales() {
-  const select = document.getElementById("saleCustomer");
-  const customers = getCustomers();
-
-  select.innerHTML = `<option value="">عميل نقدي</option>`;
-
-  customers.forEach(c => {
+  getCustomers().forEach(c => {
     const opt = document.createElement("option");
     opt.value = c.name;
-    opt.textContent = c.name;
-    select.appendChild(opt);
+    list.appendChild(opt);
   });
 }
 
-/* ================= الأصناف ================= */
+/* ============ الأصناف (بحث سريع) ============ */
+function loadProducts() {
+  const list = document.getElementById("productsList");
+  list.innerHTML = "";
 
-function loadProductsToSales() {
-  const select = document.getElementById("saleProduct");
-  const products = getProducts();
-
-  select.innerHTML = `<option value="">اختر الصنف</option>`;
-
-  products.forEach(p => {
+  getProducts().forEach(p => {
     const opt = document.createElement("option");
-    opt.value = p.id;
-    opt.textContent = p.name;
-    select.appendChild(opt);
+    opt.value = p.name;
+    opt.dataset.id = p.id;
+    list.appendChild(opt);
   });
 }
 
-/* ================= إضافة للفاتورة ================= */
+/* ============ ربط وحدة القياس بالسعر ============ */
+function getPriceByUnit(product, unit) {
+  switch (unit) {
+    case "كجم":
+      return product.priceKg || product.price || 0;
+    case "علبة":
+      return product.priceBox || product.price || 0;
+    case "كرتونة":
+      return product.priceCarton || product.price || 0;
+    case "باكيت":
+      return product.pricePacket || product.price || 0;
+    default:
+      return product.price || 0;
+  }
+}
 
+/* ============ إضافة للفاتورة ============ */
 function addToInvoice() {
-  const productId = document.getElementById("saleProduct").value;
+  const productName = document.getElementById("saleProduct").value.trim();
   const unit = document.getElementById("saleUnit").value;
   const qty = parseFloat(document.getElementById("saleQty").value);
 
-  if (!productId || qty <= 0) {
+  if (!productName || qty <= 0) {
     alert("اختار الصنف والكمية");
     return;
   }
 
-  const product = getProducts().find(p => p.id == productId);
-  if (!product) return;
+  const product = getProducts().find(p => p.name === productName);
+  if (!product) {
+    alert("الصنف غير موجود");
+    return;
+  }
 
-  // ربط القياس بالسعر
-  let price = 0;
-  if (unit === "كجم") price = product.priceKg || product.price;
-  if (unit === "علبة") price = product.priceBox || product.price;
-  if (unit === "كرتونة") price = product.priceCarton || product.price;
-  if (unit === "باكيت") price = product.pricePacket || product.price;
-
+  const price = getPriceByUnit(product, unit);
   const total = price * qty;
 
   invoiceItems.push({
@@ -87,8 +93,7 @@ function addToInvoice() {
   renderInvoice();
 }
 
-/* ================= عرض الفاتورة ================= */
-
+/* ============ عرض الفاتورة ============ */
 function renderInvoice() {
   const tbody = document.getElementById("invoiceItems");
   tbody.innerHTML = "";
@@ -112,7 +117,8 @@ function renderInvoice() {
     tbody.appendChild(tr);
   });
 
-  document.getElementById("totalAmount").textContent = totalAmount.toFixed(2);
+  document.getElementById("totalAmount").textContent =
+    totalAmount.toFixed(2);
 }
 
 function removeItem(index) {
@@ -120,8 +126,7 @@ function removeItem(index) {
   renderInvoice();
 }
 
-/* ================= حفظ ================= */
-
+/* ============ حفظ الفاتورة ============ */
 function saveInvoice() {
   if (invoiceItems.length === 0) {
     alert("الفاتورة فاضية");
@@ -130,13 +135,12 @@ function saveInvoice() {
 
   const customer =
     document.getElementById("saleCustomer").value || "عميل نقدي";
-  const paymentType = document.getElementById("paymentType").value;
 
   const invoices = getInvoices();
   invoices.push({
     id: Date.now(),
     customer,
-    paymentType,
+    payment: currentPayment,
     items: invoiceItems,
     total: totalAmount,
     date: new Date().toLocaleString()
@@ -150,22 +154,20 @@ function saveInvoice() {
   renderInvoice();
 }
 
-/* ================= طباعة ================= */
-
+/* ============ طباعة ============ */
 function printInvoice() {
   const customer =
     document.getElementById("saleCustomer").value || "عميل نقدي";
-  const paymentType = document.getElementById("paymentType").value;
 
   let html = `
     <h2>فاتورة بيع</h2>
-    <p><strong>العميل:</strong> ${customer}</p>
-    <p><strong>الدفع:</strong> ${paymentType}</p>
+    <p><b>العميل:</b> ${customer}</p>
+    <p><b>طريقة الدفع:</b> ${currentPayment}</p>
     <hr>
     <table border="1" width="100%">
       <tr>
         <th>الصنف</th>
-        <th>القياس</th>
+        <th>الوحدة</th>
         <th>الكمية</th>
         <th>السعر</th>
         <th>الإجمالي</th>
@@ -193,4 +195,10 @@ function printInvoice() {
   w.document.write(html);
   w.print();
   w.close();
+}
+
+/* ============ نقدي / آجل ============ */
+function setPayment(type) {
+  currentPayment = type;
+  document.getElementById("paymentType").textContent = type;
 }
