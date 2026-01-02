@@ -77,3 +77,18 @@ request.onsuccess = e => {
 request.onerror = () => {
   alert("خطأ في فتح قاعدة البيانات");
 };
+// الأصناف
+if (!db.objectStoreNames.contains("products")) {
+  db.createObjectStore("products", {
+    keyPath: "id",
+    autoIncrement: true
+  });
+}
+
+// المشتريات
+if (!db.objectStoreNames.contains("purchases")) {
+  db.createObjectStore("purchases", {
+    keyPath: "id",
+    autoIncrement: true
+  });
+}
