@@ -107,6 +107,18 @@ function saveSale() {
   renderCart();
 }
 }
+const customerSelect = document.getElementById("customerSelect");
 
+function loadCustomers() {
+  const tx = db.transaction("customers", "readonly");
+  tx.objectStore("customers").getAll().onsuccess = e => {
+    customerSelect.innerHTML = `<option value="">عميل نقدي</option>`;
+    e.target.result.forEach(c => {
+      customerSelect.innerHTML += `
+        <option value="${c.id}">${c.name}</option>
+      `;
+    });
+  };
+}
 // تحميل أولي
 setTimeout(loadProducts, 500);
