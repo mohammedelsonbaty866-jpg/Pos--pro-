@@ -1,6 +1,62 @@
+.invoice {
+  max-width: 350px;
+  margin: auto;
+  font-size: 14px;
+  padding: 10px;
+}
+
+.inv-header {
+  text-align: center;
+}
+
+.inv-header img {
+  max-width: 80px;
+  margin-bottom: 5px;
+}
+
+.inv-info {
+  font-size: 13px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 5px;
+  border-bottom: 1px dashed #999;
+  text-align: center;
+}
+
+.thanks {
+  text-align: center;
+  margin: 10px 0;
+}
+
+/* ===== Print Only ===== */
 @media print {
-  body {
-    font-size: 14px;
-    direction: rtl;
+  body * {
+    visibility: hidden;
   }
+
+  .invoice, .invoice * {
+    visibility: visible;
+  }
+
+  .invoice {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  button {
+    display: none;
+  }
+}
+
+/* ===== 58mm ===== */
+.print-58 .invoice {
+  max-width: 220px;
+  font-size: 12px;
 }
