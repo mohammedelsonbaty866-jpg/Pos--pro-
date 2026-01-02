@@ -14,3 +14,16 @@ request.onupgradeneeded = e => {
 };
 
 request.onsuccess = e => db = e.target.result;
+db.createObjectStore("inventory_logs", {
+  keyPath: "id",
+  autoIncrement: true
+});
+db.transaction("inventory_logs","readwrite")
+  .objectStore("inventory_logs")
+  .add({
+    productId: id,
+    bookStock,
+    actualStock,
+    diff,
+    date: new Date().toLocaleString()
+  });
