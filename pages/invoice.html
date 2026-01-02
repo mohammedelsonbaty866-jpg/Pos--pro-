@@ -1,62 +1,73 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>فاتورة</title>
+  <meta charset="UTF-8" />
+  <title>عرض الفاتورة</title>
 
-<link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="../css/buttons.css">
-<link rel="stylesheet" href="../css/print.css">
-
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/print.css" />
 </head>
 <body>
 
-<div class="invoice">
+<div class="app">
 
-  <!-- رأس الفاتورة -->
-  <div class="inv-header">
-    <img id="invLogo">
-    <h2 id="invStore"></h2>
-    <p id="invPhone"></p>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>POS PRO</h2>
+    <a href="sales.html">🛒 المبيعات</a>
+    <a href="products.html">📦 الأصناف</a>
+    <a href="customers.html">👥 العملاء</a>
+    <a href="reports.html">📊 التقارير</a>
+    <a href="settings.html">⚙️ الإعدادات</a>
   </div>
 
-  <hr>
+  <!-- Main -->
+  <div class="main">
+    <div class="header">
+      <h3>فاتورة بيع</h3>
+    </div>
 
-  <!-- بيانات -->
-  <div class="inv-info">
-    <div>رقم الفاتورة: <span id="invNo"></span></div>
-    <div>التاريخ: <span id="invDate"></span></div>
-    <div>العميل: <span id="invCustomer"></span></div>
-    <div>الدفع: <span id="invPayment"></span></div>
+    <div class="content">
+
+      <!-- Invoice Info -->
+      <div class="card">
+        <p>رقم الفاتورة: <strong id="invNo"></strong></p>
+        <p>التاريخ: <strong id="invDate"></strong></p>
+        <p>العميل: <strong id="invCustomer"></strong></p>
+        <p>طريقة الدفع: <strong id="invPayment"></strong></p>
+      </div>
+
+      <!-- Items -->
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>الصنف</th>
+              <th>الكمية</th>
+              <th>السعر</th>
+              <th>الإجمالي</th>
+            </tr>
+          </thead>
+          <tbody id="items"></tbody>
+        </table>
+      </div>
+
+      <!-- Total -->
+      <div class="card">
+        <h2>الإجمالي: <span id="invTotal"></span></h2>
+        <button data-action="print-invoice">🖨 طباعة</button>
+      </div>
+
+    </div>
   </div>
-
-  <hr>
-
-  <!-- الأصناف -->
-  <table>
-    <thead>
-      <tr>
-        <th>الصنف</th>
-        <th>سعر</th>
-        <th>كمية</th>
-        <th>إجمالي</th>
-      </tr>
-    </thead>
-    <tbody id="items"></tbody>
-  </table>
-
-  <hr>
-
-  <h3>الإجمالي: <span id="invTotal"></span></h3>
-
-  <p class="thanks">شكرًا لتعاملكم معنا</p>
-
-  <button class="btn btn-dark" onclick="window.print()">
-    🖨️ طباعة
-  </button>
-
 </div>
 
-<script src="../js/invoice-view.js"></script>
+<!-- Scripts -->
+<script src="../js/db.js"></script>
+<script src="../js/ui.js"></script>
+<script src="../js/events.js"></script>
+<script src="../js/invoice.js"></script>
+
 </body>
 </html>
