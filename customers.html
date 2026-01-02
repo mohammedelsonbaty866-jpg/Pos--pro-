@@ -26,10 +26,15 @@
     <div class="content">
 
       <div class="card">
-        <input placeholder="اسم العميل">
-        <input placeholder="رقم الهاتف">
-        <input type="number" placeholder="رصيد افتتاحي">
-        <button>حفظ</button>
+       <input id="custName" placeholder="اسم العميل">
+<input id="custPhone" placeholder="رقم الهاتف">
+<input id="custBalance" type="number" placeholder="رصيد افتتاحي">
+<button onclick="addCustomer()">حفظ</button>
+
+<tbody id="customersTable"></tbody>
+
+<script src="../js/db.js"></script>
+<script src="../js/customers.js"></script>
       </div>
 
       <div class="card">
