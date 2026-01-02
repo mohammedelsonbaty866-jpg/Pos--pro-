@@ -63,19 +63,28 @@ function saveSale() {
     return;
   }
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("user")) || { username: "admin" };
 
+  const invoiceData = {
+    no: Date.now(), // رقم فاتورة تلقائي
+    date: new Date().toLocaleString(),
+    customer: "عميل نقدي",
+    payment: payment.value,
+    total: grandTotal,
+    agent: user.username,
+    items: cart.map(i => ({
+      name: i.name,
+      qty: i.qty,
+      price: i.price
+    }))
+  };
+
+  // 1️⃣ حفظ الفاتورة
   db.transaction("sales", "readwrite")
     .objectStore("sales")
-    .add({
-      date: new Date().toLocaleString(),
-      items: cart,
-      total: grandTotal,
-      payment: payment.value,
-      agent: user?.username || "admin"
-    });
+    .add(invoiceData);
 
-  // تحديث المخزون
+  // 2️⃣ تحديث المخزون
   const tx = db.transaction("products", "readwrite");
   const store = tx.objectStore("products");
 
@@ -87,9 +96,16 @@ function saveSale() {
     };
   });
 
-  alert("تم حفظ الفاتورة");
+  // 3️⃣ تخزين الفاتورة للطباعة
+  localStorage.setItem("printInvoice", JSON.stringify(invoiceData));
+
+  // 4️⃣ فتح الفاتورة الحرارية
+  window.open("invoice-print.html", "_blank");
+
+  // 5️⃣ تفريغ السلة
   cart = [];
   renderCart();
+}
 }
 
 // تحميل أولي
