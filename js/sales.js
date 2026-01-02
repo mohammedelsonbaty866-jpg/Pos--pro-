@@ -133,4 +133,7 @@ function loadCustomers() {
   };
 }
 // تحميل أولي
-setTimeout(loadProducts, 500);
+setTimeout(() => {
+  loadCustomers();
+  loadProducts();
+}, 500);
