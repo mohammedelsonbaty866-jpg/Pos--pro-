@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>المصروفات</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/mobile.css">
+</head>
+<body>
+
+<div class="app">
+
+<div class="sidebar">
+  <h2>POS</h2>
+  <a href="expenses.html" class="active">💸 المصروفات</a>
+</div>
+
+<div class="main">
+<div class="header"><h3>المصروفات</h3></div>
+
+<div class="content">
+
+<div class="card">
+  <input id="amount" type="number" placeholder="قيمة المصروف">
+  <input id="note" placeholder="البيان">
+  <button onclick="addExpense()">تسجيل المصروف</button>
+</div>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>التاريخ</th>
+        <th>القيمة</th>
+        <th>البيان</th>
+      </tr>
+    </thead>
+    <tbody id="expensesTable"></tbody>
+  </table>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="bottom-nav">
+  <a href="cashbox.html">💰<br>خزنة</a>
+  <a href="expenses.html" class="active">💸<br>مصروفات</a>
+</div>
+
+<script src="../js/db.js"></script>
+<script src="../js/expenses.js"></script>
+</body>
+</html>
