@@ -7,27 +7,48 @@
 </head>
 <body>
 
-<h2>العملاء</h2>
+<div class="container">
 
-<div class="card">
-  <input type="text" id="customerName" placeholder="اسم العميل">
-  <button id="addCustomerBtn">إضافة عميل</button>
+  <h2>إدارة العملاء</h2>
+
+  <!-- إضافة عميل -->
+  <div class="card">
+    <div class="form-group">
+      <label>اسم العميل</label>
+      <input
+        type="text"
+        id="customerName"
+        class="form-control"
+        placeholder="اكتب اسم العميل"
+      >
+    </div>
+
+    <button id="addCustomerBtn" class="btn btn-primary">
+      إضافة عميل
+    </button>
+  </div>
+
+  <!-- جدول العملاء -->
+  <div class="card">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>اسم العميل</th>
+          <th>حذف</th>
+        </tr>
+      </thead>
+      <tbody id="customersTable">
+        <!-- يتم التعبئة من JS -->
+      </tbody>
+    </table>
+  </div>
+
 </div>
 
-<div class="card">
-  <table border="1" width="100%">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>اسم العميل</th>
-        <th>حذف</th>
-      </tr>
-    </thead>
-    <tbody id="customersTable"></tbody>
-  </table>
-</div>
-
+<!-- Scripts -->
 <script src="../js/db.js"></script>
 <script src="../js/customers.js"></script>
+
 </body>
 </html>
