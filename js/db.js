@@ -3,7 +3,10 @@ const request = indexedDB.open("POS_DB", 1);
 
 request.onupgradeneeded = e => {
   db = e.target.result;
-
+db.createObjectStore("returns", {
+  keyPath: "id",
+  autoIncrement: true
+});
   db.createObjectStore("products", { keyPath: "id", autoIncrement: true });
   db.createObjectStore("customers", { keyPath: "id", autoIncrement: true });
   db.createObjectStore("suppliers", { keyPath: "id", autoIncrement: true });
