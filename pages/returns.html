@@ -1,33 +1,79 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>المرتجعات</title>
-<link rel="stylesheet" href="../css/style.css">
+  <meta charset="UTF-8">
+  <title>المرتجعات</title>
+  <link rel="stylesheet" href="../css/style.css">
 </head>
+
 <body>
 
 <h2>المرتجعات</h2>
 
-<select id="returnType">
-  <option value="sale">مرتجع بيع</option>
-  <option value="purchase">مرتجع شراء</option>
-</select>
+<!-- ===== نوع المرتجع ===== -->
+<div class="card">
+  <label>نوع المرتجع</label>
+  <select id="returnType">
+    <option value="sale">مرتجع بيع</option>
+    <option value="purchase">مرتجع شراء</option>
+  </select>
+</div>
 
-<input id="invoiceNo" placeholder="رقم الفاتورة">
-<input id="productName" placeholder="اسم الصنف">
-<input id="qty" type="number" placeholder="الكمية">
-<input id="amount" type="number" placeholder="القيمة">
+<!-- ===== العميل / المورد ===== -->
+<div class="card">
+  <label id="partyLabel">اسم العميل (بحث سريع)</label>
+  <input list="partyList" id="partyName" placeholder="اكتب الاسم">
+  <datalist id="partyList"></datalist>
+</div>
 
-<input id="reason" placeholder="سبب المرتجع">
+<!-- ===== الصنف ===== -->
+<div class="card">
+  <label>الصنف (بحث سريع)</label>
+  <input list="productsList" id="returnProduct">
+  <datalist id="productsList"></datalist>
 
-<br><br>
-<button onclick="saveReturn()">حفظ المرتجع</button>
+  <label>وحدة القياس</label>
+  <select id="returnUnit">
+    <option>كجم</option>
+    <option>علبة</option>
+    <option>كرتونة</option>
+    <option>باكيت</option>
+  </select>
 
-<hr>
-<div id="result"></div>
+  <label>الكمية</label>
+  <input type="number" id="returnQty" value="1" min="1">
 
+  <label>السعر</label>
+  <input type="number" id="returnPrice">
+
+  <button id="addReturnBtn">إضافة للمرتجع</button>
+</div>
+
+<!-- ===== جدول المرتجعات ===== -->
+<div class="card">
+  <table width="100%" border="1">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>الصنف</th>
+        <th>الوحدة</th>
+        <th>الكمية</th>
+        <th>السعر</th>
+        <th>الإجمالي</th>
+        <th>حذف</th>
+      </tr>
+    </thead>
+    <tbody id="returnItems"></tbody>
+  </table>
+
+  <h3>الإجمالي: <span id="returnTotal">0</span></h3>
+
+  <button id="saveReturnBtn">حفظ المرتجع</button>
+</div>
+
+<!-- ===== Scripts ===== -->
 <script src="../js/db.js"></script>
 <script src="../js/returns.js"></script>
+
 </body>
 </html>
