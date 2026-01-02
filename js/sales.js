@@ -1,152 +1,105 @@
-/*********************************
- * sales.js
- *********************************/
-alert("sales.js loaded");
-let cart = [];
-let total = 0;
-
-/*********************************
- * عند تحميل الصفحة
- *********************************/
 document.addEventListener("DOMContentLoaded", () => {
   initSales();
 });
 
+let cart = [];
+let selectedProduct = null;
+
 function initSales() {
-  document.getElementById("invoiceNo").textContent =
-    "فاتورة رقم: " + POS_DB.getNextInvoiceNumber();
-
-  UI.fillSelect(
-    "customerSelect",
-    POS_DB.DB.customers,
-    "id",
-    "name"
-  );
-
-  UI.fillSelect(
-    "productSelect",
-    POS_DB.DB.products,
-    "id",
-    "name"
-  );
-
-  renderCart();
+  document.getElementById("productSearch").addEventListener("input", searchProduct);
+  document.getElementById("addItemBtn").addEventListener("click", addItem);
+  document.getElementById("saveInvoiceBtn").addEventListener("click", saveInvoice);
 }
 
-/*********************************
- * إضافة صنف
- *********************************/
-function addToCart() {
-  const productId = document.getElementById("productSelect").value;
-  const qty = Number(document.getElementById("qty").value);
+function searchProduct(e) {
+  const term = e.target.value.toLowerCase();
+  const results = document.getElementById("searchResults");
+  results.innerHTML = "";
 
-  if (!productId || qty <= 0) {
-    UI.showAlert("اختر الصنف والكمية", "error");
+  if (!term) return;
+
+  const products = getProducts().filter(p =>
+    p.name.toLowerCase().includes(term) || String(p.barcode || "").includes(term)
+  );
+
+  products.forEach(p => {
+    const li = document.createElement("li");
+    li.textContent = `${p.name} - ${p.price}`;
+    li.onclick = () => {
+      selectedProduct = p;
+      document.getElementById("productSearch").value = p.name;
+      results.innerHTML = "";
+    };
+    results.appendChild(li);
+  });
+}
+
+function addItem() {
+  if (!selectedProduct) {
+    alert("اختر صنف أولًا");
     return;
   }
 
-  const product = POS_DB.getItem("products", productId);
-  if (!product) return;
+  const qty = parseInt(document.getElementById("qty").value);
+  const existing = cart.find(i => i.id === selectedProduct.id);
 
-  const existing = cart.find(i => i.id === productId);
   if (existing) {
     existing.qty += qty;
   } else {
     cart.push({
-      id: product.id,
-      name: product.name,
-      price: product.price,
+      id: selectedProduct.id,
+      name: selectedProduct.name,
+      price: selectedProduct.price,
       qty
     });
   }
 
+  selectedProduct = null;
+  document.getElementById("productSearch").value = "";
   renderCart();
 }
 
-/*********************************
- * حذف صنف
- *********************************/
-function removeFromCart(id) {
-  cart = cart.filter(i => i.id !== id);
-  renderCart();
-}
-
-/*********************************
- * عرض العربة
- *********************************/
 function renderCart() {
-  total = 0;
-
-  const rows = cart.map((item, i) => {
-    const rowTotal = item.price * item.qty;
-    total += rowTotal;
-
-    return {
-      index: i + 1,
-      name: item.name,
-      qty: item.qty,
-      price: UI.formatCurrency(item.price),
-      total: UI.formatCurrency(rowTotal),
-      delete: "حذف"
-    };
-  });
-
   const tbody = document.getElementById("cartItems");
-  if (!tbody) return;
-
   tbody.innerHTML = "";
+  let total = 0;
 
-  rows.forEach((row, i) => {
+  cart.forEach((item, index) => {
     const tr = document.createElement("tr");
+    const sum = item.qty * item.price;
+    total += sum;
 
     tr.innerHTML = `
-      <td>${row.index}</td>
-      <td>${row.name}</td>
-      <td>${row.qty}</td>
-      <td>${row.price}</td>
-      <td>${row.total}</td>
-      <td>
-        <button onclick="removeFromCart('${cart[i].id}')">✖</button>
-      </td>
+      <td>${index + 1}</td>
+      <td>${item.name}</td>
+      <td>${item.qty}</td>
+      <td>${item.price}</td>
+      <td>${sum}</td>
+      <td><button onclick="removeItem(${index})">X</button></td>
     `;
-
     tbody.appendChild(tr);
   });
 
-  document.getElementById("totalAmount").textContent =
-    UI.formatCurrency(total);
+  document.getElementById("totalAmount").textContent = total;
 }
 
-/*********************************
- * حفظ الفاتورة
- *********************************/
-function addItemToInvoice() {
-  alert("إضافة للفاتورة شغالة ✅");
+function removeItem(index) {
+  cart.splice(index, 1);
+  renderCart();
 }
 
 function saveInvoice() {
-  alert("حفظ الفاتورة شغال ✅");
-}
   if (cart.length === 0) {
-    UI.showAlert("الفاتورة فارغة", "error");
+    alert("الفاتورة فارغة");
     return;
   }
 
-  const invoice = {
-    id: POS_DB.generateId("INV"),
-    number: POS_DB.getNextInvoiceNumber(),
-    date: new Date().toISOString(),
-    customerId: document.getElementById("customerSelect").value || null,
-    paymentType: document.getElementById("paymentType").value,
+  saveSale({
     items: cart,
-    total,
-    status: "saved"
-  };
+    total: document.getElementById("totalAmount").textContent
+  });
 
-  POS_DB.DB.invoices.push(invoice);
-  POS_DB.commit();
-
-  UI.showAlert("تم حفظ الفاتورة بنجاح");
-
-  window.location.href = "invoice.html?id=" + invoice.id;
+  cart = [];
+  renderCart();
+  alert("تم حفظ الفاتورة ✅");
 }
