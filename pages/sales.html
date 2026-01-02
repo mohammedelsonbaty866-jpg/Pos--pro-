@@ -57,10 +57,15 @@
             </table>
 
             <h3>الإجمالي: <span id="total">0</span> ج</h3>
+<select id="customerSelect">
+  <option value="">عميل نقدي</option>
+</select>
 
-            <select id="payment">
-              <option value="نقدي">نقدي</option>
-              <option value="آجل">آجل</option>
+<select id="payment">
+  <option value="نقدي">نقدي</option>
+  <option value="آجل">آجل</option>
+</select>
+     
             </select>
 
             <button onclick="saveSale()">💾 حفظ</button>
@@ -76,8 +81,11 @@
   </div>
 
 </div>
+<tbody id="cart"></tbody>
+<span id="total">0</span>
 
 <script src="../js/db.js"></script>
 <script src="../js/sales.js"></script>
+
 </body>
 </html>
