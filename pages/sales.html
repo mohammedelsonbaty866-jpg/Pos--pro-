@@ -5,94 +5,82 @@
   <title>المبيعات</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
+
 <body>
 
-<div class="container">
+<h2>شاشة المبيعات</h2>
 
-  <h2>فاتورة بيع</h2>
+<!-- ================= العميل ================= -->
+<div class="card">
+  <label>اسم العميل (بحث سريع)</label>
+  <input list="customersList" id="saleCustomer" placeholder="عميل نقدي">
+  <datalist id="customersList"></datalist>
 
-  <div class="card">
+  <button onclick="window.location.href='customers.html'">
+    + إضافة عميل جديد
+  </button>
 
-    <!-- العميل -->
-    <div class="form-group">
-      <label>العميل</label>
-      <select id="customerSelect" class="form-control">
-        <option value="">اختر عميل</option>
-      </select>
-    </div>
-
-    <!-- طريقة الدفع -->
-    <div class="form-group">
-      <label>طريقة الدفع</label>
-      <select id="paymentType" class="form-control">
-        <option value="cash">نقدي</option>
-        <option value="credit">آجل</option>
-      </select>
-    </div>
-
-    <!-- الصنف -->
-    <div class="form-group">
-      <label>الصنف</label>
-      <select id="productSelect" class="form-control">
-        <option value="">اختر صنف</option>
-      </select>
-    </div>
-
-    <!-- القياس -->
-    <div class="form-group">
-      <label>القياس</label>
-      <select id="unitSelect" class="form-control">
-        <option value="كيلو">كيلو</option>
-        <option value="علبة">علبة</option>
-        <option value="كرتونة">كرتونة</option>
-        <option value="باكيت">باكيت</option>
-      </select>
-    </div>
-
-    <!-- الكمية -->
-    <div class="form-group">
-      <label>الكمية</label>
-      <input type="number" id="qty" class="form-control" value="1" min="1">
-    </div>
-
-    <button id="addToCartBtn" class="btn btn-primary">
-      إضافة للفاتورة
-    </button>
-
+  <div style="margin-top:10px">
+    <button onclick="setPayment('نقدي')">نقدي</button>
+    <button onclick="setPayment('آجل')">آجل</button>
+    <span id="paymentType">نقدي</span>
   </div>
-
-  <!-- جدول الأصناف -->
-  <div class="card">
-    <table class="table table-bordered">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>الصنف</th>
-          <th>القياس</th>
-          <th>الكمية</th>
-          <th>السعر</th>
-          <th>الإجمالي</th>
-          <th>حذف</th>
-        </tr>
-      </thead>
-      <tbody id="cartItems"></tbody>
-    </table>
-  </div>
-
-  <!-- الإجمالي -->
-  <div class="card">
-    <h3>الإجمالي: <span id="totalAmount">0</span></h3>
-    <button id="saveInvoiceBtn" class="btn btn-success">
-      حفظ الفاتورة
-    </button>
-    <button id="printInvoiceBtn" class="btn btn-secondary">
-      طباعة
-    </button>
-  </div>
-
 </div>
 
+<!-- ================= الصنف ================= -->
+<div class="card">
+  <label>الصنف (بحث سريع)</label>
+  <input list="productsList" id="saleProduct" placeholder="اكتب اسم الصنف">
+  <datalist id="productsList"></datalist>
+
+  <label>وحدة القياس</label>
+  <select id="saleUnit">
+    <option value="كجم">كجم</option>
+    <option value="علبة">علبة</option>
+    <option value="كرتونة">كرتونة</option>
+    <option value="باكيت">باكيت</option>
+  </select>
+
+  <label>الكمية</label>
+  <input type="number" id="saleQty" value="1" min="1">
+
+  <button id="addToInvoiceBtn">إضافة للفاتورة</button>
+</div>
+
+<!-- ================= الفاتورة ================= -->
+<div class="card">
+  <h3>الفاتورة</h3>
+
+  <table width="100%" border="1">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>الصنف</th>
+        <th>الوحدة</th>
+        <th>الكمية</th>
+        <th>السعر</th>
+        <th>الإجمالي</th>
+        <th>حذف</th>
+      </tr>
+    </thead>
+    <tbody id="invoiceItems"></tbody>
+  </table>
+
+  <h3>الإجمالي: <span id="totalAmount">0</span></h3>
+
+  <button id="saveInvoiceBtn">حفظ الفاتورة</button>
+  <button id="printInvoiceBtn">طباعة</button>
+</div>
+
+<!-- ================= Scripts ================= -->
 <script src="../js/db.js"></script>
 <script src="../js/sales.js"></script>
+
+<script>
+function setPayment(type) {
+  document.getElementById("paymentType").textContent = type;
+}
+</script>
+
 </body>
 </html>
