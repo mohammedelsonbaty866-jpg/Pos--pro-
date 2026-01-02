@@ -18,6 +18,9 @@
 <button onclick="saveSale()">حفظ</button>
 
 <script src="../js/db.js"></script>
-<script src="../js/sales.js"></script>
+<script src="../js/sales.js"></script>  
+  <script>
+    localStorage.setItem("printInvoice", JSON.stringify(invoiceData));
+window.open("invoice-print.html");
 </body>
 </html>
