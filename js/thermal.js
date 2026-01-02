@@ -6,24 +6,30 @@ window.onload = () => {
     return;
   }
 
-  invNo.innerText = invoice.no;
-  invDate.innerText = invoice.date;
-  invCustomer.innerText = invoice.customer;
-  invPayment.innerText = invoice.payment;
-  invTotal.innerText = invoice.total;
+  // بيانات الفاتورة
+  document.getElementById("invNo").innerText = invoice.no;
+  document.getElementById("invDate").innerText = invoice.date;
+  document.getElementById("invCustomer").innerText = invoice.customer;
+  document.getElementById("invPayment").innerText = invoice.payment;
+  document.getElementById("invTotal").innerText = invoice.total;
 
-  items.innerHTML = "";
-  invoice.items.forEach(i => {
-    items.innerHTML += `
-      <tr>
-        <td>${i.name}</td>
-        <td>${i.qty}</td>
-        <td>${i.price}</td>
-        <td>${i.qty * i.price}</td>
-      </tr>
+  // الأصناف
+  const itemsBody = document.getElementById("items");
+  itemsBody.innerHTML = "";
+
+  invoice.items.forEach(item => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${item.name}</td>
+      <td>${item.qty}</td>
+      <td>${item.price}</td>
+      <td>${item.qty * item.price}</td>
     `;
+    itemsBody.appendChild(row);
   });
 
   // طباعة تلقائية
-  setTimeout(() => window.print(), 500);
+  setTimeout(() => {
+    window.print();
+  }, 500);
 };
