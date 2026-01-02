@@ -120,7 +120,10 @@ th {
   padding: 15px;
   border-radius: 10px;
 }
-
+.sidebar a.active {
+  background: #2563eb;
+  color: #fff;
+}
 /* ===== Mobile ===== */
 @media (max-width: 768px) {
   .sidebar {
