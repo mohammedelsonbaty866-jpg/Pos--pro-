@@ -1,82 +1,33 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>العملاء</title>
-
-  <link rel="stylesheet" href="../css/style.css" />
-  <link rel="stylesheet" href="../css/mobile.css" />
+  <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
 
-<div class="app">
+<h2>العملاء</h2>
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <h2>POS PRO</h2>
-    <a href="sales.html">🛒 المبيعات</a>
-    <a href="products.html">📦 الأصناف</a>
-    <a href="customers.html" class="active">👥 العملاء</a>
-    <a href="suppliers.html">🏭 الموردين</a>
-    <a href="expenses.html">💸 المصروفات</a>
-    <a href="reports.html">📊 التقارير</a>
-    <a href="settings.html">⚙️ الإعدادات</a>
-  </div>
-
-  <!-- Main -->
-  <div class="main">
-
-    <!-- Header -->
-    <div class="header">
-      <h3>إدارة العملاء</h3>
-    </div>
-
-    <!-- Content -->
-    <div class="content">
-
-      <!-- Add Customer -->
-      <div class="card">
-        <h4>إضافة عميل</h4>
-
-        <label>اسم العميل</label>
-        <input type="text" id="custName" placeholder="اسم العميل" />
-
-        <label>رقم الهاتف</label>
-        <input type="text" id="custPhone" placeholder="01xxxxxxxxx" />
-
-        <label>الرصيد الافتتاحي</label>
-        <input type="number" id="custBalance" value="0" />
-
-        <button data-action="add-customer">➕ إضافة عميل</button>
-      </div>
-
-      <!-- Customers Table -->
-      <div class="card">
-        <h4>قائمة العملاء</h4>
-
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>الاسم</th>
-              <th>الهاتف</th>
-              <th>الرصيد</th>
-              <th>حذف</th>
-            </tr>
-          </thead>
-          <tbody id="customersTable"></tbody>
-        </table>
-      </div>
-
-    </div>
-  </div>
+<div class="card">
+  <input type="text" id="customerName" placeholder="اسم العميل">
+  <button id="addCustomerBtn">إضافة عميل</button>
 </div>
 
-<!-- Scripts -->
-<script src="../js/db.js"></script>
-<script src="../js/ui.js"></script>
-<script src="../js/events.js"></script>
-<script src="../js/customers.js"></script>
+<div class="card">
+  <table border="1" width="100%">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>اسم العميل</th>
+        <th>حذف</th>
+      </tr>
+    </thead>
+    <tbody id="customersTable"></tbody>
+  </table>
+</div>
 
+<script src="../js/db.js"></script>
+<script src="../js/customers.js"></script>
 </body>
 </html>
