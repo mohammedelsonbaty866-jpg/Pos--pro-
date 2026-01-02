@@ -1,56 +1,79 @@
-const table = document.getElementById("productsTable");
+/*********************************
+ * products.js
+ *********************************/
 
-function loadProducts() {
-  table.innerHTML = "";
-  db.transaction("products", "readonly")
-    .objectStore("products")
-    .getAll().onsuccess = e => {
-      e.target.result.forEach(p => {
-        table.innerHTML += `
-          <tr>
-            <td>${p.name}</td>
-            <td>${p.price}</td>
-            <td>${p.cost}</td>
-            <td>${p.stock}</td>
-            <td>${p.unit}</td>
-            <td>
-              <button onclick="deleteProduct(${p.id})">🗑️</button>
-            </td>
-          </tr>
-        `;
-      });
-    };
-}
+document.addEventListener("DOMContentLoaded", () => {
+  renderProducts();
+});
 
+/*********************************
+ * إضافة صنف
+ *********************************/
 function addProduct() {
-  const product = {
-    name: document.getElementById("name").value,
-    price: Number(document.getElementById("price").value),
-    cost: Number(document.getElementById("cost").value),
-    stock: Number(document.getElementById("stock").value),
-    unit: document.getElementById("unit").value
-  };
+  const name = document.getElementById("prodName").value.trim();
+  const price = Number(document.getElementById("prodPrice").value);
+  const unit = document.getElementById("prodUnit").value;
 
-  if (!product.name) return alert("اسم الصنف مطلوب");
+  if (!name || price <= 0) {
+    UI.showAlert("ادخل اسم وسعر صحيح", "error");
+    return;
+  }
 
-  db.transaction("products", "readwrite")
-    .objectStore("products")
-    .add(product);
+  POS_DB.addItem("products", {
+    name,
+    price,
+    unit
+  });
 
-  document.querySelectorAll("input").forEach(i => i.value = "");
-  document.getElementById("unit").value = "قطعة";
+  UI.showAlert("تم إضافة الصنف");
 
-  loadProducts();
+  document.getElementById("prodName").value = "";
+  document.getElementById("prodPrice").value = "";
+
+  renderProducts();
 }
 
+/*********************************
+ * حذف صنف
+ *********************************/
 function deleteProduct(id) {
-  if (!confirm("حذف الصنف؟")) return;
+  if (!UI.confirmAction("تأكيد حذف الصنف؟")) return;
 
-  db.transaction("products", "readwrite")
-    .objectStore("products")
-    .delete(id);
+  POS_DB.deleteItem("products", id);
+  UI.showAlert("تم حذف الصنف");
 
-  loadProducts();
+  renderProducts();
 }
 
-setTimeout(loadProducts, 500);
+/*********************************
+ * عرض الأصناف
+ *********************************/
+function renderProducts() {
+  const products = POS_DB.DB.products;
+
+  if (products.length === 0) {
+    UI.showEmpty("productsTable", 5);
+    return;
+  }
+
+  const tbody = document.getElementById("productsTable");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  products.forEach((p, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${p.name}</td>
+      <td>${p.unit}</td>
+      <td>${UI.formatCurrency(p.price)}</td>
+      <td>
+        <button data-action="delete-product" data-id="${p.id}">
+          🗑
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
