@@ -1,87 +1,72 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>الأصناف</title>
-
-  <link rel="stylesheet" href="../css/style.css" />
-  <link rel="stylesheet" href="../css/mobile.css" />
+  <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
 
-<div class="app">
+<div class="container">
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <h2>POS PRO</h2>
-    <a href="sales.html">🛒 المبيعات</a>
-    <a href="products.html" class="active">📦 الأصناف</a>
-    <a href="customers.html">👥 العملاء</a>
-    <a href="suppliers.html">🏭 الموردين</a>
-    <a href="inventory.html">📊 المخزون</a>
-    <a href="reports.html">📈 التقارير</a>
-    <a href="settings.html">⚙️ الإعدادات</a>
-  </div>
+  <h2>إدارة الأصناف</h2>
 
-  <!-- Main -->
-  <div class="main">
+  <!-- إضافة صنف -->
+  <div class="card">
 
-    <!-- Header -->
-    <div class="header">
-      <h3>إدارة الأصناف</h3>
+    <div class="form-group">
+      <label>اسم الصنف</label>
+      <input type="text" id="productName" class="form-control">
     </div>
 
-    <!-- Content -->
-    <div class="content">
-
-      <!-- Add Product -->
-      <div class="card">
-        <h4>إضافة صنف جديد</h4>
-
-        <label>اسم الصنف</label>
-        <input type="text" id="prodName" placeholder="مثال: سكر 1 كجم" />
-
-        <label>السعر</label>
-        <input type="number" id="prodPrice" placeholder="0.00" />
-
-        <label>وحدة القياس</label>
-        <select id="prodUnit">
-          <option value="قطعة">قطعة</option>
-          <option value="كرتونة">كرتونة</option>
-          <option value="باكو">باكو</option>
-          <option value="كيس">كيس</option>
-        </select>
-
-        <button data-action="add-product">➕ إضافة الصنف</button>
-      </div>
-
-      <!-- Products Table -->
-      <div class="card">
-        <h4>قائمة الأصناف</h4>
-
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>الاسم</th>
-              <th>الوحدة</th>
-              <th>السعر</th>
-              <th>حذف</th>
-            </tr>
-          </thead>
-          <tbody id="productsTable"></tbody>
-        </table>
-      </div>
-
+    <div class="form-group">
+      <label>سعر الكيلو</label>
+      <input type="number" id="priceKg" class="form-control">
     </div>
+
+    <div class="form-group">
+      <label>سعر العلبة</label>
+      <input type="number" id="priceBox" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label>سعر الكرتونة</label>
+      <input type="number" id="priceCarton" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label>سعر الباكيت</label>
+      <input type="number" id="pricePacket" class="form-control">
+    </div>
+
+    <button id="addProductBtn" class="btn btn-primary">
+      إضافة الصنف
+    </button>
   </div>
+
+  <!-- جدول الأصناف -->
+  <div class="card">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>الصنف</th>
+          <th>كجم</th>
+          <th>علبة</th>
+          <th>كرتونة</th>
+          <th>باكيت</th>
+          <th>حذف</th>
+        </tr>
+      </thead>
+      <tbody id="productsTable">
+        <!-- من JS -->
+      </tbody>
+    </table>
+  </div>
+
 </div>
 
-<!-- Scripts -->
 <script src="../js/db.js"></script>
-<script src="../js/ui.js"></script>
-<script src="../js/events.js"></script>
 <script src="../js/products.js"></script>
-
 </body>
 </html>
