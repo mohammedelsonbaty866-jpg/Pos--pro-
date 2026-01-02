@@ -120,7 +120,13 @@ function renderCart() {
 /*********************************
  * حفظ الفاتورة
  *********************************/
+function addItemToInvoice() {
+  alert("إضافة للفاتورة شغالة ✅");
+}
+
 function saveInvoice() {
+  alert("حفظ الفاتورة شغال ✅");
+}
   if (cart.length === 0) {
     UI.showAlert("الفاتورة فارغة", "error");
     return;
