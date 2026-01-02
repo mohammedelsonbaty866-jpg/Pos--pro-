@@ -2,59 +2,47 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>اسم الصفحة</title>
+<title>العملاء</title>
 <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
 
 <div class="app">
 
-  <!-- Sidebar -->
   <div class="sidebar">
     <h2>POS</h2>
-
     <a href="sales.html">🛒 المبيعات</a>
-    <a href="products.html">📦 الأصناف</a>
-    <a href="inventory.html">📊 المخزون</a>
-    <a href="customers.html">👥 العملاء</a>
-    <a href="suppliers.html">🚚 الموردين</a>
-    <a href="agents.html">👨‍💼 المناديب</a>
-    <a href="expenses.html">💸 المصروفات</a>
-    <a href="reports.html">📈 التقارير</a>
-    <a href="cashbox.html">💰 الخزنة</a>
+    <a href="customers.html" class="active">👥 العملاء</a>
+    <a href="reports.html">📊 التقارير</a>
   </div>
 
-  <!-- Main -->
   <div class="main">
 
-    <!-- Header -->
     <div class="header">
-      <h3>اسم الصفحة</h3>
-      <button>زر اختياري</button>
+      <h3>إدارة العملاء</h3>
+      <button>➕ عميل جديد</button>
     </div>
 
-    <!-- Content -->
-    <div class="card">
-  <input placeholder="اسم العميل">
-  <input placeholder="رقم الهاتف">
-  <button>حفظ</button>
-</div>
+    <div class="content">
 
-<div class="card">
-  <table>
-    <thead>
-      <tr>
-        <th>الاسم</th>
-        <th>الهاتف</th>
-        <th>الرصيد</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
+      <div class="card">
+        <input placeholder="اسم العميل">
+        <input placeholder="رقم الهاتف">
+        <input type="number" placeholder="رصيد افتتاحي">
+        <button>حفظ</button>
+      </div>
 
-      
-        محتوى الصفحة هنا
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>الاسم</th>
+              <th>الهاتف</th>
+              <th>الرصيد</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
 
     </div>
