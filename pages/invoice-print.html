@@ -1,83 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-<meta charset="UTF-8">
-<title>فاتورة حرارية</title>
-
-<link rel="stylesheet" href="../css/thermal.css">
-
-</head>
-<body>
-
-<div class="invoice">
-
-  <!-- بيانات المحل -->
-  <h2 class="center">اسم المحل</h2>
-  <p class="center">العنوان: ----</p>
-  <p class="center">تليفون: ----</p>
-
-  <hr>
-
-  <!-- بيانات الفاتورة -->
-  <div class="row">
-    <span>فاتورة رقم:</span>
-    <span id="invNo"></span>
-  </div>
-
-  <div class="row">
-    <span>التاريخ:</span>
-    <span id="invDate"></span>
-  </div>
-
-  <div class="row">
-    <span>العميل:</span>
-    <span id="invCustomer"></span>
-  </div>
-
-  <div class="row">
-    <span>الدفع:</span>
-    <span id="invPayment"></span>
-  </div>
-
-  <hr>
-
-  <!-- جدول الأصناف -->
-  <table>
-    <thead>
-      <tr>
-        <th>الصنف</th>
-        <th>ك</th>
-        <th>س</th>
-        <th>ج</th>
-      </tr>
-    </thead>
-    <tbody id="items"></tbody>
-  </table>
-
-  <hr>
-
-  <!-- الإجمالي -->
-  <div class="total-row">
-    <span>الإجمالي:</span>
-    <span><b id="invTotal"></b> ج</span>
-  </div>
-
-  <hr>
-
-  <!-- رسالة -->
-  <p class="center">🙏 شكرًا لتعاملكم معنا</p>
-
-</div>
-
-<script src="../js/thermal.js"></script>
-<link rel="stylesheet" href="../css/mobile.css">
-
-<div class="bottom-nav">
-  <a href="sales.html">🛒<br>بيع</a>
-  <a href="purchases.html">📦<br>شراء</a>
-  <a href="cashbox.html">💰<br>خزنة</a>
-  <a href="customers.html">👥<br>عملاء</a>
-  <a href="reports.html">📊<br>تقارير</a>
-</div>
-</body>
-</html>
