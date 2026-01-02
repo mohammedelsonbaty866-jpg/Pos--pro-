@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>كشف حساب مورد</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <div class="sidebar">
+    <h2>POS</h2>
+    <a href="suppliers.html">🚚 الموردين</a>
+    <a href="supplier-statement.html" class="active">📄 كشف حساب مورد</a>
+  </div>
+
+  <div class="main">
+
+    <div class="header">
+      <h3>كشف حساب مورد</h3>
+    </div>
+
+    <div class="content">
+
+      <div class="card">
+        <select id="supplierSelect"></select>
+        <button onclick="loadSupplierStatement()">عرض الكشف</button>
+      </div>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>التاريخ</th>
+              <th>البيان</th>
+              <th>مدين</th>
+              <th>دائن</th>
+            </tr>
+          </thead>
+          <tbody id="supplierTable"></tbody>
+        </table>
+
+        <h3>الرصيد النهائي: <span id="supplierBalance">0</span></h3>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="../js/db.js"></script>
+<script src="../js/supplier-statement.js"></script>
+
+</body>
+</html>
