@@ -1,55 +1,63 @@
-<!-- ====== Main Menu ====== -->
-<div class="main-menu">
+<!-- ===== Sidebar Menu ===== -->
+<div class="sidebar">
 
-  <button onclick="location.href='sales.html'">
-    المبيعات
-  </button>
-
-  <button onclick="location.href='purchases.html'">
-    المشتريات
-  </button>
-
-  <button onclick="location.href='returns.html'">
-    المرتجعات
-  </button>
-
-  <button onclick="location.href='stock.html'">
-    المخزون
-  </button>
-
-  <button onclick="location.href='products.html'">
-    الأصناف
-  </button>
-
-  <button onclick="location.href='customers.html'">
-    العملاء
-  </button>
-
-  <button onclick="location.href='suppliers.html'">
-    الموردين
-  </button>
-
+  <a href="sales.html" class="item active">🧾<span>المبيعات</span></a>
+  <a href="purchases.html" class="item">📦<span>المشتريات</span></a>
+  <a href="returns.html" class="item">↩️<span>المرتجعات</span></a>
+  <a href="stock.html" class="item">📊<span>المخزون</span></a>
+  <a href="products.html" class="item">🏷️<span>الأصناف</span></a>
+  <a href="customers.html" class="item">👤<span>العملاء</span></a>
+  <a href="suppliers.html" class="item">🚚<span>الموردين</span></a>
+<a href="settings.html" class="item settings">⚙️<span>الإعدادات</span></a>
 </div>
 
 <style>
-  .main-menu {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 15px;
+  body {
+    margin-right: 70px;
   }
 
-  .main-menu button {
-    padding: 8px 14px;
-    border: none;
+  .sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 70px;
+    height: 100vh;
     background: #2c3e50;
-    color: #fff;
-    cursor: pointer;
-    font-size: 14px;
-    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 10px;
+    z-index: 1000;
   }
 
-  .main-menu button:hover {
+  .sidebar .item {
+    width: 100%;
+    color: #fff;
+    text-decoration: none;
+    text-align: center;
+    padding: 12px 0;
+    font-size: 18px;
+  }
+
+  .sidebar .item span {
+    display: block;
+    font-size: 11px;
+    margin-top: 3px;
+  }
+
+  .sidebar .item:hover {
     background: #34495e;
   }
+
+  .sidebar .active {
+    background: #1abc9c;
+  }
+ .sidebar .settings {
+  margin-top: auto;
+  background: #1f2d3d;
+}
+
+.sidebar .settings:hover {
+  background: #273746;
+} 
 </style>
