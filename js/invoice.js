@@ -6,65 +6,50 @@ document.addEventListener("DOMContentLoaded", () => {
   loadInvoice();
 });
 
-/*********************************
- * تحميل الفاتورة
- *********************************/
 function loadInvoice() {
-  const params = new URLSearchParams(window.location.search);
-  const invoiceId = params.get("id");
+  const invoice = POS_DB.getLastSale();
+  const settings = POS_DB.DB.settings || {};
 
-  if (!invoiceId) {
-    UI.showAlert("فاتورة غير موجودة", "error");
-    return;
+  if (!invoice) return;
+
+  // Store Info
+  document.getElementById("storeName").textContent =
+    settings.storeName || "POS PRO";
+
+  document.getElementById("storePhone").textContent =
+    settings.storePhone || "";
+
+  if (settings.storeLogo) {
+    const logo = document.getElementById("storeLogo");
+    logo.src = settings.storeLogo;
+    logo.style.display = "block";
   }
 
-  const invoice = POS_DB.getItem("invoices", invoiceId);
-  if (!invoice) {
-    UI.showAlert("فاتورة غير موجودة", "error");
-    return;
-  }
+  // Invoice Info
+  document.getElementById("invNo").textContent = invoice.id;
+  document.getElementById("invDate").textContent = invoice.date;
+  document.getElementById("invCustomer").textContent =
+    invoice.customer || "نقدي";
 
-  renderInvoice(invoice);
-}
+  document.getElementById("invPayment").textContent =
+    invoice.payment;
 
-/*********************************
- * عرض البيانات
- *********************************/
-function renderInvoice(inv) {
-  const customer =
-    POS_DB.getItem("customers", inv.customerId) || {};
+  document.getElementById("invTotal").textContent =
+    UI.formatCurrency(invoice.total);
 
-  setText("invNo", inv.number);
-  setText("invDate", UI.formatDate(inv.date));
-  setText("invCustomer", customer.name || "نقدي");
-  setText(
-    "invPayment",
-    inv.paymentType === "cash" ? "نقدي" : "آجل"
-  );
-  setText("invTotal", UI.formatCurrency(inv.total));
-
+  // Items
   const tbody = document.getElementById("items");
-  if (!tbody) return;
-
   tbody.innerHTML = "";
 
-  inv.items.forEach((item, i) => {
+  invoice.items.forEach((item, i) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${i + 1}</td>
       <td>${item.name}</td>
       <td>${item.qty}</td>
       <td>${UI.formatCurrency(item.price)}</td>
-      <td>${UI.formatCurrency(item.price * item.qty)}</td>
+      <td>${UI.formatCurrency(item.qty * item.price)}</td>
     `;
     tbody.appendChild(tr);
   });
-}
-
-/*********************************
- * أدوات مساعدة
- *********************************/
-function setText(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = value;
 }
