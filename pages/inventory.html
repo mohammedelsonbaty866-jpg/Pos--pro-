@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>جرد المخزون</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<h2>جرد المخزون</h2>
+
+<table border="1" width="100%">
+  <thead>
+    <tr>
+      <th>الصنف</th>
+      <th>الرصيد الدفتري</th>
+      <th>الرصيد الفعلي</th>
+      <th>الفرق</th>
+      <th>تأكيد</th>
+    </tr>
+  </thead>
+  <tbody id="inventoryTable"></tbody>
+</table>
+
+<br>
+<button onclick="loadInventory()">🔄 تحديث</button>
+
+<script src="../js/db.js"></script>
+<script src="../js/inventory.js"></script>
+</body>
+</html>
