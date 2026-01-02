@@ -73,4 +73,11 @@
 <script src="../js/db.js"></script>
 <script src="../js/customers.js"></script>
 </body>
+ <script>
+  fetch("../partials/menu.html")
+    .then(res => res.text())
+    .then(html => {
+      document.body.insertAdjacentHTML("afterbegin", html);
+    });
+</script> 
 </html>
