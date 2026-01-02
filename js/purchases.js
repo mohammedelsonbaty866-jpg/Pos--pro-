@@ -1,111 +1,132 @@
-const supplierSelect = document.getElementById("supplierSelect");
-const productSelect = document.getElementById("productSelect");
-const qtyInput = document.getElementById("purchaseQty");
-const priceInput = document.getElementById("purchasePrice");
-const paymentSelect = document.getElementById("purchasePayment");
-const tableBody = document.getElementById("purchasesTable");
+// js/purchases.js
 
-/* تحميل الموردين */
-function loadSuppliers() {
-  const tx = db.transaction("suppliers", "readonly");
-  tx.objectStore("suppliers").getAll().onsuccess = e => {
-    supplierSelect.innerHTML = "<option value=''>اختر المورد</option>";
-    e.target.result.forEach(s => {
-      supplierSelect.innerHTML += `
-        <option value="${s.id}">${s.name}</option>
-      `;
-    });
-  };
-}
+let purchaseItems = [];
+let purchaseTotal = 0;
 
-/* تحميل الأصناف */
-function loadProducts() {
-  const tx = db.transaction("products", "readonly");
-  tx.objectStore("products").getAll().onsuccess = e => {
-    productSelect.innerHTML = "<option value=''>اختر الصنف</option>";
-    e.target.result.forEach(p => {
-      productSelect.innerHTML += `
-        <option value="${p.id}">${p.name}</option>
-      `;
-    });
-  };
-}
-
-/* إضافة فاتورة شراء */
-function addPurchase() {
-  if (!supplierSelect.value || !productSelect.value)
-    return alert("اختر المورد والصنف");
-
-  const qty = Number(qtyInput.value);
-  const price = Number(priceInput.value);
-  const total = qty * price;
-
-  const purchase = {
-    supplierId: Number(supplierSelect.value),
-    productId: Number(productSelect.value),
-    qty,
-    price,
-    total,
-    payment: paymentSelect.value,
-    date: new Date().toLocaleDateString()
-  };
-
-  /* حفظ الفاتورة */
-  db.transaction("purchases", "readwrite")
-    .objectStore("purchases")
-    .add(purchase);
-
-  /* تحديث المخزون */
-  const pTx = db.transaction("products", "readwrite");
-  const pStore = pTx.objectStore("products");
-
-  pStore.get(purchase.productId).onsuccess = e => {
-    const product = e.target.result;
-    product.stock = (product.stock || 0) + qty;
-    pStore.put(product);
-  };
-
-  /* تحديث رصيد المورد لو آجل */
-  if (purchase.payment === "آجل") {
-    const sTx = db.transaction("suppliers", "readwrite");
-    const sStore = sTx.objectStore("suppliers");
-
-    sStore.get(purchase.supplierId).onsuccess = e => {
-      const supplier = e.target.result;
-      supplier.balance = (supplier.balance || 0) + total;
-      sStore.put(supplier);
-    };
-  }
-
-  alert("تم حفظ فاتورة الشراء");
-  qtyInput.value = "";
-  priceInput.value = "";
-
-  setTimeout(loadPurchases, 300);
-}
-
-/* تحميل المشتريات */
-function loadPurchases() {
-  tableBody.innerHTML = "";
-  db.transaction("purchases", "readonly")
-    .objectStore("purchases")
-    .getAll().onsuccess = e => {
-      e.target.result.forEach(p => {
-        tableBody.innerHTML += `
-          <tr>
-            <td>${p.date}</td>
-            <td>${p.qty}</td>
-            <td>${p.total}</td>
-            <td>${p.payment}</td>
-          </tr>
-        `;
-      });
-    };
-}
-
-/* تحميل أولي */
-setTimeout(() => {
+document.addEventListener("DOMContentLoaded", () => {
   loadSuppliers();
   loadProducts();
-  loadPurchases();
-}, 500);
+
+  document
+    .getElementById("addToPurchaseBtn")
+    .addEventListener("click", addToPurchase);
+
+  document
+    .getElementById("savePurchaseBtn")
+    .addEventListener("click", savePurchase);
+});
+
+/* ============ الموردين (بحث سريع) ============ */
+function loadSuppliers() {
+  const list = document.getElementById("suppliersList");
+  list.innerHTML = "";
+
+  getSuppliers().forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s.name;
+    list.appendChild(opt);
+  });
+}
+
+/* ============ الأصناف (بحث سريع) ============ */
+function loadProducts() {
+  const list = document.getElementById("productsList");
+  list.innerHTML = "";
+
+  getProducts().forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p.name;
+    list.appendChild(opt);
+  });
+}
+
+/* ============ إضافة للفاتورة ============ */
+function addToPurchase() {
+  const productName = document
+    .getElementById("purchaseProduct")
+    .value.trim();
+  const unit = document.getElementById("purchaseUnit").value;
+  const qty = parseFloat(document.getElementById("purchaseQty").value);
+  const price = parseFloat(
+    document.getElementById("purchasePrice").value
+  );
+
+  if (!productName || qty <= 0 || price <= 0) {
+    alert("أدخل الصنف والكمية وسعر الشراء");
+    return;
+  }
+
+  const total = qty * price;
+
+  purchaseItems.push({
+    name: productName,
+    unit,
+    qty,
+    price,
+    total
+  });
+
+  renderPurchase();
+}
+
+/* ============ عرض الفاتورة ============ */
+function renderPurchase() {
+  const tbody = document.getElementById("purchaseItems");
+  tbody.innerHTML = "";
+  purchaseTotal = 0;
+
+  purchaseItems.forEach((item, index) => {
+    purchaseTotal += item.total;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${index + 1}</td>
+      <td>${item.name}</td>
+      <td>${item.unit}</td>
+      <td>${item.qty}</td>
+      <td>${item.price}</td>
+      <td>${item.total}</td>
+      <td>
+        <button onclick="removePurchaseItem(${index})">✖</button>
+      </td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("purchaseTotal").textContent =
+    purchaseTotal.toFixed(2);
+}
+
+function removePurchaseItem(index) {
+  purchaseItems.splice(index, 1);
+  renderPurchase();
+}
+
+/* ============ حفظ المشتريات ============ */
+function savePurchase() {
+  if (purchaseItems.length === 0) {
+    alert("فاتورة المشتريات فاضية");
+    return;
+  }
+
+  const supplier =
+    document.getElementById("purchaseSupplier").value || "مورد غير محدد";
+
+  const purchases = getPurchases();
+
+  purchases.push({
+    id: Date.now(),
+    supplier,
+    items: purchaseItems,
+    total: purchaseTotal,
+    date: new Date().toLocaleString()
+  });
+
+  localStorage.setItem("pos_purchases", JSON.stringify(purchases));
+
+  alert("تم حفظ فاتورة المشتريات");
+
+  purchaseItems = [];
+  renderPurchase();
+}
