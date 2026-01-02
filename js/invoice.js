@@ -1,31 +1,70 @@
-function printInvoice() {
-  const content = `
-    <h2>فاتورة بيع</h2>
-    <p>رقم الفاتورة: ${invoiceNo.value}</p>
-    <p>العميل: ${customer.value}</p>
-    <p>طريقة الدفع: ${payment.value}</p>
-    <p>الإجمالي: ${total.value} جنيه</p>
-  `;
+/*********************************
+ * invoice.js
+ *********************************/
 
-  const win = window.open('', '', 'width=400,height=600');
-  win.document.write(content);
-  win.print();
-  win.close();
+document.addEventListener("DOMContentLoaded", () => {
+  loadInvoice();
+});
+
+/*********************************
+ * تحميل الفاتورة
+ *********************************/
+function loadInvoice() {
+  const params = new URLSearchParams(window.location.search);
+  const invoiceId = params.get("id");
+
+  if (!invoiceId) {
+    UI.showAlert("فاتورة غير موجودة", "error");
+    return;
+  }
+
+  const invoice = POS_DB.getItem("invoices", invoiceId);
+  if (!invoice) {
+    UI.showAlert("فاتورة غير موجودة", "error");
+    return;
+  }
+
+  renderInvoice(invoice);
 }
 
-// ================= PDF =================
+/*********************************
+ * عرض البيانات
+ *********************************/
+function renderInvoice(inv) {
+  const customer =
+    POS_DB.getItem("customers", inv.customerId) || {};
 
-function generatePDF() {
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF();
+  setText("invNo", inv.number);
+  setText("invDate", UI.formatDate(inv.date));
+  setText("invCustomer", customer.name || "نقدي");
+  setText(
+    "invPayment",
+    inv.paymentType === "cash" ? "نقدي" : "آجل"
+  );
+  setText("invTotal", UI.formatCurrency(inv.total));
 
-  pdf.setFont("Helvetica");
-  pdf.text("فاتورة بيع", 80, 10);
+  const tbody = document.getElementById("items");
+  if (!tbody) return;
 
-  pdf.text(`رقم الفاتورة: ${invoiceNo.value}`, 10, 30);
-  pdf.text(`العميل: ${customer.value}`, 10, 40);
-  pdf.text(`طريقة الدفع: ${payment.value}`, 10, 50);
-  pdf.text(`الإجمالي: ${total.value} جنيه`, 10, 60);
+  tbody.innerHTML = "";
 
-  pdf.save(`invoice_${invoiceNo.value}.pdf`);
+  inv.items.forEach((item, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${item.name}</td>
+      <td>${item.qty}</td>
+      <td>${UI.formatCurrency(item.price)}</td>
+      <td>${UI.formatCurrency(item.price * item.qty)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+/*********************************
+ * أدوات مساعدة
+ *********************************/
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
 }
