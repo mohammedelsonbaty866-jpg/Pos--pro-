@@ -1,32 +1,37 @@
 <!-- ===== Sidebar Menu ===== -->
 <div class="sidebar">
 
-  <a href="sales.html" class="item active">🧾<span>المبيعات</span></a>
+  <a href="sales.html" class="item">🧾<span>المبيعات</span></a>
   <a href="purchases.html" class="item">📦<span>المشتريات</span></a>
-  <a href="returns.html" class="item">↩️<span>المرتجعات</span></a>
-  <a href="stock.html" class="item">📊<span>المخزون</span></a>
   <a href="products.html" class="item">🏷️<span>الأصناف</span></a>
+  <a href="returns.html" class="item">↩️<span>المرتجعات</span></a>
   <a href="customers.html" class="item">👤<span>العملاء</span></a>
   <a href="suppliers.html" class="item">🚚<span>الموردين</span></a>
-<a href="settings.html" class="item settings">⚙️<span>الإعدادات</span></a>
+  <a href="stock.html" class="item">📊<span>المخزون</span></a>
+  <a href="reports.html" class="item">📈<span>التقارير</span></a>
+  <a href="expenses.html" class="item">💸<span>المصروفات</span></a>
+  <a href="cashbox.html" class="item">💰<span>الخزنة</span></a>
+
+  <a href="settings.html" class="item settings">⚙️<span>الإعدادات</span></a>
+
 </div>
 
 <style>
   body {
-    margin-right: 70px;
+    margin-right: 90px;
   }
 
   .sidebar {
     position: fixed;
     top: 0;
     right: 0;
-    width: 70px;
+    width: 90px;
     height: 100vh;
-    background: #2c3e50;
+    background: #1f2d3d;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 10px;
+    padding-top: 8px;
     z-index: 1000;
   }
 
@@ -35,29 +40,27 @@
     color: #fff;
     text-decoration: none;
     text-align: center;
-    padding: 12px 0;
-    font-size: 18px;
+    padding: 14px 0;
+    font-size: 22px; /* الأيقونة */
   }
 
   .sidebar .item span {
     display: block;
-    font-size: 11px;
-    margin-top: 3px;
+    font-size: 13px;
+    margin-top: 6px;
+    font-weight: bold;
   }
 
   .sidebar .item:hover {
-    background: #34495e;
+    background: #2c3e50;
   }
 
-  .sidebar .active {
-    background: #1abc9c;
+  .sidebar .settings {
+    margin-top: auto;
+    background: #16222e;
   }
- .sidebar .settings {
-  margin-top: auto;
-  background: #1f2d3d;
-}
 
-.sidebar .settings:hover {
-  background: #273746;
-} 
+  .sidebar .settings:hover {
+    background: #22303f;
+  }
 </style>
