@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>طباعة فاتورة</title>
+
+  <link rel="stylesheet" href="../css/print.css" />
+  <link rel="stylesheet" href="../css/thermal.css" media="print" />
+</head>
+<body>
+
+<div class="invoice-print">
+
+  <!-- Store Info -->
+  <div class="store-info">
+    <img id="storeLogo" style="max-width:120px;display:none" />
+    <h2 id="storeName"></h2>
+    <p id="storePhone"></p>
+    <hr />
+  </div>
+
+  <!-- Invoice Info -->
+  <div class="inv-info">
+    <p>فاتورة رقم: <span id="invNo"></span></p>
+    <p>التاريخ: <span id="invDate"></span></p>
+    <p>العميل: <span id="invCustomer"></span></p>
+    <p>الدفع: <span id="invPayment"></span></p>
+  </div>
+
+  <!-- Items -->
+  <table class="print-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>الصنف</th>
+        <th>ك</th>
+        <th>س</th>
+        <th>ج</th>
+      </tr>
+    </thead>
+    <tbody id="items"></tbody>
+  </table>
+
+  <!-- Total -->
+  <div class="total">
+    الإجمالي: <strong id="invTotal"></strong>
+  </div>
+
+  <p class="thanks">شكرًا لتعاملكم معنا</p>
+
+</div>
+
+<!-- Scripts -->
+<script src="../js/db.js"></script>
+<script src="../js/ui.js"></script>
+<script>
+/*********************************
+ * invoice-print inline
+ *********************************/
+document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
+
+  const invoice = POS_DB.getItem("invoices", id);
+  if (!invoice) return;
+
+  const settings = POS_DB.DB.settings;
+  const customer =
+    POS_DB.getItem("customers", invoice.customerId) || {};
+
+  set("storeName", settings.storeName || "");
+  set("storePhone", settings.storePhone || "");
+
+  if (settings.storeLogo) {
+    const img = document.getElementById("storeLogo");
+    img.src = settings.storeLogo;
+    img.style.display = "block";
+  }
+
+  set("invNo", invoice.number);
+  set("invDate", UI.formatDate(invoice.date));
+  set("invCustomer", customer.name || "نقدي");
+  set(
+    "invPayment",
+    invoice.paymentType === "cash" ? "نقدي" : "آجل"
+  );
+  set("invTotal", UI.formatCurrency(invoice.total));
+
+  const tbody = document.getElementById("items");
+  invoice.items.forEach((item, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${item.name}</td>
+      <td>${item.qty}</td>
+      <td>${UI.formatCurrency(item.price)}</td>
+      <td>${UI.formatCurrency(item.price * item.qty)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  setTimeout(() => window.print(), 300);
+});
+
+function set(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+</script>
+
+</body>
+</html>
