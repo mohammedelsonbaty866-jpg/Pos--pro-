@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>لوحة التحكم</title>
+
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/mobile.css" />
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>POS PRO</h2>
+    <a href="dashboard.html" class="active">🏠 الرئيسية</a>
+    <a href="sales.html">🛒 المبيعات</a>
+    <a href="products.html">📦 الأصناف</a>
+    <a href="customers.html">👥 العملاء</a>
+    <a href="suppliers.html">🏭 الموردين</a>
+    <a href="expenses.html">💸 المصروفات</a>
+    <a href="reports.html">📊 التقارير</a>
+    <a href="settings.html">⚙️ الإعدادات</a>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Header -->
+    <div class="header">
+      <h3>لوحة التحكم</h3>
+      <span id="todayDate"></span>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- Stats -->
+      <div class="stats">
+        <div class="stat">
+          <h4>إجمالي المبيعات</h4>
+          <p id="dashSales">0</p>
+        </div>
+
+        <div class="stat">
+          <h4>إجمالي المصروفات</h4>
+          <p id="dashExpenses">0</p>
+        </div>
+
+        <div class="stat">
+          <h4>صافي الربح</h4>
+          <p id="dashProfit">0</p>
+        </div>
+
+        <div class="stat">
+          <h4>عدد الفواتير</h4>
+          <p id="dashInvoices">0</p>
+        </div>
+      </div>
+
+      <!-- More Stats -->
+      <div class="stats">
+        <div class="stat">
+          <h4>عدد العملاء</h4>
+          <p id="dashCustomers">0</p>
+        </div>
+
+        <div class="stat">
+          <h4>عدد الأصناف</h4>
+          <p id="dashProducts">0</p>
+        </div>
+
+        <div class="stat">
+          <h4>عدد المندوبين</h4>
+          <p id="dashAgents">0</p>
+        </div>
+      </div>
+
+      <!-- Last Sales -->
+      <div class="card">
+        <h4>آخر عمليات بيع</h4>
+
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>التاريخ</th>
+              <th>العميل</th>
+              <th>المندوب</th>
+              <th>الإجمالي</th>
+            </tr>
+          </thead>
+          <tbody id="lastSalesTable"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="../js/db.js"></script>
+<script src="../js/ui.js"></script>
+<script src="../js/dashboard.js"></script>
+
+</body>
+</html>
