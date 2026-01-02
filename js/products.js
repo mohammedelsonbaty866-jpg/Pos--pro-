@@ -1,79 +1,89 @@
-/*********************************
- * products.js
- *********************************/
+// js/products.js
 
 document.addEventListener("DOMContentLoaded", () => {
-  renderProducts();
+  initProducts();
 });
 
-/*********************************
- * إضافة صنف
- *********************************/
-function addProduct() {
-  const name = document.getElementById("prodName").value.trim();
-  const price = Number(document.getElementById("prodPrice").value);
-  const unit = document.getElementById("prodUnit").value;
+function initProducts() {
+  const btn = document.getElementById("addProductBtn");
+  if (btn) btn.addEventListener("click", addProduct);
 
-  if (!name || price <= 0) {
-    UI.showAlert("ادخل اسم وسعر صحيح", "error");
+  renderProducts();
+}
+
+/* ========= إضافة صنف ========= */
+function addProduct() {
+  const name = document.getElementById("productName").value.trim();
+  const priceKg = parseFloat(document.getElementById("priceKg").value) || 0;
+  const priceBox = parseFloat(document.getElementById("priceBox").value) || 0;
+  const priceCarton =
+    parseFloat(document.getElementById("priceCarton").value) || 0;
+  const pricePacket =
+    parseFloat(document.getElementById("pricePacket").value) || 0;
+
+  if (!name) {
+    alert("اسم الصنف مطلوب");
     return;
   }
 
-  POS_DB.addItem("products", {
+  const products = getProducts();
+
+  products.push({
+    id: Date.now(),
     name,
-    price,
-    unit
+    priceKg,
+    priceBox,
+    priceCarton,
+    pricePacket
   });
 
-  UI.showAlert("تم إضافة الصنف");
+  localStorage.setItem("pos_products", JSON.stringify(products));
 
-  document.getElementById("prodName").value = "";
-  document.getElementById("prodPrice").value = "";
-
+  clearProductInputs();
   renderProducts();
 }
 
-/*********************************
- * حذف صنف
- *********************************/
-function deleteProduct(id) {
-  if (!UI.confirmAction("تأكيد حذف الصنف؟")) return;
-
-  POS_DB.deleteItem("products", id);
-  UI.showAlert("تم حذف الصنف");
-
-  renderProducts();
-}
-
-/*********************************
- * عرض الأصناف
- *********************************/
+/* ========= عرض الأصناف ========= */
 function renderProducts() {
-  const products = POS_DB.DB.products;
-
-  if (products.length === 0) {
-    UI.showEmpty("productsTable", 5);
-    return;
-  }
-
   const tbody = document.getElementById("productsTable");
   if (!tbody) return;
 
   tbody.innerHTML = "";
+  const products = getProducts();
 
-  products.forEach((p, i) => {
+  products.forEach((p, index) => {
     const tr = document.createElement("tr");
+
     tr.innerHTML = `
-      <td>${i + 1}</td>
+      <td>${index + 1}</td>
       <td>${p.name}</td>
-      <td>${p.unit}</td>
-      <td>${UI.formatCurrency(p.price)}</td>
+      <td>${p.priceKg || ""}</td>
+      <td>${p.priceBox || ""}</td>
+      <td>${p.priceCarton || ""}</td>
+      <td>${p.pricePacket || ""}</td>
       <td>
-        <button data-action="delete-product" data-id="${p.id}">
-          🗑
-        </button>
+        <button onclick="deleteProduct(${p.id})">حذف</button>
       </td>
     `;
+
     tbody.appendChild(tr);
   });
+}
+
+/* ========= حذف ========= */
+function deleteProduct(id) {
+  if (!confirm("حذف الصنف؟")) return;
+
+  const products = getProducts().filter(p => p.id !== id);
+  localStorage.setItem("pos_products", JSON.stringify(products));
+  renderProducts();
+}
+
+/* ========= تنظيف الحقول ========= */
+function clearProductInputs() {
+  document.getElementById("productName").value = "";
+  document.getElementById("priceKg").value = "";
+  document.getElementById("priceBox").value = "";
+  document.getElementById("priceCarton").value = "";
+  document.getElementById("pricePacket").value = "";
 }
