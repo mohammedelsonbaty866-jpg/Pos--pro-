@@ -1,4 +1,5 @@
 // بيانات تجريبية (لاحقًا من الفاتورة الحقيقية)
+const invoice = JSON.parse(localStorage.getItem("printInvoice"));
 const invoice = {
   no: "1001",
   date: new Date().toLocaleString(),
