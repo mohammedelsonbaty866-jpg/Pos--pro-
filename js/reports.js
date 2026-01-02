@@ -1,15 +1,58 @@
-function profitLoss(sales, purchases, expenses) {
-  return sales - purchases - expenses;
-}
-function generateReport() {
-  const type = reportType.value;
-  reportResult.innerHTML = "جارٍ التحميل...";
+const salesTotalEl = document.getElementById("salesTotal");
+const purchasesTotalEl = document.getElementById("purchasesTotal");
+const profitTotalEl = document.getElementById("profitTotal");
+const reportTable = document.getElementById("reportTable");
 
-  if (type === "profit") return profitLossReport();
-  if (type === "products") return productsReport();
+function loadProfitLoss() {
+  const from = document.getElementById("fromDate").value;
+  const to = document.getElementById("toDate").value;
 
-  salesReport(type);
+  let salesTotal = 0;
+  let purchasesTotal = 0;
+
+  // المبيعات
+  const salesTx = db.transaction("sales", "readonly");
+  salesTx.objectStore("sales").getAll().onsuccess = e => {
+    e.target.result.forEach(s => {
+      if (checkDate(s.date, from, to)) {
+        salesTotal += Number(s.total);
+      }
+    });
+
+    // المشتريات
+    const purTx = db.transaction("purchases", "readonly");
+    purTx.objectStore("purchases").getAll().onsuccess = ev => {
+      ev.target.result.forEach(p => {
+        if (checkDate(p.date, from, to)) {
+          purchasesTotal += Number(p.total);
+        }
+      });
+
+      const profit = salesTotal - purchasesTotal;
+
+      salesTotalEl.innerText = salesTotal.toFixed(2);
+      purchasesTotalEl.innerText = purchasesTotal.toFixed(2);
+      profitTotalEl.innerText = profit.toFixed(2);
+
+      reportTable.innerHTML = `
+        <tr>
+          <td>${from || "بداية"} → ${to || "نهاية"}</td>
+          <td>${salesTotal}</td>
+          <td>${purchasesTotal}</td>
+          <td>${profit}</td>
+        </tr>
+      `;
+    };
+  };
 }
+
+function checkDate(dateStr, from, to) {
+  const d = new Date(dateStr);
+  if (from && d < new Date(from)) return false;
+  if (to && d > new Date(to)) return false;
+  return true;
+}
+
 
 // ================== تقارير المبيعات ==================
 
