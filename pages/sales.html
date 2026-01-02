@@ -4,88 +4,73 @@
 <meta charset="UTF-8">
 <title>المبيعات</title>
 <link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/buttons.css">
+<link rel="stylesheet" href="../css/mobile.css">
 </head>
 <body>
 
 <div class="app">
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <h2>POS</h2>
-    <a href="../dashboard.html">🏠 الرئيسية</a>
-    <a href="sales.html">🛒 المبيعات</a>
-    <a href="products.html">📦 الأصناف</a>
-    <a href="reports.html">📊 التقارير</a>
-  </div>
+<div class="sidebar">
+  <h2>POS</h2>
+  <a href="sales.html" class="active">🛒 المبيعات</a>
+  <a href="products.html">📦 الأصناف</a>
+</div>
 
-  <!-- Main -->
-  <div class="main">
+<div class="main">
+<div class="header">
+  <h3>فاتورة بيع</h3>
+  <button class="btn btn-dark" id="btnPrint">🖨️ طباعة</button>
+</div>
 
-    <div class="header">
-      <h3>شاشة المبيعات</h3>
-      <span>فاتورة جديدة</span>
-    </div>
+<div class="content">
 
-    <div class="content">
+<!-- بيانات الفاتورة -->
+<div class="card">
+  <select id="customerSelect"></select>
+  <select id="repSelect"></select>
 
-      <div class="card">
+  <select id="paymentType">
+    <option value="cash">نقدي</option>
+    <option value="credit">آجل</option>
+  </select>
+</div>
 
-        <!-- Top -->
-        <div style="display:grid;grid-template-columns:2fr 1fr;gap:15px">
+<!-- إضافة صنف -->
+<div class="card">
+  <select id="productSelect"></select>
+  <input id="qty" type="number" placeholder="الكمية">
+  <button class="btn btn-primary" id="btnAddItem">➕ إضافة</button>
+</div>
 
-          <!-- Products -->
-          <div>
-            <input id="search" placeholder="🔍 بحث عن صنف" onkeyup="loadProducts()">
+<!-- جدول الفاتورة -->
+<div class="card">
+<table>
+<thead>
+<tr>
+<th>الصنف</th>
+<th>سعر</th>
+<th>كمية</th>
+<th>إجمالي</th>
+<th></th>
+</tr>
+</thead>
+<tbody id="invoiceItems"></tbody>
+</table>
 
-            <div id="products"
-              style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:10px">
-            </div>
-          </div>
+<h3>الإجمالي: <span id="total">0</span></h3>
 
-          <!-- Cart -->
-          <div>
-            <h4>🧾 سلة البيع</h4>
-            <table>
-              <thead>
-                <tr>
-                  <th>صنف</th>
-                  <th>ك</th>
-                  <th>ج</th>
-                </tr>
-              </thead>
-              <tbody id="cart"></tbody>
-            </table>
-
-            <h3>الإجمالي: <span id="total">0</span> ج</h3>
-<select id="customerSelect">
-  <option value="">عميل نقدي</option>
-</select>
-
-<select id="payment">
-  <option value="نقدي">نقدي</option>
-  <option value="آجل">آجل</option>
-</select>
-     
-            </select>
-
-            <button onclick="saveSale()">💾 حفظ</button>
-            <button onclick="print()">🖨️ طباعة</button>
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
+<button class="btn btn-success" id="btnSaveInvoice">
+💾 حفظ الفاتورة
+</button>
+</div>
 
 </div>
-<tbody id="cart"></tbody>
-<span id="total">0</span>
+</div>
+</div>
 
 <script src="../js/db.js"></script>
 <script src="../js/sales.js"></script>
-
+<script src="../js/invoice.js"></script>
 </body>
 </html>
