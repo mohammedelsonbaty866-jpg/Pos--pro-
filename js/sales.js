@@ -63,39 +63,51 @@ function saveSale() {
     return;
   }
 
-  const user = JSON.parse(localStorage.getItem("user")) || { username: "admin" };
+  const customerId = customerSelect.value
+    ? Number(customerSelect.value)
+    : null;
 
-  const invoiceData = {
-    no: Date.now(), // رقم فاتورة تلقائي
+  const invoice = {
     date: new Date().toLocaleString(),
-    customer: "عميل نقدي",
-    payment: payment.value,
+    customerId,
     total: grandTotal,
-    agent: user.username,
-    items: cart.map(i => ({
-      name: i.name,
-      qty: i.qty,
-      price: i.price
-    }))
+    payment: payment.value,
+    items: cart
   };
 
-  // 1️⃣ حفظ الفاتورة
+  // حفظ الفاتورة
   db.transaction("sales", "readwrite")
     .objectStore("sales")
-    .add(invoiceData);
+    .add(invoice);
 
-  // 2️⃣ تحديث المخزون
-  const tx = db.transaction("products", "readwrite");
-  const store = tx.objectStore("products");
+  // تحديث المخزون
+  const pTx = db.transaction("products", "readwrite");
+  const pStore = pTx.objectStore("products");
 
   cart.forEach(i => {
-    store.get(i.id).onsuccess = e => {
+    pStore.get(i.id).onsuccess = e => {
       const p = e.target.result;
       p.stock -= i.qty;
-      store.put(p);
+      pStore.put(p);
     };
   });
 
+  // تحديث رصيد العميل لو آجل
+  if (invoice.payment === "آجل" && customerId) {
+    const cTx = db.transaction("customers", "readwrite");
+    const cStore = cTx.objectStore("customers");
+
+    cStore.get(customerId).onsuccess = e => {
+      const customer = e.target.result;
+      customer.balance = (customer.balance || 0) + grandTotal;
+      cStore.put(customer);
+    };
+  }
+
+  alert("تم حفظ الفاتورة");
+  cart = [];
+  renderCart();
+}
   // 3️⃣ تخزين الفاتورة للطباعة
   localStorage.setItem("printInvoice", JSON.stringify(invoiceData));
 
