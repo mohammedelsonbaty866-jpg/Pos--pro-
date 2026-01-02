@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>مندوب المبيعات</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<h2>واجهة المندوب</h2>
+
+<p id="agentName"></p>
+
+<nav>
+  <a href="sales.html">مبيعاتي</a>
+  <a href="reports.html">تقاريري</a>
+</nav>
+
+<button onclick="logout()">خروج</button>
+
+<script src="../js/auth.js"></script>
+<script>
+const user = currentUser();
+agentName.innerText = "مرحبًا " + user.username;
+
+function logout() {
+  localStorage.removeItem("user");
+  location.href = "login.html";
+}
+</script>
+</body>
+</html>
