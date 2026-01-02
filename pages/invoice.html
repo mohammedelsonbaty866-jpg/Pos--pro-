@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>فاتورة</title>
+
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/buttons.css">
+<link rel="stylesheet" href="../css/print.css">
+
+</head>
+<body>
+
+<div class="invoice">
+
+  <!-- رأس الفاتورة -->
+  <div class="inv-header">
+    <img id="invLogo">
+    <h2 id="invStore"></h2>
+    <p id="invPhone"></p>
+  </div>
+
+  <hr>
+
+  <!-- بيانات -->
+  <div class="inv-info">
+    <div>رقم الفاتورة: <span id="invNo"></span></div>
+    <div>التاريخ: <span id="invDate"></span></div>
+    <div>العميل: <span id="invCustomer"></span></div>
+    <div>الدفع: <span id="invPayment"></span></div>
+  </div>
+
+  <hr>
+
+  <!-- الأصناف -->
+  <table>
+    <thead>
+      <tr>
+        <th>الصنف</th>
+        <th>سعر</th>
+        <th>كمية</th>
+        <th>إجمالي</th>
+      </tr>
+    </thead>
+    <tbody id="items"></tbody>
+  </table>
+
+  <hr>
+
+  <h3>الإجمالي: <span id="invTotal"></span></h3>
+
+  <p class="thanks">شكرًا لتعاملكم معنا</p>
+
+  <button class="btn btn-dark" onclick="window.print()">
+    🖨️ طباعة
+  </button>
+
+</div>
+
+<script src="../js/invoice-view.js"></script>
+</body>
+</html>
