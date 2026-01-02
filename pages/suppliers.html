@@ -25,9 +25,15 @@
     <div class="content">
 
       <div class="card">
-        <input placeholder="اسم المورد">
-        <input placeholder="رقم الهاتف">
-        <input type="number" placeholder="رصيد افتتاحي">
+<input id="supName" placeholder="اسم المورد">
+<input id="supPhone" placeholder="رقم الهاتف">
+<input id="supBalance" type="number" placeholder="رصيد افتتاحي">
+<button onclick="addSupplier()">حفظ</button>
+
+<tbody id="suppliersTable"></tbody>
+
+<script src="../js/db.js"></script>
+<script src="../js/suppliers.js"></script>
         <button>حفظ</button>
       </div>
 
