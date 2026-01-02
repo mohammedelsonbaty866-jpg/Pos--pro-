@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>فاتورة حرارية</title>
+<link rel="stylesheet" href="../css/thermal.css">
+</head>
+<body>
+
+<div class="invoice">
+  <h2>🧾 اسم المحل</h2>
+  <p>العنوان: ----</p>
+  <p>تليفون: ----</p>
+
+  <hr>
+
+  <p>فاتورة رقم: <span id="invNo"></span></p>
+  <p>التاريخ: <span id="invDate"></span></p>
+  <p>العميل: <span id="invCustomer"></span></p>
+  <p>الدفع: <span id="invPayment"></span></p>
+
+  <hr>
+
+  <table>
+    <thead>
+      <tr>
+        <th>صنف</th>
+        <th>ك</th>
+        <th>س</th>
+        <th>ج</th>
+      </tr>
+    </thead>
+    <tbody id="items"></tbody>
+  </table>
+
+  <hr>
+
+  <p class="total">الإجمالي: <span id="invTotal"></span> ج</p>
+
+  <hr>
+
+  <p class="thanks">🙏 شكرًا لتعاملكم معنا</p>
+</div>
+
+<button onclick="printThermal()">🖨️ طباعة</button>
+
+<script src="../js/thermal.js"></script>
+</body>
+</html>
