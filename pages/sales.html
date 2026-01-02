@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>المبيعات</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<h2>فاتورة بيع</h2>
+
+<select id="payment">
+  <option value="cash">نقدي</option>
+  <option value="credit">آجل</option>
+</select>
+
+<input id="total" placeholder="الإجمالي">
+<button onclick="saveSale()">حفظ</button>
+
+<script src="../js/db.js"></script>
+<script src="../js/sales.js"></script>
+</body>
+</html>
