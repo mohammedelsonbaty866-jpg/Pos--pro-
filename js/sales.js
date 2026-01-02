@@ -7,3 +7,15 @@ function saveSale() {
   });
   alert("تم تسجيل البيع");
 }
+function saveSale() {
+  const tx = db.transaction("sales", "readwrite");
+  tx.objectStore("sales").add({
+    invoiceNo: invoiceNo.value,
+    customer: customer.value,
+    payment: payment.value,
+    total: Number(total.value),
+    date: new Date().toLocaleString()
+  });
+
+  alert("تم حفظ الفاتورة");
+}
