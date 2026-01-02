@@ -6,6 +6,10 @@ request.onupgradeneeded = e => {
 db.createObjectStore("returns", {
   keyPath: "id",
   autoIncrement: true
+  db.createObjectStore("users", {
+  keyPath: "id",
+  autoIncrement: true
+});
 });
   db.createObjectStore("products", { keyPath: "id", autoIncrement: true });
   db.createObjectStore("customers", { keyPath: "id", autoIncrement: true });
