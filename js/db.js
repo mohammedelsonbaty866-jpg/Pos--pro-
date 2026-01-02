@@ -1,5 +1,5 @@
 let db;
-const request = indexedDB.open("POS_DB", 3);
+const request = indexedDB.open("POS_DB", 4);
 
 request.onupgradeneeded = e => {
   db = e.target.result;
@@ -11,7 +11,19 @@ db.createObjectStore("returns", {
   autoIncrement: true
     request.onsuccess = e => {
   db = e.target.result;
+if (!db.objectStoreNames.contains("salesReturns")) {
+  db.createObjectStore("salesReturns", {
+    keyPath: "id",
+    autoIncrement: true
+  });
+}
 
+if (!db.objectStoreNames.contains("purchaseReturns")) {
+  db.createObjectStore("purchaseReturns", {
+    keyPath: "id",
+    autoIncrement: true
+  });
+}
   const tx = db.transaction("users", "readwrite");
   const store = tx.objectStore("users");
 
