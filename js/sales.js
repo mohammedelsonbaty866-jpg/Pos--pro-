@@ -9,8 +9,15 @@ function initSales() {
   document.getElementById("productSearch").addEventListener("input", searchProduct);
   document.getElementById("addItemBtn").addEventListener("click", addItem);
   document.getElementById("saveInvoiceBtn").addEventListener("click", saveInvoice);
+  document.getElementById("printInvoiceBtn").addEventListener("click", printInvoice);
+
+  document.getElementById("addCustomerBtn").addEventListener("click", openCustomerModal);
+  document.getElementById("saveCustomerBtn").addEventListener("click", saveCustomer);
+
+  loadCustomers();
 }
 
+// ---------- Products ----------
 function searchProduct(e) {
   const term = e.target.value.toLowerCase();
   const results = document.getElementById("searchResults");
@@ -19,7 +26,8 @@ function searchProduct(e) {
   if (!term) return;
 
   const products = getProducts().filter(p =>
-    p.name.toLowerCase().includes(term) || String(p.barcode || "").includes(term)
+    p.name.toLowerCase().includes(term) ||
+    String(p.barcode || "").includes(term)
   );
 
   products.forEach(p => {
@@ -65,10 +73,10 @@ function renderCart() {
   let total = 0;
 
   cart.forEach((item, index) => {
-    const tr = document.createElement("tr");
     const sum = item.qty * item.price;
     total += sum;
 
+    const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${index + 1}</td>
       <td>${item.name}</td>
@@ -88,18 +96,92 @@ function removeItem(index) {
   renderCart();
 }
 
+// ---------- Customers ----------
+function loadCustomers() {
+  const select = document.getElementById("customerSelect");
+  select.innerHTML = `<option value="">عميل نقدي</option>`;
+
+  getCustomers().forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c.id;
+    opt.textContent = c.name;
+    select.appendChild(opt);
+  });
+}
+
+function openCustomerModal() {
+  document.getElementById("customerModal").style.display = "flex";
+}
+
+function closeCustomerModal() {
+  document.getElementById("customerModal").style.display = "none";
+  document.getElementById("newCustomerName").value = "";
+}
+
+function saveCustomer() {
+  const name = document.getElementById("newCustomerName").value.trim();
+  if (!name) {
+    alert("اكتب اسم العميل");
+    return;
+  }
+
+  addCustomer({ name });
+  closeCustomerModal();
+  loadCustomers();
+}
+
+// ---------- Save Invoice ----------
 function saveInvoice() {
   if (cart.length === 0) {
     alert("الفاتورة فارغة");
     return;
   }
 
+  const paymentType = document.getElementById("paymentType").value;
+  const customerId = document.getElementById("customerSelect").value;
+
+  if (paymentType === "credit" && !customerId) {
+    alert("يجب اختيار عميل في حالة البيع الآجل");
+    return;
+  }
+
   saveSale({
     items: cart,
-    total: document.getElementById("totalAmount").textContent
+    customerId: customerId || null,
+    paymentType,
+    total: Number(document.getElementById("totalAmount").textContent)
   });
 
   cart = [];
   renderCart();
   alert("تم حفظ الفاتورة ✅");
+}
+
+// ---------- Print ----------
+function printInvoice() {
+  if (cart.length === 0) {
+    alert("لا يوجد بيانات للطباعة");
+    return;
+  }
+
+  let printContent = `
+    <h3>فاتورة بيع</h3>
+    <hr>
+  `;
+
+  cart.forEach(i => {
+    printContent += `
+      ${i.name} × ${i.qty} = ${i.qty * i.price}<br>
+    `;
+  });
+
+  printContent += `
+    <hr>
+    الإجمالي: ${document.getElementById("totalAmount").textContent}
+  `;
+
+  const win = window.open("", "", "width=300,height=600");
+  win.document.write(printContent);
+  win.print();
+  win.close();
 }
