@@ -1,68 +1,94 @@
-// تحميل الإعدادات
-document.addEventListener("DOMContentLoaded", loadSettings);
+/*********************************
+ * settings.js
+ *********************************/
 
+document.addEventListener("DOMContentLoaded", () => {
+  loadSettings();
+  renderAgents();
+});
+
+/*********************************
+ * تحميل الإعدادات
+ *********************************/
 function loadSettings() {
-  const s = JSON.parse(localStorage.getItem("settings")) || {};
+  const s = POS_DB.DB.settings || {};
 
-  storeName.value = s.storeName || "";
-  storePhone.value = s.storePhone || "";
-  printSize.value = s.printSize || "80";
-  printLang.value = s.printLang || "ar";
-
-  loadReps(s.reps || []);
+  document.getElementById("setStoreName").value = s.storeName || "";
+  document.getElementById("setStorePhone").value = s.storePhone || "";
+  document.getElementById("printAuto").checked = s.printAuto || false;
 }
 
-// حفظ
-btnSaveSettings.addEventListener("click", () => {
-  const reader = new FileReader();
+/*********************************
+ * حفظ الإعدادات
+ *********************************/
+function saveSettings() {
+  const storeName = document.getElementById("setStoreName").value.trim();
+  const storePhone = document.getElementById("setStorePhone").value.trim();
+  const printAuto = document.getElementById("printAuto").checked;
+  const logoInput = document.getElementById("setStoreLogo");
 
-  reader.onload = () => {
-    const settings = {
-      storeName: storeName.value,
-      storePhone: storePhone.value,
-      logo: reader.result || null,
-      printSize: printSize.value,
-      printLang: printLang.value,
-      reps: reps
+  if (!POS_DB.DB.settings) POS_DB.DB.settings = {};
+
+  POS_DB.DB.settings.storeName = storeName;
+  POS_DB.DB.settings.storePhone = storePhone;
+  POS_DB.DB.settings.printAuto = printAuto;
+
+  if (logoInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      POS_DB.DB.settings.storeLogo = e.target.result;
+      POS_DB.save();
+      UI.showAlert("تم حفظ الإعدادات");
     };
-
-    localStorage.setItem("settings", JSON.stringify(settings));
-    alert("تم حفظ الإعدادات");
-  };
-
-  if (storeLogo.files[0])
-    reader.readAsDataURL(storeLogo.files[0]);
-  else reader.onload();
-});
-
-// مندوبين
-let reps = [];
-
-function loadReps(list) {
-  reps = list;
-  renderReps();
+    reader.readAsDataURL(logoInput.files[0]);
+  } else {
+    POS_DB.save();
+    UI.showAlert("تم حفظ الإعدادات");
+  }
 }
 
-btnAddRep.addEventListener("click", () => {
-  if (!repName.value) return;
-  reps.push(repName.value);
-  repName.value = "";
-  renderReps();
-});
+/*********************************
+ * إضافة مندوب
+ *********************************/
+function addAgent() {
+  const name = document.getElementById("agentName").value.trim();
+  if (!name) return;
 
-function renderReps() {
-  repsList.innerHTML = "";
-  reps.forEach((r, i) => {
-    repsList.innerHTML += `
-      <li>
-        ${r}
-        <button class="btn btn-danger btn-icon"
-          onclick="removeRep(${i})">🗑️</button>
-      </li>`;
+  POS_DB.addItem("agents", { name });
+  document.getElementById("agentName").value = "";
+
+  renderAgents();
+}
+
+/*********************************
+ * حذف مندوب
+ *********************************/
+function deleteAgent(id) {
+  if (!UI.confirmAction("حذف المندوب؟")) return;
+
+  POS_DB.deleteItem("agents", id);
+  renderAgents();
+}
+
+/*********************************
+ * عرض المندوبين
+ *********************************/
+function renderAgents() {
+  const agents = POS_DB.DB.agents || [];
+  const tbody = document.getElementById("agentsTable");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  agents.forEach((a, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${a.name}</td>
+      <td>
+        <button data-action="delete-agent" data-id="${a.id}">🗑</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
   });
-}
-
-function removeRep(i) {
-  reps.splice(i, 1);
-  renderReps();
 }
