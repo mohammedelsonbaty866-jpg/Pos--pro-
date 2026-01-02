@@ -1,25 +1,18 @@
-// بيانات تجريبية (لاحقًا من الفاتورة الحقيقية)
 const invoice = JSON.parse(localStorage.getItem("printInvoice"));
-const invoice = {
-  no: "1001",
-  date: new Date().toLocaleString(),
-  customer: "عميل نقدي",
-  payment: "نقدي",
-  total: 150,
-  items: [
-    { name: "صنف 1", qty: 2, price: 25 },
-    { name: "صنف 2", qty: 1, price: 100 }
-  ]
-};
 
-// تحميل البيانات
 window.onload = () => {
+  if (!invoice) {
+    alert("لا توجد فاتورة للطباعة");
+    return;
+  }
+
   invNo.innerText = invoice.no;
   invDate.innerText = invoice.date;
   invCustomer.innerText = invoice.customer;
   invPayment.innerText = invoice.payment;
   invTotal.innerText = invoice.total;
 
+  items.innerHTML = "";
   invoice.items.forEach(i => {
     items.innerHTML += `
       <tr>
@@ -30,9 +23,7 @@ window.onload = () => {
       </tr>
     `;
   });
-};
 
-// الطباعة
-function printThermal() {
-  window.print();
-}
+  // طباعة تلقائية
+  setTimeout(() => window.print(), 500);
+};
