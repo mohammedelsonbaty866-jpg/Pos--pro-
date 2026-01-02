@@ -159,19 +159,75 @@ function printInvoice() {
   const customer =
     document.getElementById("saleCustomer").value || "عميل نقدي";
 
+  const date = new Date().toLocaleString("ar-EG");
+
   let html = `
+  <html dir="rtl">
+  <head>
+    <meta charset="UTF-8">
+    <title>فاتورة</title>
+    <style>
+      body {
+        font-family: Arial;
+        font-size: 12px;
+        margin: 0;
+        padding: 10px;
+      }
+      h2 {
+        text-align: center;
+        margin: 5px 0;
+      }
+      .info {
+        margin-bottom: 10px;
+      }
+      .info div {
+        margin: 3px 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 5px;
+      }
+      th, td {
+        border: 1px solid #000;
+        padding: 4px;
+        text-align: center;
+      }
+      .total {
+        margin-top: 10px;
+        font-size: 14px;
+        font-weight: bold;
+        text-align: center;
+      }
+      .footer {
+        margin-top: 15px;
+        text-align: center;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+
+  <body>
+
     <h2>فاتورة بيع</h2>
-    <p><b>العميل:</b> ${customer}</p>
-    <p><b>طريقة الدفع:</b> ${currentPayment}</p>
-    <hr>
-    <table border="1" width="100%">
-      <tr>
-        <th>الصنف</th>
-        <th>الوحدة</th>
-        <th>الكمية</th>
-        <th>السعر</th>
-        <th>الإجمالي</th>
-      </tr>
+
+    <div class="info">
+      <div><b>العميل:</b> ${customer}</div>
+      <div><b>طريقة الدفع:</b> ${currentPayment}</div>
+      <div><b>التاريخ:</b> ${date}</div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>الصنف</th>
+          <th>الوحدة</th>
+          <th>الكمية</th>
+          <th>السعر</th>
+          <th>الإجمالي</th>
+        </tr>
+      </thead>
+      <tbody>
   `;
 
   invoiceItems.forEach(i => {
@@ -187,16 +243,27 @@ function printInvoice() {
   });
 
   html += `
+      </tbody>
     </table>
-    <h3>الإجمالي: ${totalAmount}</h3>
+
+    <div class="total">
+      الإجمالي: ${totalAmount.toFixed(2)}
+    </div>
+
+    <div class="footer">
+      شكراً لتعاملكم معنا
+    </div>
+
+  </body>
+  </html>
   `;
 
-  const w = window.open("", "", "width=400");
+  const w = window.open("", "", "width=350");
   w.document.write(html);
+  w.document.close();
   w.print();
   w.close();
 }
-
 /* ============ نقدي / آجل ============ */
 function setPayment(type) {
   currentPayment = type;
