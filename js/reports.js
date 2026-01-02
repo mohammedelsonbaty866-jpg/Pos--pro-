@@ -64,7 +64,21 @@ db.transaction("returns").objectStore("returns").getAll()
           <h4>صافي الربح: ${profit}</h4>
         `;
       };
+    };function agentSalesReport() {
+  const user = JSON.parse(localStorage.getItem("user"));
+  let total = 0;
+
+  db.transaction("sales")
+    .objectStore("sales")
+    .getAll().onsuccess = e => {
+      e.target.result
+        .filter(s => s.agent === user.username)
+        .forEach(s => total += s.total);
+
+      reportResult.innerHTML =
+        `<h3>مبيعاتك: ${total}</h3>`;
     };
+}
   };
 }
 
