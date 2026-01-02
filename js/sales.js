@@ -164,24 +164,67 @@ function printInvoice() {
     return;
   }
 
-  let printContent = `
-    <h3>فاتورة بيع</h3>
-    <hr>
+  let html = `
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>فاتورة</title>
+      <style>
+        body {
+          font-family: Arial;
+          direction: rtl;
+          width: 80mm;
+        }
+        h3 { text-align: center; }
+        hr { border: 1px dashed #000; }
+      </style>
+    </head>
+    <body>
+      <h3>فاتورة بيع</h3>
+      <hr>
   `;
 
   cart.forEach(i => {
-    printContent += `
-      ${i.name} × ${i.qty} = ${i.qty * i.price}<br>
+    html += `
+      <div>
+        ${i.name} × ${i.qty}
+        <span style="float:left">${i.qty * i.price}</span>
+      </div>
     `;
   });
 
-  printContent += `
-    <hr>
-    الإجمالي: ${document.getElementById("totalAmount").textContent}
+  html += `
+      <hr>
+      <strong>
+        الإجمالي:
+        <span style="float:left">
+          ${document.getElementById("totalAmount").textContent}
+        </span>
+      </strong>
+    </body>
+    </html>
   `;
 
-  const win = window.open("", "", "width=300,height=600");
-  win.document.write(printContent);
-  win.print();
-  win.close();
+  const frame = document.createElement("iframe");
+  frame.style.position = "fixed";
+  frame.style.right = "0";
+  frame.style.bottom = "0";
+  frame.style.width = "0";
+  frame.style.height = "0";
+  frame.style.border = "0";
+
+  document.body.appendChild(frame);
+
+  frame.contentDocument.open();
+  frame.contentDocument.write(html);
+  frame.contentDocument.close();
+
+  frame.onload = () => {
+    frame.contentWindow.focus();
+    frame.contentWindow.print();
+
+    setTimeout(() => {
+      document.body.removeChild(frame);
+    }, 1000);
+  };
 }
