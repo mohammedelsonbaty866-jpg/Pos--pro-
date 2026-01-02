@@ -1,62 +1,106 @@
-.invoice {
-  max-width: 350px;
-  margin: auto;
-  font-size: 14px;
-  padding: 10px;
-}
+/* =========================
+   PRINT STYLE – INVOICE
+   ========================= */
 
-.inv-header {
-  text-align: center;
-}
-
-.inv-header img {
-  max-width: 80px;
-  margin-bottom: 5px;
-}
-
-.inv-info {
-  font-size: 13px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th, td {
-  padding: 5px;
-  border-bottom: 1px dashed #999;
-  text-align: center;
-}
-
-.thanks {
-  text-align: center;
-  margin: 10px 0;
-}
-
-/* ===== Print Only ===== */
 @media print {
-  body * {
-    visibility: hidden;
-  }
 
-  .invoice, .invoice * {
-    visibility: visible;
-  }
-
-  .invoice {
-    position: absolute;
-    left: 0;
-    top: 0;
-  }
-
+  /* إخفاء أي عناصر غير مطلوبة */
+  .sidebar,
+  .header,
+  .no-print,
   button {
-    display: none;
+    display: none !important;
   }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    font-family: "Segoe UI", Tahoma, Arial;
+  }
+
+  /* الحاوية الرئيسية للفاتورة */
+  .invoice {
+    width: 80mm; /* مناسب للطابعة الحرارية */
+    margin: auto;
+    padding: 5mm;
+    font-size: 12px;
+    color: #000;
+  }
+
+  /* رأس الفاتورة */
+  .invoice-header {
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .invoice-header img {
+    max-width: 100%;
+    max-height: 80px;
+    margin-bottom: 5px;
+  }
+
+  .invoice-header h2 {
+    margin: 5px 0;
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .invoice-header p {
+    margin: 2px 0;
+    font-size: 11px;
+  }
+
+  /* معلومات الفاتورة */
+  .invoice-info p {
+    margin: 3px 0;
+    font-size: 11px;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px dashed #000;
+    margin: 6px 0;
+  }
+
+  /* جدول الأصناف */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+  }
+
+  thead th {
+    border-bottom: 1px solid #000;
+    padding: 4px 0;
+    font-weight: bold;
+  }
+
+  tbody td {
+    padding: 3px 0;
+    border-bottom: 1px dotted #ccc;
+  }
+
+  th, td {
+    text-align: center;
+  }
+
+  /* الإجمالي */
+  h3 {
+    margin-top: 8px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
 }
 
-/* ===== 58mm ===== */
-.print-58 .invoice {
-  max-width: 220px;
-  font-size: 12px;
+/* =========================
+   دعم طابعة 58mm (اختياري)
+   ========================= */
+@media print and (max-width: 58mm) {
+  .invoice {
+    width: 58mm;
+    font-size: 11px;
+  }
 }
