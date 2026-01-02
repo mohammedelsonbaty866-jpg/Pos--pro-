@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>المرتجعات</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<h2>المرتجعات</h2>
+
+<select id="returnType">
+  <option value="sale">مرتجع بيع</option>
+  <option value="purchase">مرتجع شراء</option>
+</select>
+
+<input id="invoiceNo" placeholder="رقم الفاتورة">
+<input id="productName" placeholder="اسم الصنف">
+<input id="qty" type="number" placeholder="الكمية">
+<input id="amount" type="number" placeholder="القيمة">
+
+<input id="reason" placeholder="سبب المرتجع">
+
+<br><br>
+<button onclick="saveReturn()">حفظ المرتجع</button>
+
+<hr>
+<div id="result"></div>
+
+<script src="../js/db.js"></script>
+<script src="../js/returns.js"></script>
+</body>
+</html>
