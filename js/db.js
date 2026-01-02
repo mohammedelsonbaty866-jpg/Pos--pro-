@@ -9,6 +9,18 @@ db.createObjectStore("returns", {
   db.createObjectStore("users", {
   keyPath: "id",
   autoIncrement: true
+    request.onsuccess = e => {
+  db = e.target.result;
+
+  const tx = db.transaction("users", "readwrite");
+  const store = tx.objectStore("users");
+
+  store.add({
+    username: "admin",
+    password: "1234",
+    role: "admin"
+  });
+};
 });
 });
   db.createObjectStore("products", { keyPath: "id", autoIncrement: true });
