@@ -1,56 +1,62 @@
 // js/customers.js
-
 document.addEventListener("DOMContentLoaded", () => {
-  initCustomers();
+  bindCustomersEvents();
+  loadCustomers();
 });
 
-function initCustomers() {
-  document
-    .getElementById("addCustomerBtn")
-    .addEventListener("click", addCustomerHandler);
-
-  renderCustomers();
+function bindCustomersEvents() {
+  const addBtn = document.getElementById("addCustomerBtn");
+  if (addBtn) {
+    addBtn.addEventListener("click", addCustomerHandler);
+  }
 }
 
 function addCustomerHandler() {
-  const input = document.getElementById("customerName");
-  const name = input.value.trim();
+  // الاسم ده من التصميم القديم
+  const nameInput = document.getElementById("customerName");
 
+  if (!nameInput) {
+    alert("حقل اسم العميل غير موجود في الصفحة");
+    return;
+  }
+
+  const name = nameInput.value.trim();
   if (!name) {
     alert("اكتب اسم العميل");
     return;
   }
 
   addCustomer({ name });
-  input.value = "";
-  renderCustomers();
+  nameInput.value = "";
+  loadCustomers();
 }
 
-function renderCustomers() {
-  const tbody = document.getElementById("customersTable");
-  tbody.innerHTML = "";
+function loadCustomers() {
+  const tableBody = document.getElementById("customersTable");
+  if (!tableBody) return;
 
+  tableBody.innerHTML = "";
   const customers = getCustomers();
 
   customers.forEach((c, index) => {
     const tr = document.createElement("tr");
-
     tr.innerHTML = `
       <td>${index + 1}</td>
       <td>${c.name}</td>
       <td>
-        <button onclick="deleteCustomer(${c.id})">حذف</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteCustomer(${c.id})">
+          حذف
+        </button>
       </td>
     `;
-
-    tbody.appendChild(tr);
+    tableBody.appendChild(tr);
   });
 }
 
 function deleteCustomer(id) {
-  if (!confirm("حذف العميل؟")) return;
+  if (!confirm("هل أنت متأكد من الحذف؟")) return;
 
   const customers = getCustomers().filter(c => c.id !== id);
   localStorage.setItem("pos_customers", JSON.stringify(customers));
-  renderCustomers();
+  loadCustomers();
 }
