@@ -1,51 +1,43 @@
-// js/customers.js
-
 document.addEventListener("DOMContentLoaded", () => {
-  initCustomers();
+  document
+    .getElementById("addCustomerBtn")
+    .addEventListener("click", addCustomer);
+
+  renderCustomers();
 });
 
-function initCustomers() {
-  const addBtn = document.getElementById("addCustomerBtn");
-  if (addBtn) {
-    addBtn.addEventListener("click", addCustomerHandler);
-  }
-  renderCustomers();
-}
-
-function addCustomerHandler() {
-  const nameInput = document.getElementById("customerName");
-  const phoneInput = document.getElementById("customerPhone");
-  const companyInput = document.getElementById("customerCompany");
-
-  if (!nameInput) return;
-
-  const name = nameInput.value.trim();
-  const phone = phoneInput.value.trim();
-  const company = companyInput.value.trim();
+function addCustomer() {
+  const name = document.getElementById("customerName").value.trim();
+  const phone = document.getElementById("customerPhone").value.trim();
+  const company = document.getElementById("customerCompany").value.trim();
 
   if (!name) {
     alert("اسم العميل مطلوب");
     return;
   }
 
-  addCustomer({
-    name,
-    phone,
-    company
+  const customers = getCustomers();
+
+  customers.push({
+    id: Date.now(),
+    name: name,
+    phone: phone,
+    company: company
   });
 
-  nameInput.value = "";
-  phoneInput.value = "";
-  companyInput.value = "";
+  localStorage.setItem("pos_customers", JSON.stringify(customers));
+
+  document.getElementById("customerName").value = "";
+  document.getElementById("customerPhone").value = "";
+  document.getElementById("customerCompany").value = "";
 
   renderCustomers();
 }
 
 function renderCustomers() {
   const tbody = document.getElementById("customersTable");
-  if (!tbody) return;
-
   tbody.innerHTML = "";
+
   const customers = getCustomers();
 
   customers.forEach((c, index) => {
@@ -68,7 +60,7 @@ function renderCustomers() {
 }
 
 function deleteCustomer(id) {
-  if (!confirm("هل تريد حذف العميل؟")) return;
+  if (!confirm("حذف العميل؟")) return;
 
   const customers = getCustomers().filter(c => c.id !== id);
   localStorage.setItem("pos_customers", JSON.stringify(customers));
