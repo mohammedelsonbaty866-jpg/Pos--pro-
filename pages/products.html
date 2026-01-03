@@ -1,119 +1,188 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>الأصناف</title>
-  <link rel="stylesheet" href="../css/style.css">
+<meta charset="UTF-8">
+<title>الأصناف</title>
 
-  <style>
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-    th {
-      background: #f2f2f2;
-      padding: 8px;
-      border: 1px solid #ccc;
-      text-align: center;
-    }
-    td {
-      padding: 6px;
-      border: 1px solid #ddd;
-      text-align: center;
-    }
-    tbody tr:nth-child(even) {
-      background: #fafafa;
-    }
-    tbody tr:hover {
-      background: #eef6ff;
-    }
-    .price {
-      font-weight: bold;
-      color: #0a6;
-    }
-    .btn-del {
-      background: #c0392b;
-      color: #fff;
-      border: none;
-      padding: 4px 8px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-    .btn-del:hover {
-      background: #e74c3c;
-    }
-  </style>
+<!-- ستايل عام -->
+<style>
+body{margin:0;font-family:Tahoma;background:#f4f6f9}
+.sidebar{
+  position:fixed;right:0;top:0;width:260px;height:100vh;
+  background:linear-gradient(180deg,#0f1f3a,#142850);
+  padding:12px;color:#fff
+}
+.menu-item{
+  display:flex;align-items:center;gap:10px;
+  background:#1b2d4a;padding:14px;border-radius:14px;
+  margin-bottom:10px;cursor:pointer
+}
+.menu-item:hover{background:#284b8f}
+.main{margin-right:260px;padding:20px}
+.card{
+  background:#fff;padding:15px;border-radius:14px;margin-bottom:15px
+}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+input,select,button{
+  padding:10px;border-radius:10px;border:1px solid #ccc
+}
+button{
+  background:#2f6df6;color:#fff;border:none;cursor:pointer
+}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #ccc;padding:8px;text-align:center}
+th{background:#eee}
+h2{margin-top:0}
+</style>
 </head>
 
 <body>
 
-<div class="container">
+<!-- ========== MENU ========== -->
+<div class="sidebar" id="sidebar">
+  <div class="menu-item" onclick="go('sales.html')">المبيعات</div>
+  <div class="menu-item" onclick="go('products.html')">الأصناف</div>
+  <div class="menu-item" onclick="go('purchases.html')">المشتريات</div>
+  <div class="menu-item" onclick="go('returns.html')">المرتجعات</div>
+  <div class="menu-item" onclick="go('customers.html')">العملاء</div>
+  <div class="menu-item" onclick="go('suppliers.html')">الموردين</div>
+  <div class="menu-item" onclick="go('stock.html')">المخزون</div>
+  <div class="menu-item" onclick="go('reports.html')">التقارير</div>
+  <div class="menu-item" onclick="go('settings.html')">الإعدادات</div>
+</div>
 
-  <h2>إدارة الأصناف</h2>
+<!-- ========== CONTENT ========== -->
+<div class="main">
 
-  <!-- إضافة صنف -->
-  <div class="card">
-    <div class="form-group">
-      <label>اسم الصنف</label>
-      <input type="text" id="productName" class="form-control">
-    </div>
+<h2>شاشة الأصناف</h2>
 
-    <div class="form-group">
-      <label>سعر الكيلو</label>
-      <input type="number" id="priceKg" class="form-control">
-    </div>
-
-    <div class="form-group">
-      <label>سعر العلبة</label>
-      <input type="number" id="priceBox" class="form-control">
-    </div>
-
-    <div class="form-group">
-      <label>سعر الكرتونة</label>
-      <input type="number" id="priceCarton" class="form-control">
-    </div>
-
-    <div class="form-group">
-      <label>سعر الباكيت</label>
-      <input type="number" id="pricePacket" class="form-control">
-    </div>
-
-    <button id="addProductBtn">إضافة الصنف</button>
+<!-- إضافة / تعديل صنف -->
+<div class="card">
+  <div class="row">
+    <input id="prodName" placeholder="اسم الصنف">
+    <select id="prodUnit">
+      <option>كيلو</option>
+      <option>علبة</option>
+      <option>كرتونة</option>
+      <option>باكيت</option>
+    </select>
+    <input id="prodPrice" type="number" placeholder="سعر البيع">
+    <input id="prodStock" type="number" placeholder="الكمية بالمخزن">
   </div>
+  <br>
+  <button onclick="saveProduct()">💾 حفظ الصنف</button>
+</div>
 
-  <!-- جدول الأصناف -->
-  <div class="card">
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>الصنف</th>
-          <th>كجم</th>
-          <th>علبة</th>
-          <th>كرتونة</th>
-          <th>باكيت</th>
-          <th>حذف</th>
-        </tr>
-      </thead>
+<!-- بحث -->
+<div class="card">
+  <input id="productSearch" placeholder="بحث سريع عن صنف">
+</div>
 
-      <tbody id="productsTable">
-        <!-- من JS -->
-      </tbody>
-    </table>
-  </div>
+<!-- جدول الأصناف -->
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>الصنف</th>
+        <th>الوحدات / الأسعار</th>
+        <th>المخزون</th>
+        <th>تحكم</th>
+      </tr>
+    </thead>
+    <tbody id="productsTable"></tbody>
+  </table>
+</div>
 
 </div>
 
-<script src="../js/db.js"></script>
-<script src="../js/products.js"></script>
+<!-- ========== JS ========== -->
+<script>
+function go(page){ location.href = page; }
+</script>
+
+<script>
+/************ منطق الأصناف ************/
+let products = JSON.parse(localStorage.getItem("products")) || [];
+
+const prodName  = document.getElementById("prodName");
+const prodUnit  = document.getElementById("prodUnit");
+const prodPrice = document.getElementById("prodPrice");
+const prodStock = document.getElementById("prodStock");
+const table     = document.getElementById("productsTable");
+const searchInp = document.getElementById("productSearch");
+
+function saveProduct(){
+  const name  = prodName.value.trim();
+  const unit  = prodUnit.value;
+  const price = +prodPrice.value;
+  const stock = +prodStock.value;
+
+  if(!name || price<=0 || stock<0)
+    return alert("بيانات غير صحيحة");
+
+  let product = products.find(p=>p.name===name);
+  if(!product){
+    product={id:Date.now(),name,units:{}};
+    products.push(product);
+  }
+
+  product.units[unit]={price,stock};
+  localStorage.setItem("products",JSON.stringify(products));
+  renderProducts();
+  clearForm();
+}
+
+function renderProducts(filter=""){
+  table.innerHTML="";
+  products
+    .filter(p=>p.name.includes(filter))
+    .forEach(p=>{
+      let u="",s="";
+      for(let k in p.units){
+        u+=`${k}: ${p.units[k].price}<br>`;
+        s+=`${k}: ${p.units[k].stock}<br>`;
+      }
+      table.innerHTML+=`
+        <tr>
+          <td>${p.name}</td>
+          <td>${u}</td>
+          <td>${s}</td>
+          <td>
+            <button onclick="editProduct(${p.id})">✏️</button>
+            <button onclick="deleteProduct(${p.id})">🗑</button>
+          </td>
+        </tr>`;
+    });
+}
+renderProducts();
+
+function editProduct(id){
+  const p = products.find(x=>x.id===id);
+  if(!p)return;
+  prodName.value=p.name;
+  const u=Object.keys(p.units)[0];
+  prodUnit.value=u;
+  prodPrice.value=p.units[u].price;
+  prodStock.value=p.units[u].stock;
+}
+
+function deleteProduct(id){
+  if(!confirm("تأكيد حذف الصنف؟"))return;
+  products=products.filter(p=>p.id!==id);
+  localStorage.setItem("products",JSON.stringify(products));
+  renderProducts();
+}
+
+searchInp.addEventListener("input",e=>{
+  renderProducts(e.target.value);
+});
+
+function clearForm(){
+  prodName.value="";
+  prodPrice.value="";
+  prodStock.value="";
+}
+</script>
 
 </body>
-<script>
-  fetch("../partials/menu.html")
-    .then(res => res.text())
-    .then(html => {
-      document.body.insertAdjacentHTML("afterbegin", html);
-    });
-</script>  
 </html>
