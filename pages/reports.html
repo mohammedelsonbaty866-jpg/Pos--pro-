@@ -1,95 +1,199 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <title>التقارير</title>
+<meta charset="UTF-8">
+<title>التقارير</title>
 
-  <link rel="stylesheet" href="../css/style.css" />
-  <link rel="stylesheet" href="../css/mobile.css" />
+<style>
+body{
+  font-family:tahoma;
+  background:#f2f4f8;
+  margin:0
+}
+.header{
+  background:#142850;
+  color:#fff;
+  padding:14px;
+  text-align:center;
+  font-size:18px
+}
+
+/* ===== الفلاتر ===== */
+.filters{
+  background:#fff;
+  margin:10px;
+  padding:12px;
+  border-radius:12px
+}
+.filters label{
+  font-size:13px;
+  color:#444
+}
+.filters input, .filters select{
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  font-size:14px
+}
+.filters button{
+  width:100%;
+  padding:12px;
+  border:0;
+  border-radius:10px;
+  background:#2f6df6;
+  color:#fff;
+  font-size:15px
+}
+
+/* ===== الكروت ===== */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  margin:10px
+}
+.card{
+  background:#fff;
+  padding:14px;
+  border-radius:12px;
+  text-align:center;
+  font-size:14px
+}
+.card span{
+  display:block;
+  font-size:20px;
+  margin-top:6px;
+  color:#2f6df6
+}
+
+/* ===== التبويبات ===== */
+.tabs{
+  display:flex;
+  gap:6px;
+  margin:10px
+}
+.tab{
+  flex:1;
+  padding:10px;
+  text-align:center;
+  background:#ddd;
+  border-radius:10px;
+  font-size:14px;
+  cursor:pointer
+}
+.tab.active{
+  background:#2f6df6;
+  color:#fff
+}
+
+/* ===== الجداول ===== */
+.box{
+  background:#fff;
+  margin:10px;
+  padding:10px;
+  border-radius:12px
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px
+}
+th,td{
+  border-bottom:1px solid #eee;
+  padding:8px;
+  text-align:center
+}
+th{
+  background:#f6f7fb
+}
+
+/* ===== أدوات ===== */
+.tools{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:10px
+}
+.tools button{
+  padding:10px;
+  border:0;
+  border-radius:8px;
+  font-size:14px;
+  background:#6c757d;
+  color:#fff
+}
+</style>
 </head>
+
 <body>
 
-<div class="app">
+<div class="header">📊 التقارير</div>
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <h2>POS PRO</h2>
-    <a href="sales.html">🛒 المبيعات</a>
-    <a href="products.html">📦 الأصناف</a>
-    <a href="customers.html">👥 العملاء</a>
-    <a href="suppliers.html">🏭 الموردين</a>
-    <a href="expenses.html">💸 المصروفات</a>
-    <a href="reports.html" class="active">📊 التقارير</a>
-    <a href="settings.html">⚙️ الإعدادات</a>
-  </div>
+<!-- ===== الفلاتر ===== -->
+<div class="filters">
+  <label>من تاريخ</label>
+  <input type="date">
 
-  <!-- Main -->
-  <div class="main">
+  <label>إلى تاريخ</label>
+  <input type="date">
 
-    <!-- Header -->
-    <div class="header">
-      <h3>التقارير</h3>
-    </div>
+  <label>العميل</label>
+  <input placeholder="اختياري">
 
-    <!-- Content -->
-    <div class="content">
+  <label>المندوب</label>
+  <input placeholder="اختياري">
 
-      <!-- Filters -->
-      <div class="card">
-        <h4>فلترة التقارير</h4>
-
-        <label>من تاريخ</label>
-        <input type="date" id="fromDate" />
-
-        <label>إلى تاريخ</label>
-        <input type="date" id="toDate" />
-
-        <button data-action="load-reports">🔍 عرض التقارير</button>
-      </div>
-
-      <!-- Stats -->
-      <div class="stats">
-        <div class="stat">
-          <h4>إجمالي المبيعات</h4>
-          <p id="repSales">0</p>
-        </div>
-
-        <div class="stat">
-          <h4>إجمالي المصروفات</h4>
-          <p id="repExpenses">0</p>
-        </div>
-
-        <div class="stat">
-          <h4>صافي الربح</h4>
-          <p id="repProfit">0</p>
-        </div>
-      </div>
-
-      <!-- Product Report -->
-      <div class="card">
-        <h4>تقرير الأصناف</h4>
-
-        <table>
-          <thead>
-            <tr>
-              <th>الصنف</th>
-              <th>الكمية</th>
-              <th>الإجمالي</th>
-            </tr>
-          </thead>
-          <tbody id="productsReport"></tbody>
-        </table>
-      </div>
-
-    </div>
-  </div>
+  <button>عرض التقرير</button>
 </div>
 
-<!-- Scripts -->
-<script src="../js/db.js"></script>
-<script src="../js/ui.js"></script>
-<script src="../js/events.js"></script>
-<script src="../js/reports.js"></script>
+<!-- ===== الكروت ===== -->
+<div class="cards">
+  <div class="card">💰 إجمالي المبيعات <span>0</span></div>
+  <div class="card">↩ إجمالي المرتجعات <span>0</span></div>
+  <div class="card">🧾 صافي المبيعات <span>0</span></div>
+  <div class="card">💼 رصيد الخزنة <span>0</span></div>
+  <div class="card">📄 عدد الفواتير <span>0</span></div>
+  <div class="card">👥 عدد العملاء <span>0</span></div>
+</div>
+
+<!-- ===== التبويبات ===== -->
+<div class="tabs">
+  <div class="tab active">المبيعات</div>
+  <div class="tab">المرتجعات</div>
+  <div class="tab">المخزون</div>
+  <div class="tab">العملاء</div>
+  <div class="tab">الخزنة</div>
+</div>
+
+<!-- ===== جدول المبيعات ===== -->
+<div class="box">
+  <table>
+    <thead>
+      <tr>
+        <th>التاريخ</th>
+        <th>العميل</th>
+        <th>المندوب</th>
+        <th>النوع</th>
+        <th>الإجمالي</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>—</td>
+        <td>—</td>
+        <td>—</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- أدوات -->
+  <div class="tools">
+    <button>🖨 طباعة</button>
+    <button>📤 تصدير Excel</button>
+  </div>
+</div>
 
 </body>
 </html>
