@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>مبيعات المندوب</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial,Tahoma;
+  background:#f4f6f9;
+}
+.header{
+  background:#1e3a8a;
+  color:#fff;
+  padding:12px;
+  text-align:center;
+  font-size:18px;
+}
+.container{
+  padding:10px;
+}
+.box{
+  background:#fff;
+  border-radius:10px;
+  padding:10px;
+  margin-bottom:10px;
+}
+input,select,button{
+  width:100%;
+  padding:8px;
+  margin-bottom:8px;
+  border:1px solid #ccc;
+  border-radius:6px;
+  font-size:14px;
+}
+button{
+  background:#2563eb;
+  color:#fff;
+  border:none;
+}
+button.danger{
+  background:#dc2626;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+th,td{
+  border:1px solid #ddd;
+  padding:6px;
+  text-align:center;
+}
+.total{
+  font-size:16px;
+  font-weight:bold;
+  text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  شاشة مبيعات المندوب
+</div>
+
+<div class="container">
+
+  <!-- بيانات المندوب -->
+  <div class="box" id="repInfo"></div>
+
+  <!-- العميل -->
+  <div class="box">
+    <input id="customer" placeholder="اسم العميل">
+    <select id="payType">
+      <option value="cash">نقدي</option>
+      <option value="credit">آجل</option>
+    </select>
+  </div>
+
+  <!-- الأصناف -->
+  <div class="box">
+    <input id="itemSearch" placeholder="بحث عن صنف">
+    <input id="qty" type="number" value="1" min="1">
+    <button onclick="addItem()">إضافة صنف</button>
+  </div>
+
+  <!-- الفاتورة -->
+  <div class="box">
+    <table>
+      <thead>
+        <tr>
+          <th>الصنف</th>
+          <th>الكمية</th>
+          <th>السعر</th>
+          <th>الإجمالي</th>
+        </tr>
+      </thead>
+      <tbody id="bill"></tbody>
+    </table>
+    <div class="total">الإجمالي: <span id="total">0</span></div>
+  </div>
+
+  <!-- أزرار -->
+  <div class="box">
+    <button onclick="saveInvoice()">حفظ الفاتورة</button>
+    <button onclick="window.print()">طباعة</button>
+    <button class="danger" onclick="logout()">تسجيل خروج</button>
+  </div>
+
+</div>
+
+<script>
+// ===== حماية الصفحة =====
+const user = JSON.parse(localStorage.getItem("currentUser"));
+if(!user || user.role !== "rep"){
+  location.href = "../index.html";
+}
+
+// ===== عرض المندوب =====
+document.getElementById("repInfo").innerHTML =
+  "المندوب: <b>" + user.name + "</b>";
+
+// ===== بيانات تجريبية =====
+let items = [
+  {name:"صنف 1", price:10},
+  {name:"صنف 2", price:20}
+];
+
+let bill = [];
+let total = 0;
+
+// ===== إضافة صنف =====
+function addItem(){
+  const name = document.getElementById("itemSearch").value;
+  const qty = +document.getElementById("qty").value;
+  const item = items.find(i=>i.name===name);
+  if(!item) return alert("الصنف غير موجود");
+
+  const rowTotal = item.price * qty;
+  bill.push({name,qty,price:item.price,rowTotal});
+  total += rowTotal;
+
+  renderBill();
+}
+
+// ===== رسم الفاتورة =====
+function renderBill(){
+  const tbody = document.getElementById("bill");
+  tbody.innerHTML="";
+  bill.forEach(r=>{
+    tbody.innerHTML+=`
+      <tr>
+        <td>${r.name}</td>
+        <td>${r.qty}</td>
+        <td>${r.price}</td>
+        <td>${r.rowTotal}</td>
+      </tr>
+    `;
+  });
+  document.getElementById("total").innerText = total;
+}
+
+// ===== حفظ =====
+function saveInvoice(){
+  let invoices = JSON.parse(localStorage.getItem("repInvoices")||"[]");
+  invoices.push({
+    rep:user.name,
+    customer:customer.value,
+    total,
+    date:new Date().toLocaleString()
+  });
+  localStorage.setItem("repInvoices",JSON.stringify(invoices));
+  alert("تم حفظ الفاتورة");
+  location.reload();
+}
+
+// ===== خروج =====
+function logout(){
+  localStorage.removeItem("currentUser");
+  location.href="../index.html";
+}
+</script>
+
+</body>
+</html>
