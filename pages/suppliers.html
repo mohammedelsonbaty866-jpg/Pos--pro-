@@ -1,81 +1,54 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>الموردين</title>
-
-  <link rel="stylesheet" href="../css/style.css" />
-  <link rel="stylesheet" href="../css/mobile.css" />
+  <link rel="stylesheet" href="../css/style.css">
 </head>
+
 <body>
 
-<div class="app">
+<!-- ===== المنيو ===== -->
+<script>
+  fetch("../partials/menu.html")
+    .then(res => res.text())
+    .then(html => {
+      document.body.insertAdjacentHTML("afterbegin", html);
+    });
+</script>
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <h2>POS PRO</h2>
-    <a href="sales.html">🛒 المبيعات</a>
-    <a href="products.html">📦 الأصناف</a>
-    <a href="customers.html">👥 العملاء</a>
-    <a href="suppliers.html" class="active">🏭 الموردين</a>
-    <a href="expenses.html">💸 المصروفات</a>
-    <a href="reports.html">📊 التقارير</a>
-    <a href="settings.html">⚙️ الإعدادات</a>
-  </div>
+<h2>الموردين</h2>
 
-  <!-- Main -->
-  <div class="main">
+<!-- ===== إضافة مورد ===== -->
+<div class="card">
+  <label>اسم المورد</label>
+  <input type="text" id="supplierName">
 
-    <!-- Header -->
-    <div class="header">
-      <h3>إدارة الموردين</h3>
-    </div>
+  <label>رقم التليفون</label>
+  <input type="text" id="supplierPhone">
 
-    <!-- Content -->
-    <div class="content">
+  <label>اسم الشركة</label>
+  <input type="text" id="supplierCompany">
 
-      <!-- Add Supplier -->
-      <div class="card">
-        <h4>إضافة مورد</h4>
-
-        <label>اسم المورد</label>
-        <input type="text" id="supName" placeholder="اسم المورد" />
-
-        <label>رقم الهاتف</label>
-        <input type="text" id="supPhone" placeholder="01xxxxxxxxx" />
-
-        <label>الرصيد الافتتاحي</label>
-        <input type="number" id="supBalance" value="0" />
-
-        <button data-action="add-supplier">➕ إضافة مورد</button>
-      </div>
-
-      <!-- Suppliers Table -->
-      <div class="card">
-        <h4>قائمة الموردين</h4>
-
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>الاسم</th>
-              <th>الهاتف</th>
-              <th>الرصيد</th>
-              <th>حذف</th>
-            </tr>
-          </thead>
-          <tbody id="suppliersTable"></tbody>
-        </table>
-      </div>
-
-    </div>
-  </div>
+  <button id="addSupplierBtn">إضافة مورد</button>
 </div>
 
-<!-- Scripts -->
-<script src="../js/db.js"></script>
-<script src="../js/ui.js"></script>
-<script src="../js/events.js"></script>
+<!-- ===== جدول الموردين ===== -->
+<div class="card">
+  <table width="100%" border="1">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>الاسم</th>
+        <th>التليفون</th>
+        <th>الشركة</th>
+        <th>حذف</th>
+      </tr>
+    </thead>
+    <tbody id="suppliersTable"></tbody>
+  </table>
+</div>
+
 <script src="../js/suppliers.js"></script>
 
 </body>
