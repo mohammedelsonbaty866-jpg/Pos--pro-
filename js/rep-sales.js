@@ -1,5 +1,5 @@
 /* ===============================
-   بيانات أساسية
+   متغيرات أساسية
 ================================ */
 let saleItems = [];
 let total = 0;
@@ -12,6 +12,16 @@ let stock     = JSON.parse(localStorage.getItem("stock"))     || [];
 let sales     = JSON.parse(localStorage.getItem("sales"))     || [];
 let returns   = JSON.parse(localStorage.getItem("returns"))   || [];
 let customers = JSON.parse(localStorage.getItem("customers")) || [];
+
+/* ===============================
+   حماية صفحة المندوب
+================================ */
+function protectRepPage() {
+  if (!localStorage.getItem("currentRep")) {
+    window.location.href = "rep-login.html";
+  }
+}
+protectRepPage();
 
 /* ===============================
    بحث سريع عن صنف
@@ -52,10 +62,12 @@ function addItem(item) {
 ================================ */
 function renderItems() {
   const tbody = document.getElementById("rows");
+  if (!tbody) return;
+
   tbody.innerHTML = "";
   total = 0;
 
-  saleItems.forEach((i, index) => {
+  saleItems.forEach(i => {
     const lineTotal = i.qty * i.price;
     total += lineTotal;
 
@@ -86,7 +98,7 @@ function saveSale() {
   }
 
   if (saleItems.length === 0) {
-    alert("الفاتورة فارغة");
+    alert("الفاتورة فاضية");
     return;
   }
 
@@ -111,8 +123,7 @@ function saveSale() {
   });
   localStorage.setItem("stock", JSON.stringify(stock));
 
-  alert("تم حفظ الفاتورة");
-
+  alert("تم حفظ الفاتورة بنجاح");
   resetSale();
 }
 
@@ -123,7 +134,8 @@ function resetSale() {
   saleItems = [];
   total = 0;
   renderItems();
-  document.getElementById("customer").value = "";
+  const c = document.getElementById("customer");
+  if (c) c.value = "";
 }
 
 /* ===============================
@@ -159,7 +171,7 @@ function showStatement() {
 ================================ */
 function makeReturn() {
   if (saleItems.length === 0) {
-    alert("لا يوجد أصناف للمرتجع");
+    alert("لا يوجد أصناف لعمل مرتجع");
     return;
   }
 
@@ -185,7 +197,6 @@ function makeReturn() {
   localStorage.setItem("stock", JSON.stringify(stock));
 
   alert("تم تسجيل المرتجع");
-
   resetSale();
 }
 
