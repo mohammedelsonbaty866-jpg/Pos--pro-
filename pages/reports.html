@@ -8,7 +8,33 @@
 body{
   font-family:tahoma;
   background:#f2f4f8;
-  margin:0
+  margin:0;
+  display:flex
+}
+
+/* ===== المنيو ===== */
+.sidebar{
+  width:240px;
+  background:linear-gradient(180deg,#0f1f3a,#142850);
+  padding:12px;
+  height:100vh
+}
+.menu-item{
+  background:#1b2d4a;
+  color:#fff;
+  padding:14px;
+  border-radius:14px;
+  margin-bottom:10px;
+  cursor:pointer;
+  font-size:15px
+}
+.menu-item:hover{background:#284b8f}
+.menu-item.active{background:#2f6df6}
+
+/* ===== المحتوى ===== */
+.main{
+  flex:1;
+  overflow:auto
 }
 .header{
   background:#142850;
@@ -29,11 +55,10 @@ body{
   font-size:13px;
   color:#444
 }
-.filters input, .filters select{
+.filters input{
   width:100%;
   padding:10px;
-  margin:6px 0;
-  font-size:14px
+  margin:6px 0
 }
 .filters button{
   width:100%;
@@ -78,15 +103,14 @@ body{
   text-align:center;
   background:#ddd;
   border-radius:10px;
-  font-size:14px;
-  cursor:pointer
+  font-size:14px
 }
 .tab.active{
   background:#2f6df6;
   color:#fff
 }
 
-/* ===== الجداول ===== */
+/* ===== الجدول ===== */
 .box{
   background:#fff;
   margin:10px;
@@ -103,9 +127,7 @@ th,td{
   padding:8px;
   text-align:center
 }
-th{
-  background:#f6f7fb
-}
+th{background:#f6f7fb}
 
 /* ===== أدوات ===== */
 .tools{
@@ -127,26 +149,40 @@ th{
 
 <body>
 
+<!-- ===== المنيو ===== -->
+<div class="sidebar">
+  <div class="menu-item" onclick="location.href='sales.html'">المبيعات</div>
+  <div class="menu-item" onclick="location.href='purchases.html'">المشتريات</div>
+  <div class="menu-item" onclick="location.href='items.html'">الأصناف</div>
+  <div class="menu-item" onclick="location.href='returns.html'">المرتجعات</div>
+  <div class="menu-item" onclick="location.href='customers.html'">العملاء</div>
+  <div class="menu-item" onclick="location.href='suppliers.html'">الموردين</div>
+  <div class="menu-item" onclick="location.href='stock.html'">المخزون</div>
+  <div class="menu-item active">التقارير</div>
+  <div class="menu-item" onclick="location.href='expenses.html'">المصروفات</div>
+  <div class="menu-item" onclick="location.href='cash.html'">الخزنة</div>
+  <div class="menu-item" onclick="location.href='settings.html'">الإعدادات</div>
+</div>
+
+<!-- ===== المحتوى ===== -->
+<div class="main">
+
 <div class="header">📊 التقارير</div>
 
-<!-- ===== الفلاتر ===== -->
+<!-- الفلاتر -->
 <div class="filters">
   <label>من تاريخ</label>
   <input type="date">
-
   <label>إلى تاريخ</label>
   <input type="date">
-
   <label>العميل</label>
   <input placeholder="اختياري">
-
   <label>المندوب</label>
   <input placeholder="اختياري">
-
   <button>عرض التقرير</button>
 </div>
 
-<!-- ===== الكروت ===== -->
+<!-- الكروت -->
 <div class="cards">
   <div class="card">💰 إجمالي المبيعات <span>0</span></div>
   <div class="card">↩ إجمالي المرتجعات <span>0</span></div>
@@ -156,7 +192,7 @@ th{
   <div class="card">👥 عدد العملاء <span>0</span></div>
 </div>
 
-<!-- ===== التبويبات ===== -->
+<!-- التبويبات -->
 <div class="tabs">
   <div class="tab active">المبيعات</div>
   <div class="tab">المرتجعات</div>
@@ -165,7 +201,7 @@ th{
   <div class="tab">الخزنة</div>
 </div>
 
-<!-- ===== جدول المبيعات ===== -->
+<!-- الجدول -->
 <div class="box">
   <table>
     <thead>
@@ -188,12 +224,12 @@ th{
     </tbody>
   </table>
 
-  <!-- أدوات -->
   <div class="tools">
     <button>🖨 طباعة</button>
     <button>📤 تصدير Excel</button>
   </div>
 </div>
 
+</div>
 </body>
 </html>
