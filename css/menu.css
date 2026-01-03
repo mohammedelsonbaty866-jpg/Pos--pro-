@@ -1,9 +1,13 @@
 .sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
   width: 260px;
-  background: linear-gradient(180deg, #0f1f3a, #142850);
-  padding: 12px;
   height: 100vh;
+  background: linear-gradient(180deg, #0f1f3a, #142850);
+  padding: 14px;
   transition: 0.3s;
+  z-index: 1000;
 }
 
 .sidebar.collapsed {
@@ -49,4 +53,15 @@
   cursor: pointer;
   font-size: 20px;
   color: #fff;
+}
+
+/* ===== محتوى الصفحة ===== */
+.main-content {
+  margin-right: 260px;
+  padding: 16px;
+  transition: 0.3s;
+}
+
+.sidebar.collapsed + .main-content {
+  margin-right: 80px;
 }
