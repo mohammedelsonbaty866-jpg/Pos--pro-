@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>مبيعات المندوب</title>
+
+<style>
+body{
+  font-family:tahoma;
+  background:#f2f4f8;
+  margin:0
+}
+.header{
+  background:#142850;
+  color:#fff;
+  padding:12px;
+  text-align:center;
+  font-size:18px
+}
+.container{padding:10px}
+
+/* أزرار مربعة */
+.btns{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-bottom:10px
+}
+.btn{
+  background:#2f6df6;
+  color:#fff;
+  padding:14px 6px;
+  border-radius:10px;
+  text-align:center;
+  font-size:13px;
+  cursor:pointer
+}
+.btn.gray{background:#6c757d}
+.btn.red{background:#dc3545}
+.btn.green{background:#28a745}
+
+/* مدخلات */
+input,select{
+  width:100%;
+  padding:10px;
+  margin:5px 0;
+  border-radius:8px;
+  border:1px solid #ccc
+}
+
+/* جدول */
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  border-radius:10px;
+  overflow:hidden;
+  font-size:13px
+}
+th,td{
+  padding:8px;
+  border-bottom:1px solid #eee;
+  text-align:center
+}
+th{background:#f6f7fb}
+
+.total{
+  background:#fff;
+  padding:10px;
+  margin-top:8px;
+  border-radius:10px;
+  font-size:16px;
+  text-align:center
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">🧑‍💼 مبيعات المندوب</div>
+
+<div class="container">
+
+<!-- أزرار -->
+<div class="btns">
+  <div class="btn" onclick="addCustomer()">➕ عميل</div>
+  <div class="btn gray" onclick="showStatement()">📄 كشف حساب</div>
+  <div class="btn red" onclick="openReturn()">↩ مرتجع</div>
+  <div class="btn green" onclick="printInvoice()">🖨 طباعة</div>
+</div>
+
+<!-- العميل -->
+<input id="customerName" placeholder="اسم العميل (إجباري في الآجل)">
+
+<select id="saleType">
+  <option value="cash">نقدي</option>
+  <option value="credit">آجل</option>
+</select>
+
+<!-- الصنف -->
+<input id="itemSearch" placeholder="بحث سريع عن الصنف" oninput="searchItem()">
+
+<table>
+<thead>
+<tr>
+  <th>الصنف</th>
+  <th>الكمية</th>
+  <th>السعر</th>
+  <th>الإجمالي</th>
+</tr>
+</thead>
+<tbody id="items"></tbody>
+</table>
+
+<div class="total">الإجمالي: <span id="total">0</span></div>
+
+<div class="btn green" onclick="saveSale()">💾 حفظ الفاتورة</div>
+
+</div>
+
+<script>
+/* ===== بيانات ===== */
+let saleItems=[];
+let total=0;
+const rep=localStorage.getItem("currentRep")||"مندوب";
+
+/* ===== تحميل الأصناف ===== */
+const stock=JSON.parse(localStorage.getItem("stock"))||[];
+
+/* ===== بحث صنف ===== */
+function searchItem(){
+  const v=itemSearch.value;
+  const item=stock.find(i=>i.name.includes(v));
+  if(item){
+    addItem(item);
+    itemSearch.value="";
+  }
+}
+
+/* ===== إضافة صنف ===== */
+function addItem(item){
+  saleItems.push({
+    name:item.name,
+    qty:1,
+    price:item.price
+  });
+  render();
+}
+
+/* ===== رسم ===== */
+function render(){
+  total=0;
+  items.innerHTML="";
+  saleItems.forEach(i=>{
+    let t=i.qty*i.price;
+    total+=t;
+    items.innerHTML+=`
+      <tr>
+        <td>${i.name}</td>
+        <td>${i.qty}</td>
+        <td>${i.price}</td>
+        <td>${t}</td>
+      </tr>`;
+  });
+  document.getElementById("total").innerText=total;
+}
+
+/* ===== حفظ البيع ===== */
+function saveSale(){
+  const type=saleType.value;
+  const customer=customerName.value||"نقدي";
+
+  if(type==="credit" && !customer){
+    alert("اسم العميل مطلوب");
+    return;
+  }
+
+  const sales=JSON.parse(localStorage.getItem("sales"))||[];
+  sales.push({
+    id:Date.now(),
+    rep,
+    customer,
+    type,
+    items:saleItems,
+    total,
+    date:new Date().toLocaleString()
+  });
+  localStorage.setItem("sales",JSON.stringify(sales));
+
+  // تحديث المخزون
+  saleItems.forEach(i=>{
+    let s=stock.find(x=>x.name===i.name);
+    if(s) s.qty-=i.qty;
+  });
+  localStorage.setItem("stock",JSON.stringify(stock));
+
+  alert("تم حفظ الفاتورة");
+  saleItems=[];
+  render();
+}
+
+/* ===== طباعة ===== */
+function printInvoice(){
+  window.print();
+}
+
+/* ===== كشف حساب ===== */
+function showStatement(){
+  alert("كشف الحساب عرض فقط");
+}
+
+/* ===== مرتجع ===== */
+function openReturn(){
+  alert("فتح شاشة المرتجعات");
+}
+
+/* ===== إضافة عميل ===== */
+function addCustomer(){
+  let name=prompt("اسم العميل");
+  if(!name)return;
+  let customers=JSON.parse(localStorage.getItem("customers"))||[];
+  customers.push({name,balance:0});
+  localStorage.setItem("customers",JSON.stringify(customers));
+  customerName.value=name;
+}
+</script>
+
+</body>
+</html>
