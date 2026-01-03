@@ -11,26 +11,36 @@
   <a href="reports.html" class="item">📈<span>التقارير</span></a>
   <a href="expenses.html" class="item">💸<span>المصروفات</span></a>
   <a href="cashbox.html" class="item">💰<span>الخزنة</span></a>
-  <a href="settings.html" class="item settings">⚙️<span>الإعدادات</span></a>
+
+  <!-- ===== الإعدادات ===== -->
+  <div class="item settings toggle-settings">
+    ⚙️
+    <span>الإعدادات</span>
+
+    <div class="settings-sub">
+      <a href="settings.html">⚙️ الإعدادات العامة</a>
+      <a href="stock-audit.html">📋 جرد المخزن</a>
+    </div>
+  </div>
 
 </div>
 
 <style>
   body {
-    margin-right: 90px;
+    margin-right: 110px;
   }
 
   .sidebar {
     position: fixed;
     top: 0;
     right: 0;
-    width: 90px;
+    width: 110px;
     height: 100vh;
-    background: #1f2d3d;
+    background: linear-gradient(180deg, #1f2d3d, #16222e);
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 8px;
+    padding: 10px 6px;
     z-index: 1000;
   }
 
@@ -39,27 +49,64 @@
     color: #fff;
     text-decoration: none;
     text-align: center;
-    padding: 14px 0;
-    font-size: 22px; /* الأيقونة */
+    padding: 16px 0;
+    font-size: 26px; /* حجم الأيقونة */
+    border-radius: 10px;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
   }
 
   .sidebar .item span {
     display: block;
-    font-size: 13px;
+    font-size: 14px;
     margin-top: 6px;
     font-weight: bold;
   }
 
   .sidebar .item:hover {
-    background: #2c3e50;
+    background: rgba(255,255,255,0.12);
+    transform: scale(1.05);
   }
 
-  .sidebar .settings {
+  /* ===== الإعدادات ===== */
+  .toggle-settings {
+    cursor: pointer;
     margin-top: auto;
-    background: #16222e;
+    background: rgba(0,0,0,0.25);
   }
 
-  .sidebar .settings:hover {
-    background: #22303f;
+  .settings-sub {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 8px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .settings-sub a {
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 0;
+    font-size: 14px;
+  }
+
+  .settings-sub a:hover {
+    background: rgba(255,255,255,0.15);
   }
 </style>
+
+<script>
+  document.addEventListener("click", function (e) {
+    const settings = document.querySelector(".toggle-settings");
+    const sub = document.querySelector(".settings-sub");
+    if (!settings || !sub) return;
+
+    if (settings.contains(e.target)) {
+      sub.style.display = sub.style.display === "flex" ? "none" : "flex";
+    } else {
+      sub.style.display = "none";
+    }
+  });
+</script>
