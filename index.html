@@ -2,79 +2,116 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>POS PRO</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- ستايل عام -->
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/menu.css">
+  <title>POS PRO | تسجيل الدخول</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
     body{
       margin:0;
       font-family: Arial, Tahoma;
-      background:#f4f6f8;
+      background:#f4f6f9;
       display:flex;
-      align-items:center;
       justify-content:center;
+      align-items:center;
       height:100vh;
     }
-    .loader{
+    .login-box{
       background:#fff;
-      padding:40px;
+      width:320px;
+      padding:25px;
       border-radius:12px;
       box-shadow:0 10px 30px rgba(0,0,0,.1);
       text-align:center;
-      width:280px;
     }
-    .loader h1{
-      margin:0;
-      font-size:26px;
-      color:#222;
+    h2{
+      margin-bottom:20px;
     }
-    .loader p{
-      margin-top:10px;
-      color:#666;
+    input{
+      width:100%;
+      padding:10px;
+      margin-bottom:12px;
+      border:1px solid #ccc;
+      border-radius:6px;
       font-size:15px;
+    }
+    button{
+      width:100%;
+      padding:10px;
+      background:#2563eb;
+      border:none;
+      border-radius:6px;
+      color:#fff;
+      font-size:16px;
+      cursor:pointer;
+    }
+    button:hover{
+      background:#1e4ed8;
+    }
+    .error{
+      color:red;
+      margin-top:10px;
+      font-size:14px;
+      display:none;
     }
   </style>
 </head>
-
 <body>
 
-  <div class="loader">
-    <h1>POS PRO</h1>
-    <p>نظام نقاط بيع</p>
-    <p>جاري التحميل...</p>
-  </div>
+<div class="login-box">
+  <h2>دخول النظام</h2>
 
-  <script>
-    /*
-      منطق الدخول:
-      admin  → النظام كامل
-      rep    → شاشة المندوب فقط
-    */
+  <input type="text" id="username" placeholder="اسم المستخدم">
+  <input type="password" id="password" placeholder="كلمة المرور">
 
-    const user = JSON.parse(localStorage.getItem("currentUser"));
+  <button onclick="login()">دخول</button>
 
-    setTimeout(() => {
-      if(!user){
-        // لو مفيش تسجيل دخول
-        window.location.href = "pages/login.html";
-        return;
-      }
+  <div class="error" id="error">بيانات الدخول غير صحيحة</div>
+</div>
 
-      if(user.role === "admin"){
-        window.location.href = "pages/dashboard.html";
-      }
-      else if(user.role === "rep"){
-        window.location.href = "pages/rep-sales.html";
-      }
-      else{
-        window.location.href = "pages/login.html";
-      }
-    }, 800);
-  </script>
+<script>
+/* ===== إنشاء مستخدمين افتراضيين لو أول مرة ===== */
+if(!localStorage.getItem("users")){
+  localStorage.setItem("users", JSON.stringify([
+    {
+      id:1,
+      username:"admin",
+      password:"admin",
+      role:"admin",
+      name:"المدير"
+    },
+    {
+      id:2,
+      username:"rep",
+      password:"1234",
+      role:"rep",
+      name:"مندوب 1"
+    }
+  ]));
+}
+
+/* ===== تسجيل الدخول ===== */
+function login(){
+  const u = document.getElementById("username").value.trim();
+  const p = document.getElementById("password").value.trim();
+  const error = document.getElementById("error");
+
+  const users = JSON.parse(localStorage.getItem("users")) || [];
+  const user = users.find(x => x.username === u && x.password === p);
+
+  if(!user){
+    error.style.display = "block";
+    return;
+  }
+
+  localStorage.setItem("currentUser", JSON.stringify(user));
+
+  if(user.role === "admin"){
+    window.location.href = "pages/sales.html";
+  }else{
+    window.location.href = "pages/rep-sales.html";
+  }
+}
+</script>
 
 </body>
 </html>
