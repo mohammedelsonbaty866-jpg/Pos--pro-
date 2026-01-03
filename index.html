@@ -3,44 +3,78 @@
 <head>
   <meta charset="UTF-8">
   <title>POS PRO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ستايل عام -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/menu.css">
+
   <style>
     body{
-      font-family: Arial;
+      margin:0;
+      font-family: Arial, Tahoma;
+      background:#f4f6f8;
       display:flex;
       align-items:center;
       justify-content:center;
       height:100vh;
-      background:#f5f7fb;
     }
-    .card{
+    .loader{
       background:#fff;
       padding:40px;
       border-radius:12px;
-      text-align:center;
       box-shadow:0 10px 30px rgba(0,0,0,.1);
+      text-align:center;
+      width:280px;
+    }
+    .loader h1{
+      margin:0;
+      font-size:26px;
+      color:#222;
+    }
+    .loader p{
+      margin-top:10px;
+      color:#666;
+      font-size:15px;
     }
   </style>
 </head>
+
 <body>
 
-<div class="card">
-  <h2>POS PRO</h2>
-  <p>جاري التحميل...</p>
-</div>
+  <div class="loader">
+    <h1>POS PRO</h1>
+    <p>نظام نقاط بيع</p>
+    <p>جاري التحميل...</p>
+  </div>
 
-<script>
-  const user = JSON.parse(localStorage.getItem("currentUser"));
+  <script>
+    /*
+      منطق الدخول:
+      admin  → النظام كامل
+      rep    → شاشة المندوب فقط
+    */
 
-  setTimeout(() => {
-    if (!user) {
-      window.location.href = "rep-login.html";
-    } else if (user.role === "rep") {
-      window.location.href = "rep-sales.html";
-    } else {
-      window.location.href = "pages/sales.html";
-    }
-  }, 800);
-</script>
+    const user = JSON.parse(localStorage.getItem("currentUser"));
+
+    setTimeout(() => {
+      if(!user){
+        // لو مفيش تسجيل دخول
+        window.location.href = "pages/login.html";
+        return;
+      }
+
+      if(user.role === "admin"){
+        window.location.href = "pages/dashboard.html";
+      }
+      else if(user.role === "rep"){
+        window.location.href = "pages/rep-sales.html";
+      }
+      else{
+        window.location.href = "pages/login.html";
+      }
+    }, 800);
+  </script>
 
 </body>
 </html>
