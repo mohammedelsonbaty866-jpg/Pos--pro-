@@ -1,83 +1,158 @@
-/*********************************
- * reports.js
- *********************************/
+<script>
+/* ===============================
+   تحميل البيانات من السيستم
+================================ */
+const sales     = JSON.parse(localStorage.getItem("sales"))     || [];
+const returns   = JSON.parse(localStorage.getItem("returns"))   || [];
+const stock     = JSON.parse(localStorage.getItem("stock"))     || [];
+const customers = JSON.parse(localStorage.getItem("customers")) || [];
+const cashbox   = JSON.parse(localStorage.getItem("cashbox"))   || [];
 
-document.addEventListener("DOMContentLoaded", () => {
-  loadReports();
+/* ===============================
+   عناصر الصفحة
+================================ */
+const tabs = document.querySelectorAll(".tab");
+const tbody = document.querySelector("tbody");
+const cards = document.querySelectorAll(".card span");
+
+/* ===============================
+   التبويبات
+================================ */
+tabs.forEach(tab=>{
+  tab.onclick=()=>{
+    tabs.forEach(t=>t.classList.remove("active"));
+    tab.classList.add("active");
+    loadTab(tab.innerText);
+  }
 });
 
-/*********************************
- * تحميل التقارير
- *********************************/
-function loadReports() {
-  const from = document.getElementById("fromDate").value;
-  const to = document.getElementById("toDate").value;
+/* ===============================
+   تحميل أول مرة
+================================ */
+loadDashboard();
+loadTab("المبيعات");
 
-  const sales = filterByDate(POS_DB.DB.sales || [], from, to);
-  const expenses = filterByDate(POS_DB.DB.expenses || [], from, to);
+/* ===============================
+   الداشبورد
+================================ */
+function loadDashboard(){
+  let totalSales = sales.reduce((a,s)=>a+s.total,0);
+  let totalReturns = returns.reduce((a,r)=>a+r.total,0);
+  let cash = cashbox.reduce((a,c)=>a+c.amount,0);
 
-  const totalSales = sales.reduce((sum, s) => sum + (s.total || 0), 0);
-  const totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
-  const profit = totalSales - totalExpenses;
-
-  document.getElementById("repSales").textContent =
-    UI.formatCurrency(totalSales);
-
-  document.getElementById("repExpenses").textContent =
-    UI.formatCurrency(totalExpenses);
-
-  document.getElementById("repProfit").textContent =
-    UI.formatCurrency(profit);
-
-  renderProductsReport(sales);
+  cards[0].innerText = totalSales.toFixed(2);
+  cards[1].innerText = totalReturns.toFixed(2);
+  cards[2].innerText = (totalSales-totalReturns).toFixed(2);
+  cards[3].innerText = cash.toFixed(2);
+  cards[4].innerText = sales.length;
+  cards[5].innerText = customers.length;
 }
 
-/*********************************
- * تقرير الأصناف
- *********************************/
-function renderProductsReport(sales) {
-  const tbody = document.getElementById("productsReport");
-  if (!tbody) return;
+/* ===============================
+   تحميل التبويب
+================================ */
+function loadTab(type){
+  tbody.innerHTML="";
 
-  const map = {};
-
-  sales.forEach(sale => {
-    (sale.items || []).forEach(item => {
-      if (!map[item.name]) {
-        map[item.name] = { qty: 0, total: 0 };
-      }
-      map[item.name].qty += item.qty;
-      map[item.name].total += item.qty * item.price;
+  if(type==="المبيعات"){
+    sales.forEach(s=>{
+      tbody.innerHTML+=row(
+        s.date,
+        s.customer,
+        s.rep||"-",
+        s.type||"بيع",
+        s.total
+      );
     });
-  });
-
-  tbody.innerHTML = "";
-
-  const keys = Object.keys(map);
-  if (keys.length === 0) {
-    UI.showEmpty("productsReport", 3);
-    return;
   }
 
-  keys.forEach(name => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${name}</td>
-      <td>${map[name].qty}</td>
-      <td>${UI.formatCurrency(map[name].total)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
+  if(type==="المرتجعات"){
+    returns.forEach(r=>{
+      tbody.innerHTML+=row(
+        r.date,
+        r.customer,
+        r.rep||"-",
+        "مرتجع",
+        -r.total
+      );
+    });
+  }
+
+  if(type==="المخزون"){
+    stock.forEach(i=>{
+      tbody.innerHTML+=`
+        <tr>
+          <td>${i.name}</td>
+          <td colspan="2">${i.unit}</td>
+          <td>رصيد</td>
+          <td>${i.qty}</td>
+        </tr>`;
+    });
+  }
+
+  if(type==="العملاء"){
+    customers.forEach(c=>{
+      tbody.innerHTML+=`
+        <tr>
+          <td>${c.name}</td>
+          <td colspan="2">${c.phone||""}</td>
+          <td>رصيد</td>
+          <td>${c.balance||0}</td>
+        </tr>`;
+    });
+  }
+
+  if(type==="الخزنة"){
+    cashbox.forEach(c=>{
+      tbody.innerHTML+=row(
+        c.date,
+        c.note||"-",
+        "-",
+        c.type,
+        c.amount
+      );
+    });
+  }
 }
 
-/*********************************
- * فلترة حسب التاريخ
- *********************************/
-function filterByDate(arr, from, to) {
-  return arr.filter(item => {
-    if (!item.date) return true;
-    if (from && item.date < from) return false;
-    if (to && item.date > to) return false;
-    return true;
-  });
+/* ===============================
+   صف جدول
+================================ */
+function row(d,c,r,t,v){
+  return `
+  <tr>
+    <td>${d}</td>
+    <td>${c}</td>
+    <td>${r}</td>
+    <td>${t}</td>
+    <td>${v}</td>
+  </tr>`;
 }
+
+/* ===============================
+   طباعة
+================================ */
+function printReport(){
+  window.print();
+}
+
+/* ===============================
+   تصدير Excel (CSV حقيقي)
+================================ */
+function exportExcel(){
+  let csv="التاريخ,العميل,المندوب,النوع,القيمة\n";
+  document.querySelectorAll("tbody tr").forEach(tr=>{
+    let row=[];
+    tr.querySelectorAll("td").forEach(td=>{
+      row.push(td.innerText);
+    });
+    csv+=row.join(",")+"\n";
+  });
+
+  const blob=new Blob([csv],{type:"text/csv"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="report.csv";
+  a.click();
+}
+</script>
