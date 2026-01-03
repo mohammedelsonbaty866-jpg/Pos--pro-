@@ -161,9 +161,41 @@ saveReturnBtn.addEventListener("click", () => {
   renderTable();
   partyName.value = "";
 });
+// ============================
+// تحديث المخزون
+// ============================
+function updateStock(items, type) {
+  let stock = JSON.parse(localStorage.getItem("stock")) || [];
 
+  items.forEach(item => {
+    let record = stock.find(
+      s => s.name === item.name && s.unit === item.unit
+    );
+
+    if (!record) {
+      record = {
+        name: item.name,
+        unit: item.unit,
+        qty: 0
+      };
+      stock.push(record);
+    }
+
+    if (type === "sale") {
+      // مرتجع بيع ➜ يزيد المخزون
+      record.qty += item.qty;
+    } else {
+      // مرتجع شراء ➜ يقل المخزون
+      record.qty -= item.qty;
+      if (record.qty < 0) record.qty = 0;
+    }
+  });
+
+  localStorage.setItem("stock", JSON.stringify(stock));
+}
 // ============================
 // تحميل أولي
 // ============================
+
 loadParties();
 loadProducts();
