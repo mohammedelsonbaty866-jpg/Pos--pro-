@@ -1,214 +1,222 @@
-/* ===============================
-   بيانات أساسية
-================================ */
-let saleItems = [];
-let total = 0;
-<script src="js/rep-auth.js"></script>
-// المندوب الحالي (من تسجيل الدخول)
-const currentRep = localStorage.getItem("currentRep") || "مندوب";
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>مبيعات المندوب</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-// تحميل بيانات السيستم
-let stock     = JSON.parse(localStorage.getItem("stock"))     || [];
-let sales     = JSON.parse(localStorage.getItem("sales"))     || [];
-let returns   = JSON.parse(localStorage.getItem("returns"))   || [];
-let customers = JSON.parse(localStorage.getItem("customers")) || [];
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6fb;
+}
+.header{
+  background:#1f3c88;
+  color:#fff;
+  padding:12px;
+  text-align:center;
+  font-size:18px;
+}
+.container{
+  padding:10px;
+}
+.card{
+  background:#fff;
+  border-radius:10px;
+  padding:10px;
+  margin-bottom:10px;
+}
+input,select,button{
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:15px;
+}
+button{
+  background:#1f3c88;
+  color:#fff;
+  border:none;
+}
+button.small{
+  width:48%;
+  display:inline-block;
+}
+.grid{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.grid button{
+  width:23%;
+  height:60px;
+  font-size:14px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+th,td{
+  border:1px solid #ddd;
+  padding:6px;
+  text-align:center;
+  font-size:14px;
+}
+.total{
+  font-size:18px;
+  font-weight:bold;
+  text-align:center;
+}
+</style>
+</head>
 
-/* ===============================
-   بحث سريع عن صنف
-================================ */
-function searchItem(value) {
-  if (!value) return;
+<body>
 
-  const item = stock.find(i =>
-    i.name.toLowerCase().includes(value.toLowerCase())
-  );
+<div class="header">شاشة مبيعات المندوب</div>
 
-  if (item) {
-    addItem(item);
-    document.getElementById("search").value = "";
-  }
+<div class="container">
+
+<!-- العميل -->
+<div class="card">
+  <input id="customerName" placeholder="اسم العميل (بحث سريع)">
+  <div class="grid">
+    <button onclick="setType('cash')">نقدي</button>
+    <button onclick="setType('credit')">آجل</button>
+    <button onclick="showAccount()">كشف حساب</button>
+    <button onclick="printInvoice()">طباعة</button>
+  </div>
+</div>
+
+<!-- الصنف -->
+<div class="card">
+  <input id="productSearch" placeholder="بحث سريع عن الصنف">
+  <input id="qty" type="number" value="1">
+  <button onclick="addItem()">إضافة</button>
+</div>
+
+<!-- الفاتورة -->
+<div class="card">
+<table>
+<thead>
+<tr>
+<th>الصنف</th>
+<th>ك</th>
+<th>سعر</th>
+<th>إجمالي</th>
+<th>❌</th>
+</tr>
+</thead>
+<tbody id="invoiceBody"></tbody>
+</table>
+<div class="total">الإجمالي: <span id="total">0</span></div>
+<button onclick="saveSale()">حفظ الفاتورة</button>
+</div>
+
+</div>
+
+<script>
+// ===== حماية المندوب =====
+const user = JSON.parse(localStorage.getItem("currentUser"));
+if(!user || user.role!=="rep"){
+  location.href="rep-login.html";
 }
 
-/* ===============================
-   إضافة صنف للفاتورة
-================================ */
-function addItem(item) {
-  const exists = saleItems.find(i => i.name === item.name);
+// ===== بيانات =====
+let saleType="cash";
+let items=[];
+const products = JSON.parse(localStorage.getItem("products"))||[];
+const customers = JSON.parse(localStorage.getItem("customers"))||[];
+const stock = JSON.parse(localStorage.getItem("stock"))||[];
 
-  if (exists) {
-    exists.qty += 1;
-  } else {
-    saleItems.push({
-      name: item.name,
-      price: item.price,
-      qty: 1
-    });
-  }
-  renderItems();
+// ===== نوع البيع =====
+function setType(t){
+  saleType=t;
+  alert(t==="cash"?"بيع نقدي":"بيع آجل");
 }
 
-/* ===============================
-   رسم الفاتورة
-================================ */
-function renderItems() {
-  const tbody = document.getElementById("rows");
-  tbody.innerHTML = "";
-  total = 0;
+// ===== إضافة صنف =====
+function addItem(){
+  const name=document.getElementById("productSearch").value;
+  const qty=+document.getElementById("qty").value;
+  const p=products.find(x=>x.name===name);
+  if(!p){alert("الصنف غير موجود");return;}
+  items.push({
+    name:p.name,
+    price:p.price,
+    qty,
+    total:p.price*qty
+  });
+  render();
+}
 
-  saleItems.forEach((i, index) => {
-    const lineTotal = i.qty * i.price;
-    total += lineTotal;
-
-    tbody.innerHTML += `
+// ===== عرض =====
+function render(){
+  const body=document.getElementById("invoiceBody");
+  body.innerHTML="";
+  let sum=0;
+  items.forEach((i,idx)=>{
+    sum+=i.total;
+    body.innerHTML+=`
       <tr>
         <td>${i.name}</td>
         <td>${i.qty}</td>
         <td>${i.price}</td>
-        <td>${lineTotal}</td>
-      </tr>
-    `;
+        <td>${i.total}</td>
+        <td><button onclick="removeItem(${idx})">❌</button></td>
+      </tr>`;
   });
-
-  document.getElementById("total").innerText = total.toFixed(2);
+  document.getElementById("total").innerText=sum;
 }
 
-/* ===============================
-   حفظ الفاتورة
-================================ */
-function saveSale() {
-  const customerInput = document.getElementById("customer");
-  const saleType = document.getElementById("saleType").value;
-  const customer = customerInput.value || "نقدي";
+function removeItem(i){
+  items.splice(i,1);
+  render();
+}
 
-  if (saleType === "credit" && !customerInput.value) {
-    alert("اسم العميل مطلوب في البيع الآجل");
+// ===== حفظ =====
+function saveSale(){
+  if(items.length===0){alert("الفاتورة فاضية");return;}
+  if(saleType==="credit" && !customerName.value){
+    alert("اسم العميل مطلوب للبيع الآجل");
     return;
   }
 
-  if (saleItems.length === 0) {
-    alert("الفاتورة فارغة");
-    return;
-  }
-
-  const sale = {
-    id: Date.now(),
-    rep: currentRep,
-    customer,
-    type: saleType,
-    items: saleItems,
-    total,
-    date: new Date().toLocaleString()
-  };
-
-  // حفظ المبيعات
-  sales.push(sale);
-  localStorage.setItem("sales", JSON.stringify(sales));
+  const sales=JSON.parse(localStorage.getItem("sales"))||[];
+  sales.push({
+    id:Date.now(),
+    repId:user.id,
+    customer:customerName.value||"نقدي",
+    type:saleType,
+    items,
+    total:+total.innerText,
+    date:new Date().toLocaleString()
+  });
+  localStorage.setItem("sales",JSON.stringify(sales));
 
   // تحديث المخزون
-  saleItems.forEach(i => {
-    const s = stock.find(x => x.name === i.name);
-    if (s) s.qty -= i.qty;
+  items.forEach(it=>{
+    const s=stock.find(x=>x.name===it.name);
+    if(s) s.qty-=it.qty;
   });
-  localStorage.setItem("stock", JSON.stringify(stock));
+  localStorage.setItem("stock",JSON.stringify(stock));
 
-  alert("تم حفظ الفاتورة");
-
-  resetSale();
+  alert("تم الحفظ");
+  items=[];
+  render();
 }
 
-/* ===============================
-   إعادة ضبط الفاتورة
-================================ */
-function resetSale() {
-  saleItems = [];
-  total = 0;
-  renderItems();
-  document.getElementById("customer").value = "";
+// ===== كشف حساب =====
+function showAccount(){
+  alert("كشف حساب العميل (قيد التطوير)");
 }
 
-/* ===============================
-   كشف حساب عميل (عرض فقط)
-================================ */
-function showStatement() {
-  const customer = document.getElementById("customer").value;
-  if (!customer) {
-    alert("ادخل اسم العميل");
-    return;
-  }
-
-  const salesTotal = sales
-    .filter(s => s.customer === customer)
-    .reduce((sum, s) => sum + s.total, 0);
-
-  const returnsTotal = returns
-    .filter(r => r.customer === customer)
-    .reduce((sum, r) => sum + r.total, 0);
-
-  const balance = salesTotal - returnsTotal;
-
-  alert(
-    `كشف حساب العميل: ${customer}\n` +
-    `إجمالي المبيعات: ${salesTotal}\n` +
-    `إجمالي المرتجعات: ${returnsTotal}\n` +
-    `الرصيد: ${balance}`
-  );
-}
-
-/* ===============================
-   عمل مرتجع
-================================ */
-function makeReturn() {
-  if (saleItems.length === 0) {
-    alert("لا يوجد أصناف للمرتجع");
-    return;
-  }
-
-  const customer = document.getElementById("customer").value || "نقدي";
-
-  const ret = {
-    id: Date.now(),
-    rep: currentRep,
-    customer,
-    items: saleItems,
-    total,
-    date: new Date().toLocaleString()
-  };
-
-  returns.push(ret);
-  localStorage.setItem("returns", JSON.stringify(returns));
-
-  // تحديث المخزون (رجوع)
-  saleItems.forEach(i => {
-    const s = stock.find(x => x.name === i.name);
-    if (s) s.qty += i.qty;
-  });
-  localStorage.setItem("stock", JSON.stringify(stock));
-
-  alert("تم تسجيل المرتجع");
-
-  resetSale();
-}
-
-/* ===============================
-   إضافة عميل جديد
-================================ */
-function addCustomer() {
-  const name = prompt("اسم العميل");
-  if (!name) return;
-
-  customers.push({
-    id: Date.now(),
-    name,
-    balance: 0
-  });
-
-  localStorage.setItem("customers", JSON.stringify(customers));
-  document.getElementById("customer").value = name;
-}
-
-/* ===============================
-   طباعة الفاتورة
-================================ */
-function printInvoice() {
+// ===== طباعة =====
+function printInvoice(){
   window.print();
 }
+</script>
+
+</body>
+</html>
