@@ -157,3 +157,11 @@ function getItemsReport() {
     stockValue: getStock(i.name) * i.buyPrice
   }));
 }
+let stock=JSON.parse(localStorage.getItem("stock"))||{};
+
+function updateStock(name,qty,type){
+  stock[name]=stock[name]||0;
+  if(type==="sale") stock[name]-=qty;
+  if(type==="purchase") stock[name]+=qty;
+  localStorage.setItem("stock",JSON.stringify(stock));
+}
