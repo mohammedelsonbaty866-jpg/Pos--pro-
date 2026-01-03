@@ -7,71 +7,48 @@
   <link rel="stylesheet" href="../css/menu.css">
 
   <style>
-    body {
-      background: #f4f6f9;
-    }
-
-    .page {
-      padding: 20px;
-    }
-
-    h2 {
-      margin-bottom: 15px;
-    }
-
+    body { background:#f4f6f9; }
+    .page { padding:20px; }
     .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 15px;
-      margin-bottom: 15px;
+      background:#fff;
+      padding:15px;
+      border-radius:12px;
+      margin-bottom:15px;
     }
-
     .row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 10px;
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      gap:10px;
     }
-
     input, select {
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      width: 100%;
+      padding:10px;
+      border-radius:8px;
+      border:1px solid #ccc;
+      width:100%;
     }
-
     button {
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      background: #2f6df6;
-      color: #fff;
-      cursor: pointer;
+      padding:10px;
+      border:none;
+      border-radius:8px;
+      background:#2f6df6;
+      color:#fff;
+      cursor:pointer;
     }
-
-    button.secondary {
-      background: #1b2d4a;
-    }
-
     table {
-      width: 100%;
-      border-collapse: collapse;
+      width:100%;
+      border-collapse:collapse;
     }
-
-    th, td {
-      padding: 8px;
-      border-bottom: 1px solid #ddd;
-      text-align: center;
+    th,td {
+      padding:8px;
+      border-bottom:1px solid #ddd;
+      text-align:center;
     }
-
-    th {
-      background: #f1f3f6;
-    }
-
+    th { background:#f1f3f6; }
     .total {
-      font-size: 20px;
-      font-weight: bold;
-      text-align: left;
-      margin-top: 10px;
+      font-size:20px;
+      font-weight:bold;
+      margin-top:10px;
+      text-align:left;
     }
   </style>
 </head>
@@ -93,139 +70,154 @@
 
 <!-- ===== المحتوى ===== -->
 <div class="main-content">
-  <div class="page">
+<div class="page">
 
-    <h2>🧾 شاشة المبيعات</h2>
+<h2>🧾 شاشة المبيعات</h2>
 
-    <!-- بيانات العميل -->
-    <div class="card">
-      <div class="row">
-        <select id="saleType">
-          <option value="cash">نقدي</option>
-          <option value="credit">آجل</option>
-        </select>
+<!-- بيانات البيع -->
+<div class="card">
+  <div class="row">
+    <select id="saleType">
+      <option value="cash">نقدي</option>
+      <option value="credit">آجل</option>
+    </select>
 
-        <input type="text" id="saleCustomer" placeholder="اسم العميل (إجباري في الآجل)">
-        <input type="number" id="discount" placeholder="خصم (اختياري)">
-      </div>
-    </div>
+    <select id="customerSelect">
+      <option value="">-- اختر عميل --</option>
+    </select>
 
-    <!-- إضافة صنف -->
-    <div class="card">
-      <div class="row">
-        <input type="text" id="itemName" placeholder="بحث عن الصنف">
-        <input type="number" id="itemQty" placeholder="الكمية" value="1">
-        <input type="number" id="itemPrice" placeholder="السعر">
-        <button onclick="addItem()">إضافة</button>
-      </div>
-    </div>
-
-    <!-- الفاتورة -->
-    <div class="card">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>الصنف</th>
-            <th>الكمية</th>
-            <th>السعر</th>
-            <th>الإجمالي</th>
-            <th>حذف</th>
-          </tr>
-        </thead>
-        <tbody id="invoiceBody"></tbody>
-      </table>
-
-      <div class="total">
-        الإجمالي: <span id="total">0</span> جنيه
-      </div>
-
-      <br>
-
-      <button onclick="saveSale()">💾 حفظ الفاتورة</button>
-      <button class="secondary" onclick="printSale()">🖨 طباعة</button>
-    </div>
-
+    <input type="number" id="discount" placeholder="خصم">
   </div>
 </div>
 
-<!-- ===== JS ===== -->
+<!-- إضافة صنف -->
+<div class="card">
+  <div class="row">
+    <select id="itemSelect"></select>
+    <input type="number" id="qty" placeholder="الكمية" value="1">
+    <input type="number" id="price" placeholder="السعر">
+    <button onclick="addItem()">إضافة</button>
+  </div>
+</div>
+
+<!-- الفاتورة -->
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>الصنف</th>
+        <th>الكمية</th>
+        <th>السعر</th>
+        <th>الإجمالي</th>
+        <th>❌</th>
+      </tr>
+    </thead>
+    <tbody id="invoiceBody"></tbody>
+  </table>
+
+  <div class="total">
+    الإجمالي: <span id="total">0</span> جنيه
+  </div>
+
+  <br>
+  <button onclick="saveSale()">💾 حفظ</button>
+  <button onclick="window.print()">🖨 طباعة</button>
+</div>
+
+</div>
+</div>
+
 <script src="../js/menu.js"></script>
 
 <script>
 let invoice = [];
 let total = 0;
 
+// تحميل العملاء
+const customers = JSON.parse(localStorage.getItem("customers")) || [];
+customers.forEach(c => {
+  customerSelect.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+});
+
+// تحميل الأصناف
+const items = JSON.parse(localStorage.getItem("items")) || [];
+items.forEach(i => {
+  itemSelect.innerHTML += `<option value="${i.name}">${i.name}</option>`;
+});
+
+// عند اختيار صنف
+itemSelect.onchange = () => {
+  const item = items.find(i => i.name === itemSelect.value);
+  if (item) price.value = item.price;
+};
+
 function addItem() {
-  const name = itemName.value;
-  const qty = Number(itemQty.value);
-  const price = Number(itemPrice.value);
+  const name = itemSelect.value;
+  const q = Number(qty.value);
+  const p = Number(price.value);
 
-  if (!name || qty <= 0 || price <= 0) return alert("بيانات غير صحيحة");
+  if (!name || q <= 0 || p <= 0) return alert("بيانات غير صحيحة");
 
-  const sum = qty * price;
-  invoice.push({ name, qty, price, sum });
-
-  renderInvoice();
+  invoice.push({ name, qty:q, price:p, total:q*p });
+  render();
 }
 
-function renderInvoice() {
+function render() {
   invoiceBody.innerHTML = "";
   total = 0;
 
-  invoice.forEach((item, i) => {
-    total += item.sum;
+  invoice.forEach((i, index) => {
+    total += i.total;
     invoiceBody.innerHTML += `
       <tr>
-        <td>${i + 1}</td>
-        <td>${item.name}</td>
-        <td>${item.qty}</td>
-        <td>${item.price}</td>
-        <td>${item.sum}</td>
-        <td><button onclick="removeItem(${i})">❌</button></td>
-      </tr>
-    `;
+        <td>${index+1}</td>
+        <td>${i.name}</td>
+        <td>${i.qty}</td>
+        <td>${i.price}</td>
+        <td>${i.total}</td>
+        <td><button onclick="removeItem(${index})">❌</button></td>
+      </tr>`;
   });
 
-  const discountValue = Number(discount.value || 0);
-  total -= discountValue;
-  totalEl.innerText = total;
+  total -= Number(discount.value || 0);
+  document.getElementById("total").innerText = total;
 }
 
-function removeItem(index) {
-  invoice.splice(index, 1);
-  renderInvoice();
+function removeItem(i) {
+  invoice.splice(i,1);
+  render();
 }
 
 function saveSale() {
+  if (invoice.length === 0) return alert("الفاتورة فاضية");
+
   const type = saleType.value;
-  const customer = saleCustomer.value;
+  const customer = type === "credit" ? customerSelect.value : "نقدي";
+  if (type === "credit" && !customer) return alert("اختر عميل");
 
-  if (type === "credit" && !customer) {
-    return alert("اسم العميل إجباري في البيع الآجل");
-  }
-
+  // حفظ المبيعات
   const sales = JSON.parse(localStorage.getItem("sales")) || [];
-
   sales.push({
-    id: Date.now(),
-    customer: customer || "نقدي",
+    id:Date.now(),
     type,
-    invoice,
+    customer,
+    items:invoice,
     total,
-    date: new Date().toLocaleString()
+    date:new Date().toLocaleString()
   });
+  localStorage.setItem("sales",JSON.stringify(sales));
 
-  localStorage.setItem("sales", JSON.stringify(sales));
+  // تحديث المخزون
+  let stock = JSON.parse(localStorage.getItem("stock")) || {};
+  invoice.forEach(i=>{
+    stock[i.name]=(stock[i.name]||0)-i.qty;
+  });
+  localStorage.setItem("stock",JSON.stringify(stock));
 
   alert("تم حفظ الفاتورة");
-
-  invoice = [];
-  renderInvoice();
-}
-
-function printSale() {
-  window.print();
+  invoice=[];
+  render();
 }
 </script>
 
