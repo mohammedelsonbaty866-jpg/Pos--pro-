@@ -1,93 +1,95 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <title>الإعدادات</title>
+<meta charset="UTF-8">
+<title>الإعدادات</title>
+<link rel="stylesheet" href="../css/menu.css">
 
-  <link rel="stylesheet" href="../css/style.css" />
-  <link rel="stylesheet" href="../css/mobile.css" />
+<style>
+.page{padding:15px}
+.card{
+  background:#fff;
+  border-radius:12px;
+  padding:15px;
+  margin-bottom:15px
+}
+h3{margin-bottom:10px}
+input,button{
+  width:100%;
+  padding:12px;
+  margin:5px 0;
+  font-size:16px
+}
+button{
+  background:#2f6df6;
+  color:#fff;
+  border:0;
+  border-radius:8px
+}
+button.danger{background:#d9534f}
+button.gray{background:#6c757d}
+</style>
 </head>
+
 <body>
 
-<div class="app">
-
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <h2>POS PRO</h2>
-    <a href="sales.html">🛒 المبيعات</a>
-    <a href="products.html">📦 الأصناف</a>
-    <a href="customers.html">👥 العملاء</a>
-    <a href="suppliers.html">🏭 الموردين</a>
-    <a href="expenses.html">💸 المصروفات</a>
-    <a href="reports.html">📊 التقارير</a>
-    <a href="settings.html" class="active">⚙️ الإعدادات</a>
-  </div>
-
-  <!-- Main -->
-  <div class="main">
-
-    <div class="header">
-      <h3>إعدادات النظام</h3>
-    </div>
-
-    <div class="content">
-
-      <!-- Store Info -->
-      <div class="card">
-        <h4>بيانات المتجر</h4>
-
-        <label>اسم المتجر</label>
-        <input type="text" id="setStoreName" />
-
-        <label>رقم المتجر</label>
-        <input type="text" id="setStorePhone" />
-
-        <label>لوجو المتجر</label>
-        <input type="file" id="setStoreLogo" accept="image/*" />
-
-        <button data-action="save-settings">💾 حفظ الإعدادات</button>
-      </div>
-
-      <!-- Agents -->
-      <div class="card">
-        <h4>إضافة مندوب</h4>
-
-        <label>اسم المندوب</label>
-        <input type="text" id="agentName" />
-
-        <button data-action="add-agent">➕ إضافة مندوب</button>
-
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>الاسم</th>
-              <th>حذف</th>
-            </tr>
-          </thead>
-          <tbody id="agentsTable"></tbody>
-        </table>
-      </div>
-
-      <!-- Print -->
-      <div class="card">
-        <h4>إعدادات الطباعة</h4>
-
-        <label>
-          <input type="checkbox" id="printAuto" />
-          طباعة تلقائية بعد البيع
-        </label>
-      </div>
-
-    </div>
-  </div>
+<!-- ===== المنيو ===== -->
+<div class="sidebar" id="sidebar">
+  <div class="menu-item" onclick="go('sales.html')">🧾 المبيعات</div>
+  <div class="menu-item" onclick="go('purchases.html')">📦 المشتريات</div>
+  <div class="menu-item" onclick="go('items.html')">📋 الأصناف</div>
+  <div class="menu-item" onclick="go('customers.html')">👥 العملاء</div>
+  <div class="menu-item" onclick="go('suppliers.html')">🏭 الموردين</div>
+  <div class="menu-item" onclick="go('reports.html')">📊 التقارير</div>
+  <div class="menu-item active">⚙ الإعدادات</div>
+  <div class="menu-toggle" onclick="toggleMenu()">⬅</div>
 </div>
 
-<!-- Scripts -->
-<script src="../js/db.js"></script>
-<script src="../js/ui.js"></script>
-<script src="../js/events.js"></script>
-<script src="../js/settings.js"></script>
+<div class="main-content">
+<div class="page">
 
+<!-- بيانات المتجر -->
+<div class="card">
+  <h3>🏪 بيانات المتجر</h3>
+  <input id="storeName" placeholder="اسم المتجر">
+  <input id="storePhone" placeholder="رقم التليفون">
+  <button onclick="saveStore()">حفظ</button>
+</div>
+
+<!-- الحساب -->
+<div class="card">
+  <h3>🔐 الحساب</h3>
+  <button class="gray" onclick="changeLogin()">تغيير بيانات الدخول</button>
+  <button class="danger" onclick="logout()">تسجيل خروج</button>
+</div>
+
+<!-- المناديب -->
+<div class="card">
+  <h3>🧑‍💼 المناديب</h3>
+  <input id="repName" placeholder="اسم المندوب">
+  <input id="repUser" placeholder="يوزر">
+  <input id="repPass" placeholder="باسورد">
+  <button onclick="addRep()">إضافة مندوب</button>
+  <button class="danger" onclick="removeRep()">حذف مندوب (باليوزر)</button>
+</div>
+
+<!-- كشف الحساب -->
+<div class="card">
+  <h3>📑 كشف الحساب</h3>
+  <button onclick="go('customer-statement.html')">كشف حساب عميل</button>
+  <button onclick="go('supplier-statement.html')">كشف حساب مورد</button>
+</div>
+
+<!-- تحميل البيانات -->
+<div class="card">
+  <h3>📥 تحميل البيانات</h3>
+  <button onclick="exportExcel()">تحميل ملف Excel</button>
+</div>
+
+</div>
+</div>
+
+<script src="../js/menu.js"></script>
+<script src="../js/settings.js"></script>
 </body>
 </html>
