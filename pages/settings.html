@@ -178,27 +178,54 @@ function exportExcel(){
 }
 
 /* ===== الطباعة ===== */
-function printBluetooth(){
+
+// طباعة بلوتوث (موبايل / POS)
+function printBluetooth() {
   window.print();
 }
 
-function printPDF(){
-  const w=window.open("");
+// طباعة / تحميل PDF حقيقي
+function printPDF(title = "فاتورة / تقرير") {
+  const w = window.open("", "_blank");
+
   w.document.write(`
-    <html dir="rtl">
+    <!DOCTYPE html>
+    <html lang="ar" dir="rtl">
     <head>
-      <style>body{font-family:Arial}</style>
+      <meta charset="UTF-8">
+      <title>${title}</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          padding: 20px;
+        }
+        h2 {
+          text-align: center;
+          margin-bottom: 10px;
+        }
+        p {
+          text-align: center;
+          font-size: 14px;
+        }
+        @media print {
+          body {
+            margin: 0;
+          }
+        }
+      </style>
     </head>
     <body>
-      <h2>فاتورة / تقرير</h2>
-      <p>${new Date().toLocaleString()}</p>
-      <script>window.print()</script>
+      <h2>${title}</h2>
+      <p>التاريخ: ${new Date().toLocaleString()}</p>
+
+      <script>
+        window.onload = function () {
+          window.print();
+        }
+      <\/script>
     </body>
     </html>
   `);
+
   w.document.close();
 }
-</script>
-
-</body>
-</html>
