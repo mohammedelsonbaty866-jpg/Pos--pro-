@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>الأصناف</title>
+
+  <link rel="stylesheet" href="../css/menu.css">
+
+  <style>
+    .page { padding:20px; }
+
+    .card {
+      background:#fff;
+      padding:15px;
+      border-radius:12px;
+      margin-bottom:15px;
+    }
+
+    .row {
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      gap:10px;
+    }
+
+    input {
+      padding:10px;
+      border-radius:8px;
+      border:1px solid #ccc;
+      width:100%;
+    }
+
+    button {
+      padding:10px;
+      border:none;
+      border-radius:8px;
+      background:#2f6df6;
+      color:#fff;
+      cursor:pointer;
+    }
+
+    table {
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    th,td {
+      padding:10px;
+      border-bottom:1px solid #ddd;
+      text-align:center;
+    }
+
+    th {
+      background:#f1f3f6;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ===== المنيو ===== -->
+<div class="sidebar" id="sidebar">
+  <div class="menu-item" onclick="go('sales.html')">🧾 المبيعات</div>
+  <div class="menu-item" onclick="go('purchases.html')">📦 المشتريات</div>
+  <div class="menu-item active">📋 الأصناف</div>
+  <div class="menu-item" onclick="go('customers.html')">👥 العملاء</div>
+  <div class="menu-item" onclick="go('suppliers.html')">🏭 الموردين</div>
+  <div class="menu-item" onclick="go('stock.html')">📊 المخزون</div>
+  <div class="menu-item" onclick="go('reports.html')">📈 التقارير</div>
+  <div class="menu-item" onclick="go('settings.html')">⚙ الإعدادات</div>
+
+  <div class="menu-toggle" onclick="toggleMenu()">⬅</div>
+</div>
+
+<!-- ===== المحتوى ===== -->
+<div class="main-content">
+<div class="page">
+
+<h2>📋 إدارة الأصناف</h2>
+
+<!-- إضافة صنف -->
+<div class="card">
+  <div class="row">
+    <input type="text" id="name" placeholder="اسم الصنف">
+    <input type="number" id="buyPrice" placeholder="سعر الشراء">
+    <input type="number" id="sellPrice" placeholder="سعر البيع">
+    <button onclick="addItem()">➕ إضافة</button>
+  </div>
+</div>
+
+<!-- جدول الأصناف -->
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>الصنف</th>
+        <th>شراء</th>
+        <th>بيع</th>
+        <th>المخزون</th>
+        <th>❌</th>
+      </tr>
+    </thead>
+    <tbody id="itemsBody"></tbody>
+  </table>
+</div>
+
+</div>
+</div>
+
+<script src="../js/menu.js"></script>
+
+<script>
+let items = JSON.parse(localStorage.getItem("items")) || [];
+let stock = JSON.parse(localStorage.getItem("stock")) || {};
+
+function render() {
+  itemsBody.innerHTML = "";
+
+  items.forEach((i, idx) => {
+    itemsBody.innerHTML += `
+      <tr>
+        <td>${idx+1}</td>
+        <td>${i.name}</td>
+        <td>${i.buyPrice || 0}</td>
+        <td>${i.price || 0}</td>
+        <td>${stock[i.name] || 0}</td>
+        <td><button onclick="removeItem(${idx})">❌</button></td>
+      </tr>
+    `;
+  });
+}
+
+function addItem() {
+  if(!name.value) return alert("اسم الصنف مطلوب");
+
+  items.push({
+    name: name.value,
+    buyPrice: Number(buyPrice.value),
+    price: Number(sellPrice.value)
+  });
+
+  localStorage.setItem("items", JSON.stringify(items));
+  render();
+
+  name.value = buyPrice.value = sellPrice.value = "";
+}
+
+function removeItem(i) {
+  if(!confirm("حذف الصنف؟")) return;
+  items.splice(i,1);
+  localStorage.setItem("items", JSON.stringify(items));
+  render();
+}
+
+render();
+</script>
+
+</body>
+</html>
