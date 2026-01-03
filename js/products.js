@@ -1,89 +1,137 @@
-// js/products.js
+/*************************
+ *  منطق شاشة الأصناف
+ *************************/
 
-document.addEventListener("DOMContentLoaded", () => {
-  initProducts();
-});
+// ===== تحميل البيانات =====
+let products = JSON.parse(localStorage.getItem("products")) || [];
 
-function initProducts() {
-  const btn = document.getElementById("addProductBtn");
-  if (btn) btn.addEventListener("click", addProduct);
+// ===== عناصر الصفحة =====
+const productNameInput = document.getElementById("prodName");
+const unitSelect       = document.getElementById("prodUnit");
+const priceInput       = document.getElementById("prodPrice");
+const stockInput       = document.getElementById("prodStock");
 
-  renderProducts();
-}
+const productsTable    = document.getElementById("productsTable");
+const productsSearch   = document.getElementById("productSearch");
 
-/* ========= إضافة صنف ========= */
-function addProduct() {
-  const name = document.getElementById("productName").value.trim();
-  const priceKg = parseFloat(document.getElementById("priceKg").value) || 0;
-  const priceBox = parseFloat(document.getElementById("priceBox").value) || 0;
-  const priceCarton =
-    parseFloat(document.getElementById("priceCarton").value) || 0;
-  const pricePacket =
-    parseFloat(document.getElementById("pricePacket").value) || 0;
+// ===========================
+// حفظ أو تعديل صنف
+// ===========================
+function saveProduct() {
+  const name  = productNameInput.value.trim();
+  const unit  = unitSelect.value;
+  const price = Number(priceInput.value);
+  const stock = Number(stockInput.value);
 
-  if (!name) {
-    alert("اسم الصنف مطلوب");
-    return;
+  if (!name || price <= 0 || stock < 0)
+    return alert("بيانات الصنف غير صحيحة");
+
+  let product = products.find(p => p.name === name);
+
+  if (!product) {
+    product = {
+      id: Date.now(),
+      name,
+      units: {}
+    };
+    products.push(product);
   }
 
-  const products = getProducts();
+  product.units[unit] = {
+    price,
+    stock
+  };
 
-  products.push({
-    id: Date.now(),
-    name,
-    priceKg,
-    priceBox,
-    priceCarton,
-    pricePacket
-  });
-
-  localStorage.setItem("pos_products", JSON.stringify(products));
-
-  clearProductInputs();
+  localStorage.setItem("products", JSON.stringify(products));
   renderProducts();
+  clearForm();
+
+  alert("تم حفظ الصنف");
 }
 
-/* ========= عرض الأصناف ========= */
-function renderProducts() {
-  const tbody = document.getElementById("productsTable");
-  if (!tbody) return;
+// ===========================
+// عرض الأصناف
+// ===========================
+function renderProducts(filter = "") {
+  productsTable.innerHTML = "";
 
-  tbody.innerHTML = "";
-  const products = getProducts();
+  products
+    .filter(p => p.name.includes(filter))
+    .forEach(p => {
 
-  products.forEach((p, index) => {
-    const tr = document.createElement("tr");
+      let unitsHtml = "";
+      let stockHtml = "";
 
-    tr.innerHTML = `
-      <td>${index + 1}</td>
-      <td>${p.name}</td>
-      <td>${p.priceKg || ""}</td>
-      <td>${p.priceBox || ""}</td>
-      <td>${p.priceCarton || ""}</td>
-      <td>${p.pricePacket || ""}</td>
-      <td>
-        <button onclick="deleteProduct(${p.id})">حذف</button>
-      </td>
-    `;
+      for (let u in p.units) {
+        unitsHtml += `${u}: ${p.units[u].price} <br>`;
+        stockHtml += `${u}: ${p.units[u].stock} <br>`;
+      }
 
-    tbody.appendChild(tr);
-  });
+      productsTable.innerHTML += `
+        <tr>
+          <td>${p.name}</td>
+          <td>${unitsHtml}</td>
+          <td>${stockHtml}</td>
+          <td>
+            <button onclick="editProduct(${p.id})">✏️</button>
+            <button onclick="deleteProduct(${p.id})">🗑</button>
+          </td>
+        </tr>
+      `;
+    });
+}
+renderProducts();
+
+// ===========================
+// تعديل صنف
+// ===========================
+function editProduct(id) {
+  const product = products.find(p => p.id === id);
+  if (!product) return;
+
+  productNameInput.value = product.name;
+
+  const firstUnit = Object.keys(product.units)[0];
+  unitSelect.value = firstUnit;
+  priceInput.value = product.units[firstUnit].price;
+  stockInput.value = product.units[firstUnit].stock;
 }
 
-/* ========= حذف ========= */
+// ===========================
+// حذف صنف (مع حماية)
+// ===========================
 function deleteProduct(id) {
-  if (!confirm("حذف الصنف؟")) return;
+  const usedInSales =
+    (JSON.parse(localStorage.getItem("sales")) || [])
+      .some(s => s.items.some(i => {
+        const p = products.find(pr => pr.id === id);
+        return p && i.name === p.name;
+      }));
 
-  const products = getProducts().filter(p => p.id !== id);
-  localStorage.setItem("pos_products", JSON.stringify(products));
+  if (usedInSales)
+    return alert("لا يمكن حذف الصنف لأنه مستخدم في مبيعات");
+
+  if (!confirm("تأكيد حذف الصنف؟")) return;
+
+  products = products.filter(p => p.id !== id);
+  localStorage.setItem("products", JSON.stringify(products));
   renderProducts();
 }
 
-/* ========= تنظيف الحقول ========= */
-function clearProductInputs() {
-  document.getElementById("productName").value = "";
-  document.getElementById("priceKg").value = "";
-  document.getElementById("priceBox").value = "";
-  document.getElementById("priceCarton").value = "";
-  document.getElementById("pricePacket").value = "";
+// ===========================
+// بحث سريع
+// ===========================
+if (productsSearch) {
+  productsSearch.addEventListener("input", e => {
+    renderProducts(e.target.value);
+  });
+}
+
+// ===========================
+// تنظيف النموذج
+// ===========================
+function clearForm() {
+  productNameInput.value = "";
+  priceInput.value = "";
+  stockInput.value = "";
 }
