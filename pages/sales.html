@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>نظام مبيعات متكامل</title>
+<title>نظام POS متكامل</title>
 
 <style>
 body{margin:0;font-family:Tahoma;background:#f4f6f9}
@@ -17,6 +17,7 @@ button{background:#2f6df6;color:#fff;border:none;cursor:pointer}
 table{width:100%;border-collapse:collapse}
 th,td{border:1px solid #ccc;padding:6px;text-align:center}
 th{background:#eee}
+hr{margin:30px 0}
 </style>
 </head>
 
@@ -25,15 +26,13 @@ th{background:#eee}
 <!-- ===== MENU ===== -->
 <div class="sidebar">
   <div class="menu-item">المبيعات</div>
-  <div class="menu-item">المشتريات</div>
   <div class="menu-item">الأصناف</div>
-  <div class="menu-item">العملاء</div>
-  <div class="menu-item">المناديب</div>
   <div class="menu-item">التقارير</div>
 </div>
 
 <div class="main">
 
+<!-- ===================== المبيعات ===================== -->
 <h2>شاشة المبيعات</h2>
 
 <div class="card">
@@ -42,7 +41,6 @@ th{background:#eee}
       <option value="cash">نقدي</option>
       <option value="credit">آجل</option>
     </select>
-
     <input id="customerName" placeholder="اسم العميل">
     <select id="agentName"></select>
   </div>
@@ -66,7 +64,11 @@ th{background:#eee}
   <table>
     <thead>
       <tr>
-        <th>الصنف</th><th>الوحدة</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th>
+        <th>الصنف</th>
+        <th>الوحدة</th>
+        <th>الكمية</th>
+        <th>السعر</th>
+        <th>الإجمالي</th>
       </tr>
     </thead>
     <tbody id="invoice"></tbody>
@@ -75,100 +77,218 @@ th{background:#eee}
   <h3>الإجمالي: <span id="total">0</span></h3>
 </div>
 
+<hr>
+
+<!-- ===================== الأصناف ===================== -->
+<h2>شاشة الأصناف</h2>
+
+<div class="card">
+  <input id="prodName" placeholder="اسم الصنف">
+
+  <div class="row">
+    <select id="prodUnit">
+      <option>كيلو</option>
+      <option>علبة</option>
+      <option>كرتونة</option>
+      <option>باكيت</option>
+    </select>
+
+    <input type="number" id="prodPrice" placeholder="سعر البيع">
+    <input type="number" id="prodStock" placeholder="الكمية بالمخزن">
+  </div>
+
+  <button onclick="addOrUpdateProduct()">💾 حفظ الصنف</button>
+</div>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>الصنف</th>
+        <th>الوحدات / الأسعار</th>
+        <th>المخزون</th>
+      </tr>
+    </thead>
+    <tbody id="productsTable"></tbody>
+  </table>
+</div>
+
+<hr>
+
+<!-- ===================== التقارير ===================== -->
+<h2>تقرير المبيعات</h2>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>التاريخ</th>
+        <th>العميل</th>
+        <th>المندوب</th>
+        <th>الإجمالي</th>
+      </tr>
+    </thead>
+    <tbody id="salesReport"></tbody>
+  </table>
+</div>
+
 </div>
 
 <script>
-// ===== قاعدة بيانات =====
-let products = JSON.parse(localStorage.getItem("products")) || [
- {name:"سكر",prices:{كيلو:30,كرتونة:280},stock:{كيلو:100,كرتونة:10}},
- {name:"أرز",prices:{كيلو:25},stock:{كيلو:200}}
-];
-
-let customers = JSON.parse(localStorage.getItem("customers")) || [];
-let agents = JSON.parse(localStorage.getItem("agents")) || ["أحمد","محمد"];
+// ===================== البيانات =====================
+let products = JSON.parse(localStorage.getItem("products")) || [];
 let sales = JSON.parse(localStorage.getItem("sales")) || [];
+let agents = ["أحمد","محمد","علي"];
 
-localStorage.setItem("products",JSON.stringify(products));
+localStorage.setItem("agents",JSON.stringify(agents));
 
-// ===== تحميل =====
-products.forEach(p=>{
-  productsList.innerHTML+=`<option value="${p.name}">`;
-});
+// ===================== تحميل مبدئي =====================
 agents.forEach(a=>{
   agentName.innerHTML+=`<option>${a}</option>`;
 });
 
-// ===== منطق المبيعات =====
+function refreshProductsList(){
+  productsList.innerHTML="";
+  products.forEach(p=>{
+    productsList.innerHTML+=`<option value="${p.name}">`;
+  });
+}
+refreshProductsList();
+
+// ===================== الأصناف =====================
+function addOrUpdateProduct(){
+  const name = prodName.value.trim();
+  const unit = prodUnit.value;
+  const price = +prodPrice.value;
+  const stock = +prodStock.value;
+
+  if(!name || price<=0 || stock<0){
+    alert("بيانات غير صحيحة");
+    return;
+  }
+
+  let product = products.find(p=>p.name===name);
+  if(!product){
+    product={id:Date.now(),name,units:{}};
+    products.push(product);
+  }
+
+  product.units[unit]={price,stock};
+  saveProducts();
+  renderProducts();
+  refreshProductsList();
+  alert("تم حفظ الصنف");
+}
+
+function saveProducts(){
+  localStorage.setItem("products",JSON.stringify(products));
+}
+
+function renderProducts(){
+  productsTable.innerHTML="";
+  products.forEach(p=>{
+    let u="",s="";
+    for(let k in p.units){
+      u+=`${k}: ${p.units[k].price}<br>`;
+      s+=`${k}: ${p.units[k].stock}<br>`;
+    }
+    productsTable.innerHTML+=`
+      <tr>
+        <td>${p.name}</td>
+        <td>${u}</td>
+        <td>${s}</td>
+      </tr>`;
+  });
+}
+renderProducts();
+
+// ===================== المبيعات =====================
 let items=[];
 
 productName.onchange=()=>{
-  let p=products.find(x=>x.name==productName.value);
+  let p=products.find(x=>x.name===productName.value);
   unit.innerHTML="";
   if(!p)return;
-  Object.keys(p.prices).forEach(u=>{
-    unit.innerHTML+=`<option>${u}</option>`;
-  });
+  for(let k in p.units){
+    unit.innerHTML+=`<option>${k}</option>`;
+  }
 };
 
 function addItem(){
-  let p=products.find(x=>x.name==productName.value);
+  let p=products.find(x=>x.name===productName.value);
   if(!p)return alert("الصنف غير موجود");
 
   let u=unit.value;
   let q=+qty.value;
-  if(p.stock[u]<q)return alert("المخزون غير كافي");
+  if(p.units[u].stock<q)return alert("المخزون غير كافي");
 
-  let price=p.prices[u];
-  items.push({name:p.name,unit:u,qty:q,price});
-  render();
+  items.push({
+    name:p.name,
+    unit:u,
+    qty:q,
+    price:p.units[u].price
+  });
+  renderInvoice();
 }
 
-function render(){
+function renderInvoice(){
   invoice.innerHTML="";
   let t=0;
   items.forEach(i=>{
-    let row=i.qty*i.price;
-    t+=row;
+    let r=i.qty*i.price;
+    t+=r;
     invoice.innerHTML+=`
       <tr>
         <td>${i.name}</td>
         <td>${i.unit}</td>
         <td>${i.qty}</td>
         <td>${i.price}</td>
-        <td>${row}</td>
+        <td>${r}</td>
       </tr>`;
   });
   total.innerText=t;
 }
 
 function saveSale(){
-  if(items.length==0)return alert("فاتورة فاضية");
-
-  if(paymentType.value=="credit" && !customerName.value)
+  if(items.length===0)return alert("فاتورة فاضية");
+  if(paymentType.value==="credit" && !customerName.value)
     return alert("اسم العميل مطلوب");
 
-  // خصم مخزون
   items.forEach(i=>{
-    let p=products.find(x=>x.name==i.name);
-    p.stock[i.unit]-=i.qty;
+    let p=products.find(x=>x.name===i.name);
+    p.units[i.unit].stock-=i.qty;
   });
 
   sales.push({
     date:new Date().toLocaleString(),
     customer:customerName.value||"نقدي",
     agent:agentName.value,
-    payment:paymentType.value,
-    items,
     total:total.innerText
   });
 
+  saveProducts();
   localStorage.setItem("sales",JSON.stringify(sales));
-  localStorage.setItem("products",JSON.stringify(products));
+  renderReport();
 
-  alert("تم حفظ الفاتورة");
   items=[];
-  render();
+  renderInvoice();
+  alert("تم حفظ الفاتورة");
 }
+
+// ===================== التقارير =====================
+function renderReport(){
+  salesReport.innerHTML="";
+  sales.forEach(s=>{
+    salesReport.innerHTML+=`
+      <tr>
+        <td>${s.date}</td>
+        <td>${s.customer}</td>
+        <td>${s.agent}</td>
+        <td>${s.total}</td>
+      </tr>`;
+  });
+}
+renderReport();
 </script>
 
 </body>
