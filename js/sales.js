@@ -43,18 +43,52 @@ function loadProducts() {
     productInput.appendChild(opt);
   });
 }
+// تحميل الأصناف
+const items = JSON.parse(localStorage.getItem("items")) || [];
 
+function searchItems(text) {
+  const list = document.getElementById("itemsList");
+  list.innerHTML = "";
+
+  if (!text) return;
+
+  const results = items.filter(i =>
+    i.name.includes(text)
+  );
+
+  results.forEach(item => {
+    const div = document.createElement("div");
+    div.innerText = item.name;
+    div.onclick = () => selectItem(item);
+    list.appendChild(div);
+  });
+}
+
+function selectItem(item) {
+  document.getElementById("itemSearch").value = item.name;
+  document.getElementById("price").value = item.price || 0;
+  document.getElementById("itemsList").innerHTML = "";
+}
 /*********************************
  * إضافة صنف للفاتورة
  *********************************/
 function addItem() {
-  const name = productInput.value;
-  const qty  = Number(qtyInput.value);
+  const name = itemSearch.value;
+  const q = Number(qty.value);
+  const p = Number(price.value);
 
-  if (!name || qty <= 0) {
-    alert("اختار الصنف والكمية");
-    return;
-  }
+  if (!name || q <= 0 || p <= 0)
+    return alert("بيانات غير صحيحة");
+
+  invoice.push({
+    name,
+    qty: q,
+    price: p,
+    total: q * p
+  });
+
+  render();
+}
 
   const product = products.find(p => p.name === name);
   if (!product) {
