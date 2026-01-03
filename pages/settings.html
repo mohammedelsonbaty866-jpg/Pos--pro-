@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>الإعدادات</title>
 
-<!-- ===== ستايل المنيو ===== -->
+<!-- ستايل المنيو -->
 <link rel="stylesheet" href="../css/menu.css">
 
 <!-- مكتبة Excel -->
@@ -32,7 +32,8 @@ input,button{
 button{
   background:#2f6df6;
   color:#fff;
-  border:0
+  border:0;
+  cursor:pointer
 }
 button.gray{background:#6c757d}
 button.danger{background:#d9534f}
@@ -63,10 +64,10 @@ label{font-size:14px}
   <h3>🏪 بيانات المتجر</h3>
   <input id="storeName" placeholder="اسم المتجر">
   <input id="storePhone" placeholder="رقم التليفون">
-  <button onclick="saveStore()">حفظ البيانات</button>
+  <button type="button" onclick="saveStore()">حفظ البيانات</button>
 </div>
 
-<!-- المناديب -->
+<!-- إدارة المناديب -->
 <div class="card">
   <h3>🧑‍💼 إدارة المناديب</h3>
   <input id="repName" placeholder="اسم المندوب">
@@ -75,157 +76,142 @@ label{font-size:14px}
   <label>
     <input type="checkbox" onclick="togglePass()"> إظهار كلمة المرور
   </label>
-  <button onclick="addRep()">إضافة مندوب</button>
-  <button class="danger" onclick="removeRep()">حذف مندوب (باليوزر)</button>
+  <button type="button" onclick="addRep()">إضافة مندوب</button>
+  <button type="button" class="danger" onclick="removeRep()">حذف مندوب (باليوزر)</button>
 </div>
 
 <!-- كشوف الحساب -->
 <div class="card">
   <h3>📑 كشوف الحساب</h3>
-  <button onclick="go('customer-statement.html')">كشف حساب عميل</button>
-  <button onclick="go('supplier-statement.html')">كشف حساب مورد</button>
+  <button type="button" onclick="go('customer-statement.html')">كشف حساب عميل</button>
+  <button type="button" onclick="go('supplier-statement.html')">كشف حساب مورد</button>
 </div>
 
-<!-- الطباعة -->
+<!-- إعدادات الطباعة -->
 <div class="card">
   <h3>🖨 إعدادات الطباعة</h3>
-  <button onclick="printBluetooth()">طباعة بلوتوث سريعة</button>
-  <button class="gray" onclick="printPDF()">تحميل / طباعة PDF</button>
+  <button type="button" onclick="printBluetooth()">📡 طباعة بلوتوث</button>
+  <button type="button" class="gray" onclick="printPDF()">📄 طباعة / تحميل PDF</button>
 </div>
 
 <!-- تحميل البيانات -->
 <div class="card">
   <h3>📥 تحميل البيانات</h3>
-  <button onclick="exportExcel()">تحميل ملف Excel حقيقي</button>
+  <button type="button" onclick="exportExcel()">تحميل ملف Excel حقيقي</button>
 </div>
 
 <!-- تسجيل خروج -->
 <div class="card">
-  <button class="danger" onclick="logout()">🚪 تسجيل الخروج</button>
+  <button type="button" class="danger" onclick="logout()">🚪 تسجيل الخروج</button>
 </div>
 
 </div>
 </div>
 
-<!-- ===== JS ===== -->
+<!-- ===== ملفات JS ===== -->
 <script src="../js/menu.js"></script>
 
 <script>
 /* ===== بيانات المتجر ===== */
 function saveStore(){
-  localStorage.setItem("store",JSON.stringify({
-    name:storeName.value,
-    phone:storePhone.value
+  localStorage.setItem("store", JSON.stringify({
+    name: storeName.value,
+    phone: storePhone.value
   }));
   alert("تم حفظ بيانات المتجر");
 }
 
 (function(){
-  const s=JSON.parse(localStorage.getItem("store"));
+  const s = JSON.parse(localStorage.getItem("store"));
   if(s){
-    storeName.value=s.name||"";
-    storePhone.value=s.phone||"";
+    storeName.value = s.name || "";
+    storePhone.value = s.phone || "";
   }
 })();
 
 /* ===== المناديب ===== */
 function togglePass(){
-  repPass.type = repPass.type==="password"?"text":"password";
+  repPass.type = repPass.type === "password" ? "text" : "password";
 }
 
 function addRep(){
-  let reps=JSON.parse(localStorage.getItem("reps"))||[];
+  let reps = JSON.parse(localStorage.getItem("reps")) || [];
+  if(reps.find(r => r.username === repUser.value)){
+    alert("اسم المستخدم موجود");
+    return;
+  }
   reps.push({
-    id:Date.now(),
-    name:repName.value,
-    username:repUser.value,
-    password:repPass.value
+    id: Date.now(),
+    name: repName.value,
+    username: repUser.value,
+    password: repPass.value
   });
-  localStorage.setItem("reps",JSON.stringify(reps));
+  localStorage.setItem("reps", JSON.stringify(reps));
   alert("تم إضافة المندوب");
 }
 
 function removeRep(){
-  let reps=JSON.parse(localStorage.getItem("reps"))||[];
-  reps=reps.filter(r=>r.username!==repUser.value);
-  localStorage.setItem("reps",JSON.stringify(reps));
+  let reps = JSON.parse(localStorage.getItem("reps")) || [];
+  reps = reps.filter(r => r.username !== repUser.value);
+  localStorage.setItem("reps", JSON.stringify(reps));
   alert("تم حذف المندوب");
 }
 
 /* ===== تسجيل خروج ===== */
 function logout(){
   localStorage.removeItem("currentRep");
-  location.href="login.html";
+  location.href = "login.html";
 }
 
 /* ===== Excel حقيقي ===== */
 function exportExcel(){
-  const wb=XLSX.utils.book_new();
+  const wb = XLSX.utils.book_new();
 
   function add(name,data){
-    const ws=XLSX.utils.json_to_sheet(data);
-    XLSX.utils.book_append_sheet(wb,ws,name);
+    const ws = XLSX.utils.json_to_sheet(data);
+    XLSX.utils.book_append_sheet(wb, ws, name);
   }
 
-  add("المبيعات",JSON.parse(localStorage.getItem("sales"))||[]);
-  add("المشتريات",JSON.parse(localStorage.getItem("purchases"))||[]);
-  add("العملاء",JSON.parse(localStorage.getItem("customers"))||[]);
-  add("الموردين",JSON.parse(localStorage.getItem("suppliers"))||[]);
-  add("الأصناف",JSON.parse(localStorage.getItem("items"))||[]);
-  add("المناديب",JSON.parse(localStorage.getItem("reps"))||[]);
+  add("المبيعات", JSON.parse(localStorage.getItem("sales")) || []);
+  add("المشتريات", JSON.parse(localStorage.getItem("purchases")) || []);
+  add("العملاء", JSON.parse(localStorage.getItem("customers")) || []);
+  add("الموردين", JSON.parse(localStorage.getItem("suppliers")) || []);
+  add("الأصناف", JSON.parse(localStorage.getItem("items")) || []);
+  add("المناديب", JSON.parse(localStorage.getItem("reps")) || []);
 
-  XLSX.writeFile(wb,"system-data.xlsx");
+  XLSX.writeFile(wb, "system-data.xlsx");
 }
 
 /* ===== الطباعة ===== */
-
-// طباعة بلوتوث (موبايل / POS)
-function printBluetooth() {
+function printBluetooth(){
   window.print();
 }
 
-// طباعة / تحميل PDF حقيقي
-function printPDF(title = "فاتورة / تقرير") {
+function printPDF(){
   const w = window.open("", "_blank");
-
   w.document.write(`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
     <head>
       <meta charset="UTF-8">
-      <title>${title}</title>
+      <title>طباعة</title>
       <style>
-        body {
-          font-family: Arial, sans-serif;
-          padding: 20px;
-        }
-        h2 {
-          text-align: center;
-          margin-bottom: 10px;
-        }
-        p {
-          text-align: center;
-          font-size: 14px;
-        }
-        @media print {
-          body {
-            margin: 0;
-          }
-        }
+        body{font-family:Arial;padding:20px}
+        h2{text-align:center}
       </style>
     </head>
     <body>
-      <h2>${title}</h2>
-      <p>التاريخ: ${new Date().toLocaleString()}</p>
-
+      <h2>فاتورة / تقرير</h2>
+      <p>${new Date().toLocaleString()}</p>
       <script>
-        window.onload = function () {
-          window.print();
-        }
+        window.onload=function(){window.print();}
       <\/script>
     </body>
     </html>
   `);
-
   w.document.close();
 }
+</script>
+
+</body>
+</html>
