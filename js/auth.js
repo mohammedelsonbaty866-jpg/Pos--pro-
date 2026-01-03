@@ -29,3 +29,15 @@ function login() {
 function currentUser() {
   return JSON.parse(localStorage.getItem("user"));
 }
+function login(){
+  const u=username.value;
+  const p=password.value;
+
+  const reps=JSON.parse(localStorage.getItem("reps"))||[];
+  const rep=reps.find(r=>r.username===u && r.password===p);
+
+  if(!rep) return alert("بيانات غير صحيحة");
+
+  localStorage.setItem("currentRep",JSON.stringify(rep));
+  location.href="sales-rep.html";
+}
