@@ -1,3 +1,4 @@
+/* ===== SIDEBAR ===== */
 .sidebar {
   position: fixed;
   top: 0;
@@ -5,7 +6,7 @@
   width: 260px;
   height: 100vh;
   background: linear-gradient(180deg, #0f1f3a, #142850);
-  padding: 14px;
+  padding: 12px;
   transition: 0.3s;
   z-index: 1000;
 }
@@ -14,6 +15,7 @@
   width: 80px;
 }
 
+/* ===== MENU ITEM ===== */
 .menu-item {
   display: flex;
   align-items: center;
@@ -43,25 +45,30 @@
   text-align: center;
 }
 
+.text {
+  white-space: nowrap;
+}
+
 .sidebar.collapsed .text {
   display: none;
 }
 
+/* ===== TOGGLE ===== */
 .menu-toggle {
-  margin-top: 20px;
+  margin-top: 15px;
   text-align: center;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 22px;
   color: #fff;
 }
 
-/* ===== محتوى الصفحة ===== */
-.main-content {
-  margin-right: 260px;
-  padding: 16px;
-  transition: 0.3s;
-}
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+  .sidebar {
+    right: -260px;
+  }
 
-.sidebar.collapsed + .main-content {
-  margin-right: 80px;
+  .sidebar.show {
+    right: 0;
+  }
 }
