@@ -1,85 +1,199 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>المشتريات</title>
-  <link rel="stylesheet" href="../css/style.css">
+<meta charset="UTF-8">
+<title>المشتريات</title>
+
+<style>
+body{margin:0;font-family:Tahoma;background:#f4f6f9}
+.sidebar{
+  position:fixed;right:0;top:0;width:260px;height:100vh;
+  background:linear-gradient(180deg,#0f1f3a,#142850);
+  padding:12px;color:#fff
+}
+.menu-item{
+  display:flex;align-items:center;gap:10px;
+  background:#1b2d4a;padding:14px;border-radius:14px;
+  margin-bottom:10px;cursor:pointer
+}
+.menu-item:hover{background:#284b8f}
+.main{margin-right:260px;padding:20px}
+.card{
+  background:#fff;padding:15px;border-radius:14px;margin-bottom:15px
+}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+input,select,button{
+  padding:10px;border-radius:10px;border:1px solid #ccc
+}
+button{
+  background:#2f6df6;color:#fff;border:none;cursor:pointer
+}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #ccc;padding:8px;text-align:center}
+th{background:#eee}
+h2{margin-top:0}
+</style>
 </head>
 
 <body>
 
+<!-- ===== MENU ===== -->
+<div class="sidebar">
+  <div class="menu-item" onclick="go('sales.html')">المبيعات</div>
+  <div class="menu-item" onclick="go('products.html')">الأصناف</div>
+  <div class="menu-item" onclick="go('purchases.html')">المشتريات</div>
+  <div class="menu-item" onclick="go('returns.html')">المرتجعات</div>
+  <div class="menu-item" onclick="go('customers.html')">العملاء</div>
+  <div class="menu-item" onclick="go('suppliers.html')">الموردين</div>
+  <div class="menu-item" onclick="go('stock.html')">المخزون</div>
+  <div class="menu-item" onclick="go('reports.html')">التقارير</div>
+  <div class="menu-item" onclick="go('settings.html')">الإعدادات</div>
+</div>
+
+<!-- ===== CONTENT ===== -->
+<div class="main">
+
 <h2>شاشة المشتريات</h2>
 
-<!-- ============ المورد ============ -->
+<!-- بيانات الفاتورة -->
 <div class="card">
-  <label>اسم المورد (بحث سريع)</label>
-  <input list="suppliersList" id="purchaseSupplier" placeholder="اختر المورد">
-  <datalist id="suppliersList"></datalist>
-
-  <button onclick="window.location.href='suppliers.html'">
-    + إضافة مورد جديد
-  </button>
+  <div class="row">
+    <input id="supplierName" placeholder="اسم المورد">
+    <input type="date" id="purchaseDate">
+  </div>
 </div>
 
-<!-- ============ الصنف ============ -->
+<!-- إضافة صنف -->
 <div class="card">
-  <label>الصنف (بحث سريع)</label>
-  <input list="productsList" id="purchaseProduct" placeholder="اكتب اسم الصنف">
+  <input id="productName" placeholder="بحث عن الصنف" list="productsList">
   <datalist id="productsList"></datalist>
 
-  <label>وحدة القياس</label>
-  <select id="purchaseUnit">
-    <option value="كجم">كجم</option>
-    <option value="علبة">علبة</option>
-    <option value="كرتونة">كرتونة</option>
-    <option value="باكيت">باكيت</option>
-  </select>
-
-  <label>الكمية</label>
-  <input type="number" id="purchaseQty" value="1" min="1">
-
-  <label>سعر الشراء</label>
-  <input type="number" id="purchasePrice" min="0">
-
-  <button id="addToPurchaseBtn">
-    إضافة للفاتورة
-  </button>
+  <div class="row">
+    <select id="unit"></select>
+    <input type="number" id="qty" placeholder="الكمية" value="1">
+    <input type="number" id="cost" placeholder="سعر الشراء">
+    <button onclick="addItem()">إضافة</button>
+  </div>
 </div>
 
-<!-- ============ فاتورة المشتريات ============ -->
+<!-- الفاتورة -->
 <div class="card">
-  <h3>فاتورة مشتريات</h3>
+  <button onclick="savePurchase()">💾 حفظ</button>
 
-  <table width="100%" border="1">
+  <table>
     <thead>
       <tr>
-        <th>#</th>
         <th>الصنف</th>
         <th>الوحدة</th>
         <th>الكمية</th>
         <th>سعر الشراء</th>
         <th>الإجمالي</th>
-        <th>حذف</th>
       </tr>
     </thead>
-    <tbody id="purchaseItems"></tbody>
+    <tbody id="invoice"></tbody>
   </table>
 
-  <h3>الإجمالي: <span id="purchaseTotal">0</span></h3>
-
-  <button id="savePurchaseBtn">حفظ المشتريات</button>
+  <h3>الإجمالي: <span id="total">0</span></h3>
 </div>
 
-<!-- ============ Scripts ============ -->
-<script src="../js/db.js"></script>
-<script src="../js/purchases.js"></script>
+</div>
+
+<script>
+function go(p){location.href=p;}
+</script>
+
+<script>
+/************ منطق المشتريات ************/
+let products   = JSON.parse(localStorage.getItem("products")) || [];
+let purchases  = JSON.parse(localStorage.getItem("purchases")) || [];
+
+let items=[], total=0;
+
+const productInput=document.getElementById("productName");
+const unitSelect=document.getElementById("unit");
+const qtyInput=document.getElementById("qty");
+const costInput=document.getElementById("cost");
+const invoice=document.getElementById("invoice");
+const totalSpan=document.getElementById("total");
+const list=document.getElementById("productsList");
+
+// تحميل الأصناف
+products.forEach(p=>{
+  list.innerHTML+=`<option value="${p.name}">`;
+});
+
+// عند اختيار صنف
+productInput.onchange=()=>{
+  const p=products.find(x=>x.name===productInput.value);
+  unitSelect.innerHTML="";
+  if(!p)return;
+  for(let u in p.units){
+    unitSelect.innerHTML+=`<option>${u}</option>`;
+  }
+};
+
+// إضافة صنف
+function addItem(){
+  const p=products.find(x=>x.name===productInput.value);
+  if(!p)return alert("الصنف غير موجود");
+
+  const u=unitSelect.value;
+  const q=+qtyInput.value;
+  const c=+costInput.value;
+  if(q<=0||c<=0)return alert("بيانات غير صحيحة");
+
+  items.push({name:p.name,unit:u,qty:q,cost:c});
+  render();
+}
+
+// رسم الفاتورة
+function render(){
+  invoice.innerHTML="";
+  total=0;
+  items.forEach(i=>{
+    const r=i.qty*i.cost;
+    total+=r;
+    invoice.innerHTML+=`
+      <tr>
+        <td>${i.name}</td>
+        <td>${i.unit}</td>
+        <td>${i.qty}</td>
+        <td>${i.cost}</td>
+        <td>${r}</td>
+      </tr>`;
+  });
+  totalSpan.innerText=total;
+}
+
+// حفظ الفاتورة
+function savePurchase(){
+  if(items.length===0)return alert("فاتورة فاضية");
+
+  // تحديث المخزون
+  items.forEach(i=>{
+    let p=products.find(x=>x.name===i.name);
+    if(!p.units[i.unit]){
+      p.units[i.unit]={price:0,stock:0};
+    }
+    p.units[i.unit].stock+=i.qty;
+  });
+
+  purchases.push({
+    id:Date.now(),
+    supplier:document.getElementById("supplierName").value,
+    date:document.getElementById("purchaseDate").value,
+    items,
+    total
+  });
+
+  localStorage.setItem("products",JSON.stringify(products));
+  localStorage.setItem("purchases",JSON.stringify(purchases));
+
+  items=[];
+  render();
+  alert("تم حفظ المشتريات وتحديث المخزون");
+}
+</script>
 
 </body>
-  <script>
-  fetch("../partials/menu.html")
-    .then(res => res.text())
-    .then(html => {
-      document.body.insertAdjacentHTML("afterbegin", html);
-    });
-</script>
 </html>
