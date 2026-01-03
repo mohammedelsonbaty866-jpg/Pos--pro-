@@ -1,173 +1,231 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>نظام مبيعات متكامل</title>
+  <meta charset="UTF-8">
+  <title>المبيعات</title>
 
-<style>
-body{margin:0;font-family:Tahoma;background:#f4f6f9}
-.sidebar{position:fixed;right:0;top:0;width:260px;height:100vh;background:#142850;padding:10px;color:#fff}
-.menu-item{background:#1b2d4a;margin-bottom:8px;padding:12px;border-radius:10px;cursor:pointer}
-.menu-item:hover{background:#284b8f}
-.main{margin-right:260px;padding:20px}
-.card{background:#fff;padding:15px;border-radius:12px;margin-bottom:15px}
-.row{display:flex;gap:10px;flex-wrap:wrap}
-input,select,button{padding:8px;border-radius:8px;border:1px solid #ccc}
-button{background:#2f6df6;color:#fff;border:none;cursor:pointer}
-table{width:100%;border-collapse:collapse}
-th,td{border:1px solid #ccc;padding:6px;text-align:center}
-th{background:#eee}
-</style>
+  <link rel="stylesheet" href="../css/menu.css">
+
+  <style>
+    body {
+      background: #f4f6f9;
+    }
+
+    .page {
+      padding: 20px;
+    }
+
+    h2 {
+      margin-bottom: 15px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
+
+    input, select {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 100%;
+    }
+
+    button {
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      background: #2f6df6;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: #1b2d4a;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+      text-align: center;
+    }
+
+    th {
+      background: #f1f3f6;
+    }
+
+    .total {
+      font-size: 20px;
+      font-weight: bold;
+      text-align: left;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 
 <body>
 
-<!-- ===== MENU ===== -->
-<div class="sidebar">
-  <div class="menu-item">المبيعات</div>
-  <div class="menu-item">المشتريات</div>
-  <div class="menu-item">الأصناف</div>
-  <div class="menu-item">العملاء</div>
-  <div class="menu-item">المناديب</div>
-  <div class="menu-item">التقارير</div>
+<!-- ===== المنيو ===== -->
+<div class="sidebar" id="sidebar">
+  <div class="menu-item active" onclick="go('sales.html')">🧾 المبيعات</div>
+  <div class="menu-item" onclick="go('purchases.html')">📦 المشتريات</div>
+  <div class="menu-item" onclick="go('items.html')">📋 الأصناف</div>
+  <div class="menu-item" onclick="go('customers.html')">👥 العملاء</div>
+  <div class="menu-item" onclick="go('suppliers.html')">🏭 الموردين</div>
+  <div class="menu-item" onclick="go('stock.html')">📊 المخزون</div>
+  <div class="menu-item" onclick="go('reports.html')">📈 التقارير</div>
+  <div class="menu-item" onclick="go('settings.html')">⚙ الإعدادات</div>
+  <div class="menu-toggle" onclick="toggleMenu()">⬅</div>
 </div>
 
-<div class="main">
+<!-- ===== المحتوى ===== -->
+<div class="main-content">
+  <div class="page">
 
-<h2>شاشة المبيعات</h2>
+    <h2>🧾 شاشة المبيعات</h2>
 
-<div class="card">
-  <div class="row">
-    <select id="paymentType">
-      <option value="cash">نقدي</option>
-      <option value="credit">آجل</option>
-    </select>
+    <!-- بيانات العميل -->
+    <div class="card">
+      <div class="row">
+        <select id="saleType">
+          <option value="cash">نقدي</option>
+          <option value="credit">آجل</option>
+        </select>
 
-    <input id="customerName" placeholder="اسم العميل">
-    <select id="agentName"></select>
+        <input type="text" id="saleCustomer" placeholder="اسم العميل (إجباري في الآجل)">
+        <input type="number" id="discount" placeholder="خصم (اختياري)">
+      </div>
+    </div>
+
+    <!-- إضافة صنف -->
+    <div class="card">
+      <div class="row">
+        <input type="text" id="itemName" placeholder="بحث عن الصنف">
+        <input type="number" id="itemQty" placeholder="الكمية" value="1">
+        <input type="number" id="itemPrice" placeholder="السعر">
+        <button onclick="addItem()">إضافة</button>
+      </div>
+    </div>
+
+    <!-- الفاتورة -->
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>الصنف</th>
+            <th>الكمية</th>
+            <th>السعر</th>
+            <th>الإجمالي</th>
+            <th>حذف</th>
+          </tr>
+        </thead>
+        <tbody id="invoiceBody"></tbody>
+      </table>
+
+      <div class="total">
+        الإجمالي: <span id="total">0</span> جنيه
+      </div>
+
+      <br>
+
+      <button onclick="saveSale()">💾 حفظ الفاتورة</button>
+      <button class="secondary" onclick="printSale()">🖨 طباعة</button>
+    </div>
+
   </div>
 </div>
 
-<div class="card">
-  <input id="productName" placeholder="بحث عن الصنف" list="productsList">
-  <datalist id="productsList"></datalist>
-
-  <div class="row">
-    <select id="unit"></select>
-    <input type="number" id="qty" value="1">
-    <button onclick="addItem()">إضافة</button>
-  </div>
-</div>
-
-<div class="card">
-  <button onclick="saveSale()">💾 حفظ</button>
-  <button onclick="window.print()">🖨 طباعة</button>
-
-  <table>
-    <thead>
-      <tr>
-        <th>الصنف</th><th>الوحدة</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th>
-      </tr>
-    </thead>
-    <tbody id="invoice"></tbody>
-  </table>
-
-  <h3>الإجمالي: <span id="total">0</span></h3>
-</div>
-
-</div>
+<!-- ===== JS ===== -->
+<script src="../js/menu.js"></script>
 
 <script>
-// ===== قاعدة بيانات =====
-let products = JSON.parse(localStorage.getItem("products")) || [
- {name:"سكر",prices:{كيلو:30,كرتونة:280},stock:{كيلو:100,كرتونة:10}},
- {name:"أرز",prices:{كيلو:25},stock:{كيلو:200}}
-];
+let invoice = [];
+let total = 0;
 
-let customers = JSON.parse(localStorage.getItem("customers")) || [];
-let agents = JSON.parse(localStorage.getItem("agents")) || ["أحمد","محمد"];
-let sales = JSON.parse(localStorage.getItem("sales")) || [];
+function addItem() {
+  const name = itemName.value;
+  const qty = Number(itemQty.value);
+  const price = Number(itemPrice.value);
 
-localStorage.setItem("products",JSON.stringify(products));
+  if (!name || qty <= 0 || price <= 0) return alert("بيانات غير صحيحة");
 
-// ===== تحميل =====
-products.forEach(p=>{
-  productsList.innerHTML+=`<option value="${p.name}">`;
-});
-agents.forEach(a=>{
-  agentName.innerHTML+=`<option>${a}</option>`;
-});
+  const sum = qty * price;
+  invoice.push({ name, qty, price, sum });
 
-// ===== منطق المبيعات =====
-let items=[];
-
-productName.onchange=()=>{
-  let p=products.find(x=>x.name==productName.value);
-  unit.innerHTML="";
-  if(!p)return;
-  Object.keys(p.prices).forEach(u=>{
-    unit.innerHTML+=`<option>${u}</option>`;
-  });
-};
-
-function addItem(){
-  let p=products.find(x=>x.name==productName.value);
-  if(!p)return alert("الصنف غير موجود");
-
-  let u=unit.value;
-  let q=+qty.value;
-  if(p.stock[u]<q)return alert("المخزون غير كافي");
-
-  let price=p.prices[u];
-  items.push({name:p.name,unit:u,qty:q,price});
-  render();
+  renderInvoice();
 }
 
-function render(){
-  invoice.innerHTML="";
-  let t=0;
-  items.forEach(i=>{
-    let row=i.qty*i.price;
-    t+=row;
-    invoice.innerHTML+=`
+function renderInvoice() {
+  invoiceBody.innerHTML = "";
+  total = 0;
+
+  invoice.forEach((item, i) => {
+    total += item.sum;
+    invoiceBody.innerHTML += `
       <tr>
-        <td>${i.name}</td>
-        <td>${i.unit}</td>
-        <td>${i.qty}</td>
-        <td>${i.price}</td>
-        <td>${row}</td>
-      </tr>`;
+        <td>${i + 1}</td>
+        <td>${item.name}</td>
+        <td>${item.qty}</td>
+        <td>${item.price}</td>
+        <td>${item.sum}</td>
+        <td><button onclick="removeItem(${i})">❌</button></td>
+      </tr>
+    `;
   });
-  total.innerText=t;
+
+  const discountValue = Number(discount.value || 0);
+  total -= discountValue;
+  totalEl.innerText = total;
 }
 
-function saveSale(){
-  if(items.length==0)return alert("فاتورة فاضية");
+function removeItem(index) {
+  invoice.splice(index, 1);
+  renderInvoice();
+}
 
-  if(paymentType.value=="credit" && !customerName.value)
-    return alert("اسم العميل مطلوب");
+function saveSale() {
+  const type = saleType.value;
+  const customer = saleCustomer.value;
 
-  // خصم مخزون
-  items.forEach(i=>{
-    let p=products.find(x=>x.name==i.name);
-    p.stock[i.unit]-=i.qty;
-  });
+  if (type === "credit" && !customer) {
+    return alert("اسم العميل إجباري في البيع الآجل");
+  }
+
+  const sales = JSON.parse(localStorage.getItem("sales")) || [];
 
   sales.push({
-    date:new Date().toLocaleString(),
-    customer:customerName.value||"نقدي",
-    agent:agentName.value,
-    payment:paymentType.value,
-    items,
-    total:total.innerText
+    id: Date.now(),
+    customer: customer || "نقدي",
+    type,
+    invoice,
+    total,
+    date: new Date().toLocaleString()
   });
 
-  localStorage.setItem("sales",JSON.stringify(sales));
-  localStorage.setItem("products",JSON.stringify(products));
+  localStorage.setItem("sales", JSON.stringify(sales));
 
   alert("تم حفظ الفاتورة");
-  items=[];
-  render();
+
+  invoice = [];
+  renderInvoice();
+}
+
+function printSale() {
+  window.print();
 }
 </script>
 
