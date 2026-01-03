@@ -1,153 +1,214 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<title>شاشة مندوب المبيعات</title>
+/* ===============================
+   بيانات أساسية
+================================ */
+let saleItems = [];
+let total = 0;
 
-<style>
-body{font-family:tahoma;background:#f2f4f8;margin:0}
-.header{background:#142850;color:#fff;padding:12px;text-align:center}
-.container{padding:10px}
-.btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.btn{background:#2f6df6;color:#fff;padding:12px;border-radius:10px;
-text-align:center;font-size:13px}
-.btn.red{background:#dc3545}
-.btn.gray{background:#6c757d}
-.btn.green{background:#28a745}
-input,select{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px solid #ccc}
-table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px}
-th,td{padding:8px;border-bottom:1px solid #eee;text-align:center;font-size:13px}
-th{background:#f6f7fb}
-.total{background:#fff;padding:10px;margin-top:8px;border-radius:10px;text-align:center}
-</style>
-</head>
+// المندوب الحالي (من تسجيل الدخول)
+const currentRep = localStorage.getItem("currentRep") || "مندوب";
 
-<body>
+// تحميل بيانات السيستم
+let stock     = JSON.parse(localStorage.getItem("stock"))     || [];
+let sales     = JSON.parse(localStorage.getItem("sales"))     || [];
+let returns   = JSON.parse(localStorage.getItem("returns"))   || [];
+let customers = JSON.parse(localStorage.getItem("customers")) || [];
 
-<div class="header">🧑‍💼 مبيعات المندوب</div>
+/* ===============================
+   بحث سريع عن صنف
+================================ */
+function searchItem(value) {
+  if (!value) return;
 
-<div class="container">
+  const item = stock.find(i =>
+    i.name.toLowerCase().includes(value.toLowerCase())
+  );
 
-<div class="btns">
-  <div class="btn" onclick="addCustomer()">➕ عميل</div>
-  <div class="btn gray" onclick="showStatement()">📄 كشف حساب</div>
-  <div class="btn red" onclick="makeReturn()">↩ مرتجع</div>
-  <div class="btn green" onclick="printInvoice()">🖨 طباعة</div>
-</div>
-
-<input id="customer" placeholder="اسم العميل">
-<select id="saleType">
-  <option value="cash">نقدي</option>
-  <option value="credit">آجل</option>
-</select>
-
-<input id="search" placeholder="بحث سريع عن الصنف" oninput="searchItem()">
-
-<table>
-<thead>
-<tr><th>الصنف</th><th>كمية</th><th>سعر</th><th>الإجمالي</th></tr>
-</thead>
-<tbody id="rows"></tbody>
-</table>
-
-<div class="total">الإجمالي: <span id="total">0</span></div>
-
-<div class="btn green" onclick="saveSale()">💾 حفظ الفاتورة</div>
-
-</div>
-
-<script>
-/* ===== بيانات ===== */
-let saleItems=[];
-let total=0;
-const rep=localStorage.getItem("currentRep")||"مندوب";
-const stock=JSON.parse(localStorage.getItem("stock"))||[];
-const sales=JSON.parse(localStorage.getItem("sales"))||[];
-const returns=JSON.parse(localStorage.getItem("returns"))||[];
-const customers=JSON.parse(localStorage.getItem("customers"))||[];
-
-/* ===== بحث صنف ===== */
-function searchItem(){
-  let v=search.value;
-  let i=stock.find(x=>x.name.includes(v));
-  if(i){saleItems.push({...i,qty:1});search.value="";render();}
-}
-
-/* ===== رسم ===== */
-function render(){
-  total=0;rows.innerHTML="";
-  saleItems.forEach(i=>{
-    let t=i.qty*i.price;
-    total+=t;
-    rows.innerHTML+=`<tr>
-      <td>${i.name}</td><td>${i.qty}</td>
-      <td>${i.price}</td><td>${t}</td></tr>`;
-  });
-  document.getElementById("total").innerText=total;
-}
-
-/* ===== حفظ بيع ===== */
-function saveSale(){
-  if(saleType.value==="credit" && !customer.value){
-    alert("اسم العميل مطلوب");return;
+  if (item) {
+    addItem(item);
+    document.getElementById("search").value = "";
   }
-  sales.push({
-    id:Date.now(),
-    rep,customer:customer.value||"نقدي",
-    type:saleType.value,items:saleItems,total,
-    date:new Date().toLocaleString()
-  });
-  saleItems.forEach(i=>{
-    let s=stock.find(x=>x.name===i.name);
-    if(s)s.qty-=i.qty;
-  });
-  localStorage.setItem("sales",JSON.stringify(sales));
-  localStorage.setItem("stock",JSON.stringify(stock));
-  alert("تم الحفظ");
-  saleItems=[];render();
 }
 
-/* ===== كشف حساب ===== */
-function showStatement(){
-  let c=customer.value;
-  let s=sales.filter(x=>x.customer===c)
-             .reduce((a,b)=>a+b.total,0);
-  let r=returns.filter(x=>x.customer===c)
-               .reduce((a,b)=>a+b.total,0);
-  alert(`كشف حساب ${c}\nمبيعات: ${s}\nمرتجعات: ${r}\nالرصيد: ${s-r}`);
+/* ===============================
+   إضافة صنف للفاتورة
+================================ */
+function addItem(item) {
+  const exists = saleItems.find(i => i.name === item.name);
+
+  if (exists) {
+    exists.qty += 1;
+  } else {
+    saleItems.push({
+      name: item.name,
+      price: item.price,
+      qty: 1
+    });
+  }
+  renderItems();
 }
 
-/* ===== مرتجع ===== */
-function makeReturn(){
-  if(!saleItems.length)return;
-  returns.push({
-    customer:customer.value,
-    items:saleItems,
-    total,rep,
-    date:new Date().toLocaleString()
+/* ===============================
+   رسم الفاتورة
+================================ */
+function renderItems() {
+  const tbody = document.getElementById("rows");
+  tbody.innerHTML = "";
+  total = 0;
+
+  saleItems.forEach((i, index) => {
+    const lineTotal = i.qty * i.price;
+    total += lineTotal;
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${i.name}</td>
+        <td>${i.qty}</td>
+        <td>${i.price}</td>
+        <td>${lineTotal}</td>
+      </tr>
+    `;
   });
-  saleItems.forEach(i=>{
-    let s=stock.find(x=>x.name===i.name);
-    if(s)s.qty+=i.qty;
+
+  document.getElementById("total").innerText = total.toFixed(2);
+}
+
+/* ===============================
+   حفظ الفاتورة
+================================ */
+function saveSale() {
+  const customerInput = document.getElementById("customer");
+  const saleType = document.getElementById("saleType").value;
+  const customer = customerInput.value || "نقدي";
+
+  if (saleType === "credit" && !customerInput.value) {
+    alert("اسم العميل مطلوب في البيع الآجل");
+    return;
+  }
+
+  if (saleItems.length === 0) {
+    alert("الفاتورة فارغة");
+    return;
+  }
+
+  const sale = {
+    id: Date.now(),
+    rep: currentRep,
+    customer,
+    type: saleType,
+    items: saleItems,
+    total,
+    date: new Date().toLocaleString()
+  };
+
+  // حفظ المبيعات
+  sales.push(sale);
+  localStorage.setItem("sales", JSON.stringify(sales));
+
+  // تحديث المخزون
+  saleItems.forEach(i => {
+    const s = stock.find(x => x.name === i.name);
+    if (s) s.qty -= i.qty;
   });
-  localStorage.setItem("returns",JSON.stringify(returns));
-  localStorage.setItem("stock",JSON.stringify(stock));
-  alert("تم المرتجع");
-  saleItems=[];render();
+  localStorage.setItem("stock", JSON.stringify(stock));
+
+  alert("تم حفظ الفاتورة");
+
+  resetSale();
 }
 
-/* ===== طباعة ===== */
-function printInvoice(){window.print();}
-
-/* ===== إضافة عميل ===== */
-function addCustomer(){
-  let n=prompt("اسم العميل");
-  if(!n)return;
-  customers.push({name:n});
-  localStorage.setItem("customers",JSON.stringify(customers));
-  customer.value=n;
+/* ===============================
+   إعادة ضبط الفاتورة
+================================ */
+function resetSale() {
+  saleItems = [];
+  total = 0;
+  renderItems();
+  document.getElementById("customer").value = "";
 }
-</script>
 
-</body>
-</html>
+/* ===============================
+   كشف حساب عميل (عرض فقط)
+================================ */
+function showStatement() {
+  const customer = document.getElementById("customer").value;
+  if (!customer) {
+    alert("ادخل اسم العميل");
+    return;
+  }
+
+  const salesTotal = sales
+    .filter(s => s.customer === customer)
+    .reduce((sum, s) => sum + s.total, 0);
+
+  const returnsTotal = returns
+    .filter(r => r.customer === customer)
+    .reduce((sum, r) => sum + r.total, 0);
+
+  const balance = salesTotal - returnsTotal;
+
+  alert(
+    `كشف حساب العميل: ${customer}\n` +
+    `إجمالي المبيعات: ${salesTotal}\n` +
+    `إجمالي المرتجعات: ${returnsTotal}\n` +
+    `الرصيد: ${balance}`
+  );
+}
+
+/* ===============================
+   عمل مرتجع
+================================ */
+function makeReturn() {
+  if (saleItems.length === 0) {
+    alert("لا يوجد أصناف للمرتجع");
+    return;
+  }
+
+  const customer = document.getElementById("customer").value || "نقدي";
+
+  const ret = {
+    id: Date.now(),
+    rep: currentRep,
+    customer,
+    items: saleItems,
+    total,
+    date: new Date().toLocaleString()
+  };
+
+  returns.push(ret);
+  localStorage.setItem("returns", JSON.stringify(returns));
+
+  // تحديث المخزون (رجوع)
+  saleItems.forEach(i => {
+    const s = stock.find(x => x.name === i.name);
+    if (s) s.qty += i.qty;
+  });
+  localStorage.setItem("stock", JSON.stringify(stock));
+
+  alert("تم تسجيل المرتجع");
+
+  resetSale();
+}
+
+/* ===============================
+   إضافة عميل جديد
+================================ */
+function addCustomer() {
+  const name = prompt("اسم العميل");
+  if (!name) return;
+
+  customers.push({
+    id: Date.now(),
+    name,
+    balance: 0
+  });
+
+  localStorage.setItem("customers", JSON.stringify(customers));
+  document.getElementById("customer").value = name;
+}
+
+/* ===============================
+   طباعة الفاتورة
+================================ */
+function printInvoice() {
+  window.print();
+}
