@@ -1,19 +1,23 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <title>تسجيل الدخول</title>
-<link rel="stylesheet" href="../css/style.css">
+<style>
+body{font-family:Arial;background:#f4f6f9;display:flex;justify-content:center;align-items:center;height:100vh}
+.card{background:#fff;padding:20px;border-radius:12px;width:320px}
+input,button{width:100%;padding:12px;margin:8px 0}
+button{background:#2f6df6;color:#fff;border:0;border-radius:8px}
+</style>
 </head>
 <body>
+<div class="card">
+  <h3>دخول المندوب</h3>
+  <input id="username" placeholder="اسم المستخدم">
+  <input id="password" type="password" placeholder="كلمة المرور">
+  <button onclick="login()">دخول</button>
+</div>
 
-<h2>تسجيل الدخول</h2>
-
-<input id="username" placeholder="اسم المستخدم">
-<input id="password" type="password" placeholder="كلمة المرور">
-<button onclick="login()">دخول</button>
-
-<script src="../js/db.js"></script>
 <script src="../js/auth.js"></script>
 </body>
 </html>
