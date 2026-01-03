@@ -9,18 +9,25 @@
 body{
   margin:0;
   font-family:Arial,Tahoma;
-  background:#f4f6f9;
+  background:#f3f4f6;
 }
-.header{
+.topbar{
   background:#1e3a8a;
   color:#fff;
-  padding:12px;
-  text-align:center;
-  font-size:18px;
-}
-.container{
   padding:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
+.logout{
+  background:#dc2626;
+  color:#fff;
+  border:none;
+  padding:5px 10px;
+  border-radius:6px;
+  font-size:12px;
+}
+.container{padding:10px}
 .box{
   background:#fff;
   border-radius:10px;
@@ -30,7 +37,7 @@ body{
 input,select,button{
   width:100%;
   padding:8px;
-  margin-bottom:8px;
+  margin-bottom:6px;
   border:1px solid #ccc;
   border-radius:6px;
   font-size:14px;
@@ -40,8 +47,9 @@ button{
   color:#fff;
   border:none;
 }
-button.danger{
-  background:#dc2626;
+.small-btn{
+  font-size:12px;
+  padding:6px;
 }
 table{
   width:100%;
@@ -50,132 +58,168 @@ table{
 }
 th,td{
   border:1px solid #ddd;
-  padding:6px;
+  padding:5px;
   text-align:center;
 }
 .total{
-  font-size:16px;
   font-weight:bold;
   text-align:center;
+  font-size:16px;
 }
+.hidden{display:none}
 </style>
 </head>
 
 <body>
 
-<div class="header">
-  شاشة مبيعات المندوب
+<div class="topbar">
+  <div id="repName"></div>
+  <button class="logout" onclick="logout()">خروج</button>
 </div>
 
 <div class="container">
 
-  <!-- بيانات المندوب -->
-  <div class="box" id="repInfo"></div>
+<!-- اختيار العميل -->
+<div class="box">
+  <select id="customer"></select>
+  <select id="payType">
+    <option value="cash">نقدي</option>
+    <option value="credit">آجل</option>
+  </select>
+  <button class="small-btn" onclick="showStatement()">كشف حساب العميل</button>
+</div>
 
-  <!-- العميل -->
-  <div class="box">
-    <input id="customer" placeholder="اسم العميل">
-    <select id="payType">
-      <option value="cash">نقدي</option>
-      <option value="credit">آجل</option>
-    </select>
-  </div>
+<!-- إضافة صنف -->
+<div class="box">
+  <input id="itemSearch" placeholder="بحث سريع عن الصنف">
+  <input id="qty" type="number" value="1" min="1">
+  <button onclick="addItem()">إضافة</button>
+</div>
 
-  <!-- الأصناف -->
-  <div class="box">
-    <input id="itemSearch" placeholder="بحث عن صنف">
-    <input id="qty" type="number" value="1" min="1">
-    <button onclick="addItem()">إضافة صنف</button>
-  </div>
+<!-- الفاتورة -->
+<div class="box">
+  <table>
+    <thead>
+      <tr>
+        <th>الصنف</th>
+        <th>ك</th>
+        <th>سعر</th>
+        <th>إجمالي</th>
+      </tr>
+    </thead>
+    <tbody id="bill"></tbody>
+  </table>
+  <div class="total">الإجمالي: <span id="total">0</span></div>
+</div>
 
-  <!-- الفاتورة -->
-  <div class="box">
-    <table>
-      <thead>
-        <tr>
-          <th>الصنف</th>
-          <th>الكمية</th>
-          <th>السعر</th>
-          <th>الإجمالي</th>
-        </tr>
-      </thead>
-      <tbody id="bill"></tbody>
-    </table>
-    <div class="total">الإجمالي: <span id="total">0</span></div>
-  </div>
+<!-- أزرار -->
+<div class="box">
+  <button onclick="saveInvoice()">حفظ</button>
+  <button onclick="window.print()">طباعة</button>
+</div>
 
-  <!-- أزرار -->
-  <div class="box">
-    <button onclick="saveInvoice()">حفظ الفاتورة</button>
-    <button onclick="window.print()">طباعة</button>
-    <button class="danger" onclick="logout()">تسجيل خروج</button>
-  </div>
+<!-- كشف الحساب -->
+<div class="box hidden" id="statementBox">
+  <h4>كشف حساب العميل</h4>
+  <div id="statement"></div>
+  <button class="small-btn" onclick="closeStatement()">إغلاق</button>
+</div>
 
 </div>
 
 <script>
-// ===== حماية الصفحة =====
+// ===== حماية =====
 const user = JSON.parse(localStorage.getItem("currentUser"));
-if(!user || user.role !== "rep"){
-  location.href = "../index.html";
+if(!user || user.role!=="rep"){
+  location.href="../index.html";
 }
+repName.innerText = "المندوب: " + user.name;
 
-// ===== عرض المندوب =====
-document.getElementById("repInfo").innerHTML =
-  "المندوب: <b>" + user.name + "</b>";
+// ===== تحميل الداتا =====
+let items = JSON.parse(localStorage.getItem("items")||"[]");
+let customers = JSON.parse(localStorage.getItem("customers")||"[]");
+let stock = JSON.parse(localStorage.getItem("stock")||"[]");
+let reports = JSON.parse(localStorage.getItem("reports")||"[]");
+let treasury = JSON.parse(localStorage.getItem("treasury")||"0");
 
-// ===== بيانات تجريبية =====
-let items = [
-  {name:"صنف 1", price:10},
-  {name:"صنف 2", price:20}
-];
+// ===== العملاء =====
+customer.innerHTML = customers.map(c=>
+  `<option value="${c.name}">${c.name}</option>`
+).join("");
 
-let bill = [];
-let total = 0;
+// ===== الفاتورة =====
+let bill=[], total=0;
 
-// ===== إضافة صنف =====
 function addItem(){
-  const name = document.getElementById("itemSearch").value;
-  const qty = +document.getElementById("qty").value;
-  const item = items.find(i=>i.name===name);
+  let name=itemSearch.value;
+  let q=+qty.value;
+  let item=items.find(i=>i.name===name);
   if(!item) return alert("الصنف غير موجود");
 
-  const rowTotal = item.price * qty;
-  bill.push({name,qty,price:item.price,rowTotal});
-  total += rowTotal;
+  let s=stock.find(x=>x.name===name);
+  if(!s || s.qty<q) return alert("رصيد غير كافي");
 
-  renderBill();
+  let rowTotal=item.price*q;
+  bill.push({name,qty:q,price:item.price,rowTotal});
+  total+=rowTotal;
+  render();
 }
 
-// ===== رسم الفاتورة =====
-function renderBill(){
-  const tbody = document.getElementById("bill");
-  tbody.innerHTML="";
+function render(){
+  billEl="";
   bill.forEach(r=>{
-    tbody.innerHTML+=`
-      <tr>
-        <td>${r.name}</td>
-        <td>${r.qty}</td>
-        <td>${r.price}</td>
-        <td>${r.rowTotal}</td>
-      </tr>
-    `;
+    billEl+=`<tr>
+      <td>${r.name}</td>
+      <td>${r.qty}</td>
+      <td>${r.price}</td>
+      <td>${r.rowTotal}</td>
+    </tr>`;
   });
-  document.getElementById("total").innerText = total;
+  bill.innerHTML=billEl;
+  document.getElementById("total").innerText=total;
 }
 
-// ===== حفظ =====
+// ===== حفظ الفاتورة =====
 function saveInvoice(){
-  let invoices = JSON.parse(localStorage.getItem("repInvoices")||"[]");
-  invoices.push({
+  if(!bill.length) return alert("الفاتورة فاضية");
+
+  let invoice={
     rep:user.name,
     customer:customer.value,
+    payType:payType.value,
     total,
     date:new Date().toLocaleString()
+  };
+
+  reports.push(invoice);
+  localStorage.setItem("reports",JSON.stringify(reports));
+
+  if(payType.value==="cash"){
+    treasury+=total;
+    localStorage.setItem("treasury",treasury);
+  }
+
+  bill.forEach(r=>{
+    let s=stock.find(x=>x.name===r.name);
+    s.qty-=r.qty;
   });
-  localStorage.setItem("repInvoices",JSON.stringify(invoices));
-  alert("تم حفظ الفاتورة");
+  localStorage.setItem("stock",JSON.stringify(stock));
+
+  alert("تم الحفظ");
   location.reload();
+}
+
+// ===== كشف حساب =====
+function showStatement(){
+  let cust=customer.value;
+  let list=reports.filter(r=>r.customer===cust);
+  statement.innerHTML=list.map(r=>
+    `<div>${r.date} - ${r.total}</div>`
+  ).join("");
+  statementBox.classList.remove("hidden");
+}
+function closeStatement(){
+  statementBox.classList.add("hidden");
 }
 
 // ===== خروج =====
