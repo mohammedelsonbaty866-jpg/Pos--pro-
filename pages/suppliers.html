@@ -1,123 +1,280 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>الموردين</title>
+<meta charset="UTF-8">
+<title>الموردين</title>
 
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/menu.css">
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f5f6fa;
+}
 
-  <style>
-    body { background:#f5f6fa; }
-    .page { padding:15px; margin-right:260px; }
-    .card {
-      background:#fff;
-      border-radius:12px;
-      padding:15px;
-      margin-bottom:15px;
-      box-shadow:0 2px 6px rgba(0,0,0,.08);
-    }
-    .form-group { margin-bottom:10px; }
-    input {
-      width:100%;
-      padding:10px;
-      border-radius:8px;
-      border:1px solid #ccc;
-    }
-    .btn {
-      padding:10px 14px;
-      border-radius:8px;
-      border:none;
-      cursor:pointer;
-      font-size:14px;
-    }
-    .btn-primary { background:#2f6df6; color:#fff; }
-    .btn-danger { background:#e74c3c; color:#fff; }
-    .btn-success { background:#27ae60; color:#fff; }
+/* ===== المنيو ===== */
+.sidebar{
+  position:fixed;
+  right:0;
+  top:0;
+  width:240px;
+  height:100vh;
+  background:#0f1f3a;
+  padding:10px;
+}
+.menu-item{
+  background:#1b2d4a;
+  color:#fff;
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:8px;
+  cursor:pointer;
+}
+.menu-item:hover{background:#284b8f;}
+.menu-item.active{background:#2f6df6}
 
-    table {
-      width:100%;
-      border-collapse:collapse;
-      font-size:14px;
-    }
-    th, td {
-      padding:8px;
-      border-bottom:1px solid #ddd;
-      text-align:center;
-    }
-    .actions button { margin:2px; }
-  </style>
+/* ===== الصفحة ===== */
+.page{
+  margin-right:260px;
+  padding:15px;
+}
+.card{
+  background:#fff;
+  border-radius:12px;
+  padding:15px;
+  margin-bottom:15px;
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+input{
+  width:100%;
+  padding:10px;
+  margin-bottom:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+button{
+  padding:8px 12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+.btn-primary{background:#2f6df6;color:#fff}
+.btn-success{background:#27ae60;color:#fff}
+.btn-danger{background:#e74c3c;color:#fff}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+th,td{
+  padding:8px;
+  border-bottom:1px solid #ddd;
+  text-align:center;
+}
+.actions button{
+  margin:2px;
+  font-size:13px;
+}
+
+/* ===== مودال ===== */
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+}
+.modal-content{
+  background:#fff;
+  width:300px;
+  margin:120px auto;
+  padding:15px;
+  border-radius:10px;
+}
+</style>
 </head>
+
 <body>
 
 <!-- ===== المنيو ===== -->
-<div class="sidebar" id="sidebar">
-  <!-- نفس menu.html بتاع السيستم -->
+<div class="sidebar">
+  <div class="menu-item" onclick="go('sales.html')">المبيعات</div>
+  <div class="menu-item" onclick="go('purchases.html')">المشتريات</div>
+  <div class="menu-item active">الموردين</div>
+  <div class="menu-item" onclick="go('customers.html')">العملاء</div>
+  <div class="menu-item" onclick="go('stock.html')">المخزون</div>
+  <div class="menu-item" onclick="go('treasury.html')">الخزنة</div>
+  <div class="menu-item" onclick="go('reports.html')">التقارير</div>
+  <div class="menu-item" onclick="go('settings.html')">الإعدادات</div>
 </div>
 
 <div class="page">
 
-  <!-- ===== إضافة / تعديل مورد ===== -->
-  <div class="card">
-    <h3>إضافة / تعديل مورد</h3>
+<div class="card">
+<h3>إضافة / تعديل مورد</h3>
+<input type="hidden" id="supplierId">
+<input id="supplierName" placeholder="اسم المورد *">
+<input id="supplierPhone" placeholder="رقم التليفون">
+<input id="supplierCompany" placeholder="اسم الشركة">
+<input id="supplierBalance" type="number" placeholder="رصيد افتتاحي">
+<button class="btn-primary" onclick="saveSupplier()">💾 حفظ المورد</button>
+</div>
 
-    <input type="hidden" id="supplierId">
-
-    <div class="form-group">
-      <input id="supplierName" placeholder="اسم المورد *">
-    </div>
-
-    <div class="form-group">
-      <input id="supplierPhone" placeholder="رقم التليفون">
-    </div>
-
-    <div class="form-group">
-      <input id="supplierCompany" placeholder="اسم الشركة">
-    </div>
-
-    <div class="form-group">
-      <input id="supplierBalance" type="number" placeholder="رصيد افتتاحي">
-    </div>
-
-    <button class="btn btn-primary" onclick="saveSupplier()">💾 حفظ المورد</button>
-  </div>
-
-  <!-- ===== جدول الموردين ===== -->
-  <div class="card">
-    <h3>قائمة الموردين</h3>
-
-    <table>
-      <thead>
-        <tr>
-          <th>الاسم</th>
-          <th>الشركة</th>
-          <th>التليفون</th>
-          <th>الرصيد</th>
-          <th>إجراء</th>
-        </tr>
-      </thead>
-      <tbody id="suppliersTable"></tbody>
-    </table>
-  </div>
+<div class="card">
+<h3>قائمة الموردين</h3>
+<table>
+<thead>
+<tr>
+<th>الاسم</th>
+<th>الشركة</th>
+<th>التليفون</th>
+<th>الرصيد</th>
+<th>إجراء</th>
+</tr>
+</thead>
+<tbody id="suppliersTable"></tbody>
+</table>
+</div>
 
 </div>
 
-<!-- ===== نافذة دفع مورد ===== -->
-<div id="payModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5)">
-  <div style="background:#fff; padding:15px; width:300px; margin:120px auto; border-radius:10px">
+<!-- ===== مودال الدفع ===== -->
+<div class="modal" id="payModal">
+  <div class="modal-content">
     <h3>دفع مورد</h3>
-
     <input type="hidden" id="paySupplierId">
-
-    <input id="payAmount" type="number" placeholder="المبلغ"
-           style="width:100%; padding:8px; margin:10px 0">
-
-    <button class="btn btn-success" onclick="confirmPaySupplier()">✔ تأكيد</button>
-    <button class="btn btn-danger" onclick="closePayModal()">✖ إلغاء</button>
+    <input id="payAmount" type="number" placeholder="المبلغ">
+    <button class="btn-success" onclick="confirmPay()">✔ تأكيد</button>
+    <button class="btn-danger" onclick="closePay()">✖ إلغاء</button>
   </div>
 </div>
 
-<script src="js/menu.js"></script>
-<script src="js/suppliers.js"></script>
+<script>
+function go(p){location.href=p}
+
+function getData(k){return JSON.parse(localStorage.getItem(k))||[]}
+function setData(k,v){localStorage.setItem(k,JSON.stringify(v))}
+
+document.addEventListener("DOMContentLoaded",renderSuppliers)
+
+function saveSupplier(){
+  let id=supplierId.value
+  let name=supplierName.value.trim()
+  if(!name){alert("اسم المورد مطلوب");return}
+
+  let suppliers=getData("suppliers")
+  let bal=Number(supplierBalance.value||0)
+
+  if(id){
+    let s=suppliers.find(x=>x.id==id)
+    s.name=name
+    s.phone=supplierPhone.value
+    s.company=supplierCompany.value
+  }else{
+    suppliers.push({
+      id:Date.now(),
+      name,
+      phone:supplierPhone.value,
+      company:supplierCompany.value,
+      balance:bal
+    })
+    addTx(name,"opening",bal)
+  }
+
+  setData("suppliers",suppliers)
+  clearForm()
+  renderSuppliers()
+}
+
+function renderSuppliers(){
+  let suppliers=getData("suppliers")
+  suppliersTable.innerHTML=""
+  suppliers.forEach(s=>{
+    suppliersTable.innerHTML+=`
+    <tr>
+      <td>${s.name}</td>
+      <td>${s.company||"-"}</td>
+      <td>${s.phone||"-"}</td>
+      <td>${s.balance.toFixed(2)}</td>
+      <td class="actions">
+        <button onclick="editSupplier(${s.id})">✏️</button>
+        <button onclick="statement(${s.id})">📄</button>
+        <button onclick="openPay(${s.id})">💰</button>
+      </td>
+    </tr>`
+  })
+}
+
+function editSupplier(id){
+  let s=getData("suppliers").find(x=>x.id==id)
+  supplierId.value=s.id
+  supplierName.value=s.name
+  supplierPhone.value=s.phone
+  supplierCompany.value=s.company
+  supplierBalance.value=s.balance
+}
+
+function clearForm(){
+  supplierId.value=""
+  supplierName.value=""
+  supplierPhone.value=""
+  supplierCompany.value=""
+  supplierBalance.value=""
+}
+
+/* ===== حركات المورد ===== */
+function addTx(name,type,amount){
+  let arr=getData("supplierTx")
+  arr.push({name,type,amount,date:new Date().toLocaleString()})
+  setData("supplierTx",arr)
+}
+
+function statement(id){
+  let s=getData("suppliers").find(x=>x.id==id)
+  let tx=getData("supplierTx").filter(t=>t.name==s.name)
+  let html=`<h3>كشف حساب ${s.name}</h3><table border=1 width=100%>
+  <tr><th>التاريخ</th><th>البيان</th><th>مدين</th><th>دائن</th></tr>`
+  tx.forEach(t=>{
+    html+=`<tr>
+      <td>${t.date}</td>
+      <td>${t.type}</td>
+      <td>${t.type=="purchase"?t.amount:""}</td>
+      <td>${t.type=="payment"?t.amount:""}</td>
+    </tr>`
+  })
+  html+="</table>"
+  let w=open("")
+  w.document.write(html)
+}
+
+/* ===== دفع مورد ===== */
+function openPay(id){
+  paySupplierId.value=id
+  payAmount.value=""
+  payModal.style.display="block"
+}
+function closePay(){payModal.style.display="none"}
+
+function confirmPay(){
+  let id=Number(paySupplierId.value)
+  let amount=Number(payAmount.value)
+  if(amount<=0)return alert("مبلغ غير صحيح")
+
+  let suppliers=getData("suppliers")
+  let treasury=getData("treasury")||{balance:0}
+  if(treasury.balance<amount)return alert("رصيد الخزنة لا يكفي")
+
+  let s=suppliers.find(x=>x.id==id)
+  s.balance-=amount
+  treasury.balance-=amount
+
+  addTx(s.name,"payment",amount)
+
+  setData("suppliers",suppliers)
+  setData("treasury",treasury)
+  closePay()
+  renderSuppliers()
+  alert("تم الدفع بنجاح")
+}
+</script>
+
 </body>
 </html>
