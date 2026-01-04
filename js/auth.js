@@ -1,63 +1,72 @@
+import { auth } from "./firebase.js";
+
 import {
   RecaptchaVerifier,
   signInWithPhoneNumber
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-import {
-  doc,
-  setDoc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+// عناصر الصفحة
+const phoneInput = document.getElementById("phone");
+const codeInput = document.getElementById("code");
+const sendCodeBtn = document.getElementById("sendCode");
+const loginBtn = document.getElementById("login");
 
-import { auth, db } from "./firebase.js";
+// متغير عام
+let confirmationResult = null;
 
+// تهيئة reCAPTCHA (مخفي)
 window.recaptchaVerifier = new RecaptchaVerifier(
-  "recaptcha-container",
-  { size: "normal" },
-  auth
+  auth,
+  "sendCode",
+  {
+    size: "invisible",
+    callback: () => {
+      console.log("reCAPTCHA verified");
+    },
+  }
 );
 
-// إرسال الكود
-window.sendCode = async function () {
-  let phone = document.getElementById("phone").value.trim();
-
-  if (phone.startsWith("0")) {
-    phone = "+20" + phone.slice(1);
-  }
-
+// إرسال كود SMS
+sendCodeBtn.addEventListener("click", async () => {
   try {
-    const confirmationResult = await signInWithPhoneNumber(
+    let phone = phoneInput.value.trim();
+
+    if (!phone.startsWith("+20")) {
+      phone = "+20" + phone.substring(1);
+    }
+
+    confirmationResult = await signInWithPhoneNumber(
       auth,
       phone,
       window.recaptchaVerifier
     );
 
-    window.confirmationResult = confirmationResult;
-    alert("تم إرسال الكود");
-  } catch (err) {
-    console.error(err);
+    alert("تم إرسال كود التحقق");
+  } catch (error) {
+    console.error(error);
     alert("خطأ في إرسال الكود");
   }
-};
+});
 
-// تأكيد الكود + حفظ المستخدم
-window.verifyCode = async function () {
-  const code = document.getElementById("code").value;
-
+// تسجيل الدخول بالكود
+loginBtn.addEventListener("click", async () => {
   try {
-    const result = await window.confirmationResult.confirm(code);
+    const code = codeInput.value.trim();
+
+    if (!confirmationResult) {
+      alert("أرسل الكود أولاً");
+      return;
+    }
+
+    const result = await confirmationResult.confirm(code);
     const user = result.user;
 
-    await setDoc(doc(db, "users", user.uid), {
-      phone: user.phoneNumber,
-      role: "cashier",
-      createdAt: serverTimestamp()
-    }, { merge: true });
+    console.log("تم تسجيل الدخول:", user.uid);
 
-    alert("تم تسجيل الدخول بنجاح");
-    console.log("UID:", user.uid);
-
-  } catch (e) {
+    // تحويل بعد الدخول
+    window.location.href = "dashboard.html";
+  } catch (error) {
+    console.error(error);
     alert("كود غير صحيح");
   }
-};
+});
