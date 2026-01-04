@@ -1,105 +1,96 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>الخزنة</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>الخزنة</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- ستايل عام -->
-  <link rel="stylesheet" href="../css/style.css">
-  <link rel="stylesheet" href="../css/menu.css">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/menu.css">
 
-  <style>
-    body{
-      margin:0;
-      font-family:Arial;
-      background:#f4f6f8;
-    }
-    .page{
-      margin-right:260px;
-      padding:15px;
-    }
-    .card{
-      background:#fff;
-      padding:15px;
-      border-radius:10px;
-      margin-bottom:15px;
-      box-shadow:0 2px 6px rgba(0,0,0,.08);
-    }
-    .balance{
-      font-size:26px;
-      font-weight:bold;
-      text-align:center;
-      color:#2c3e50;
-    }
-    input{
-      width:100%;
-      padding:10px;
-      margin-bottom:8px;
-      border-radius:8px;
-      border:1px solid #ccc;
-      font-size:15px;
-    }
-    button{
-      width:100%;
-      padding:10px;
-      border:none;
-      border-radius:8px;
-      font-size:16px;
-      cursor:pointer;
-      margin-top:5px;
-    }
-    .btn-in{background:#27ae60;color:#fff}
-    .btn-out{background:#e74c3c;color:#fff}
-    table{
-      width:100%;
-      border-collapse:collapse;
-      margin-top:10px;
-      font-size:14px;
-    }
-    th,td{
-      border-bottom:1px solid #ddd;
-      padding:8px;
-      text-align:center;
-    }
-    th{background:#eee}
-  </style>
+<style>
+body{margin:0;font-family:Arial;background:#f4f6f8}
+.page{margin-right:260px;padding:15px}
+.card{
+  background:#fff;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:15px;
+  box-shadow:0 2px 6px rgba(0,0,0,.08)
+}
+.balance{
+  font-size:26px;
+  font-weight:bold;
+  text-align:center;
+  color:#2c3e50
+}
+input{
+  width:100%;
+  padding:10px;
+  margin-bottom:8px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:15px
+}
+button{
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  cursor:pointer;
+  margin-top:5px
+}
+.btn-in{background:#27ae60;color:#fff}
+.btn-out{background:#e74c3c;color:#fff}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+  font-size:14px
+}
+th,td{
+  border-bottom:1px solid #ddd;
+  padding:8px;
+  text-align:center
+}
+th{background:#eee}
+</style>
 </head>
 
 <body>
 
-<!-- حماية الصفحة (Admin فقط) -->
+<!-- ===== حماية الصفحة (Admin فقط) ===== -->
 <script>
-  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-  if (!currentUser || currentUser.role !== "admin") {
-    alert("غير مصرح بالدخول");
-    window.location.href = "../index.html";
-  }
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+if(!currentUser || currentUser.role !== "admin"){
+  alert("غير مصرح بالدخول");
+  window.location.href = "../index.html";
+}
 </script>
 
-<!-- المنيو -->
+<!-- ===== المنيو ===== -->
 <div id="menu"></div>
 
 <div class="page">
 
-  <!-- رصيد الخزنة -->
+  <!-- الرصيد -->
   <div class="card">
     <div class="balance">
       رصيد الخزنة: <span id="balance">0</span> جنيه
     </div>
   </div>
 
-  <!-- إضافة حركة -->
+  <!-- إضافة حركة يدوية -->
   <div class="card">
-    <h3>إضافة حركة خزنة</h3>
+    <h3>حركة خزنة يدوية</h3>
     <input type="number" id="amount" placeholder="المبلغ">
     <input type="text" id="note" placeholder="البيان">
-
-    <button class="btn-in" onclick="addCash()">قبض</button>
-    <button class="btn-out" onclick="removeCash()">صرف</button>
+    <button class="btn-in" onclick="manualIn()">قبض يدوي</button>
+    <button class="btn-out" onclick="manualOut()">صرف يدوي</button>
   </div>
 
-  <!-- سجل الحركات -->
+  <!-- السجل -->
   <div class="card">
     <h3>سجل الخزنة</h3>
     <table>
@@ -117,67 +108,123 @@
 
 </div>
 
-<!-- JS المنيو -->
 <script src="../js/menu.js"></script>
 
 <script>
-  let balance = Number(localStorage.getItem("cashBalance") || 0);
-  let log = JSON.parse(localStorage.getItem("cashLog") || "[]");
+/* ===== التخزين ===== */
+let balance = Number(localStorage.getItem("cashBalance") || 0);
+let log = JSON.parse(localStorage.getItem("cashLog") || "[]");
 
-  function render(){
-    document.getElementById("balance").innerText = balance.toFixed(2);
-    const tbody = document.getElementById("logTable");
-    tbody.innerHTML = "";
-    log.slice().reverse().forEach(l=>{
-      tbody.innerHTML += `
-        <tr>
-          <td>${l.date}</td>
-          <td>${l.type}</td>
-          <td>${l.amount}</td>
-          <td>${l.note || ""}</td>
-        </tr>
-      `;
-    });
-  }
+/* ===== رسم البيانات ===== */
+function render(){
+  document.getElementById("balance").innerText = balance.toFixed(2);
+  const tbody = document.getElementById("logTable");
+  tbody.innerHTML = "";
+  log.slice().reverse().forEach(l=>{
+    tbody.innerHTML += `
+      <tr>
+        <td>${l.date}</td>
+        <td>${l.type}</td>
+        <td>${l.amount}</td>
+        <td>${l.note || ""}</td>
+      </tr>`;
+  });
+}
 
-  function save(){
-    localStorage.setItem("cashBalance", balance);
-    localStorage.setItem("cashLog", JSON.stringify(log));
-    render();
-  }
-
-  function addCash(){
-    const amount = Number(document.getElementById("amount").value);
-    const note = document.getElementById("note").value;
-    if(amount <= 0) return alert("ادخل مبلغ صحيح");
-
-    log.push({
-      date:new Date().toLocaleString(),
-      type:"قبض",
-      amount,
-      note
-    });
-    balance += amount;
-    save();
-  }
-
-  function removeCash(){
-    const amount = Number(document.getElementById("amount").value);
-    const note = document.getElementById("note").value;
-    if(amount <= 0) return alert("ادخل مبلغ صحيح");
-    if(balance < amount) return alert("الرصيد لا يكفي");
-
-    log.push({
-      date:new Date().toLocaleString(),
-      type:"صرف",
-      amount,
-      note
-    });
-    balance -= amount;
-    save();
-  }
-
+function save(){
+  localStorage.setItem("cashBalance", balance);
+  localStorage.setItem("cashLog", JSON.stringify(log));
   render();
+}
+
+/* ===== حركات يدوية ===== */
+function manualIn(){
+  const amount = Number(amountInput.value);
+  if(amount<=0) return alert("مبلغ غير صحيح");
+  log.push({
+    date:new Date().toLocaleString(),
+    type:"قبض يدوي",
+    amount,
+    note:noteInput.value
+  });
+  balance += amount;
+  save();
+}
+
+function manualOut(){
+  const amount = Number(amountInput.value);
+  if(amount<=0) return alert("مبلغ غير صحيح");
+  if(balance < amount) return alert("الرصيد لا يكفي");
+  log.push({
+    date:new Date().toLocaleString(),
+    type:"صرف يدوي",
+    amount,
+    note:noteInput.value
+  });
+  balance -= amount;
+  save();
+}
+
+/* ===== ربط تلقائي مع السيستم ===== */
+window.cashSystem = {
+
+  saleCash(total){
+    balance += total;
+    log.push({
+      date:new Date().toLocaleString(),
+      type:"قبض (مبيعات)",
+      amount:total,
+      note:"فاتورة مبيعات نقدي"
+    });
+    save();
+  },
+
+  purchaseCash(total){
+    balance -= total;
+    log.push({
+      date:new Date().toLocaleString(),
+      type:"صرف (مشتريات)",
+      amount:total,
+      note:"فاتورة مشتريات"
+    });
+    save();
+  },
+
+  refundCash(total){
+    balance -= total;
+    log.push({
+      date:new Date().toLocaleString(),
+      type:"صرف (مرتجع)",
+      amount:total,
+      note:"مرتجع مبيعات"
+    });
+    save();
+  },
+
+  collectCustomer(total,name){
+    balance += total;
+    log.push({
+      date:new Date().toLocaleString(),
+      type:"قبض (تحصيل)",
+      amount:total,
+      note:`تحصيل من ${name}`
+    });
+    save();
+  },
+
+  paySupplier(total,name){
+    balance -= total;
+    log.push({
+      date:new Date().toLocaleString(),
+      type:"صرف (مورد)",
+      amount:total,
+      note:`سداد مورد ${name}`
+    });
+    save();
+  }
+};
+
+render();
 </script>
 
 </body>
