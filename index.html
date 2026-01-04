@@ -2,25 +2,63 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>تسجيل الدخول</title>
-  <link rel="stylesheet" href="css/login.css">
+  <title>Login</title>
 </head>
 <body>
 
-<div class="login-box">
-  <h2>تسجيل الدخول</h2>
+<h3>تسجيل الدخول برقم الموبايل</h3>
 
-  <input id="phone" placeholder="+2010xxxxxxxx">
+<input id="phone" placeholder="+2010xxxxxxxx"><br><br>
+<div id="recaptcha-container"></div><br>
 
-  <div id="recaptcha"></div>
+<button onclick="sendCode()">إرسال كود</button><br><br>
 
-  <input id="code" placeholder="كود التفعيل" style="display:none">
+<input id="code" placeholder="الكود"><br><br>
+<button onclick="verifyCode()">دخول</button>
 
-  <button id="mainBtn">إرسال كود</button>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
 
-  <p id="msg" class="note"></p>
-</div>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBZwWxWIIE0exAPoL9P8pbmp19gnBFxQq0",
+    authDomain: "pos-pro-996f0.firebaseapp.com",
+    projectId: "pos-pro-996f0",
+    storageBucket: "pos-pro-996f0.appspot.com",
+    messagingSenderId: "591451935128",
+    appId: "1:591451935128:web:683495139e62fb9b1e1bed"
+  };
 
-<script type="module" src="js/auth.js"></script>
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(
+    'recaptcha-container',
+    { size: 'normal' }
+  );
+
+  let confirmationResult;
+
+  function sendCode() {
+    const phone = document.getElementById("phone").value;
+    auth.signInWithPhoneNumber(phone, window.recaptchaVerifier)
+      .then(result => {
+        confirmationResult = result;
+        alert("تم إرسال الكود");
+      })
+      .catch(err => alert(err.message));
+  }
+
+  function verifyCode() {
+    const code = document.getElementById("code").value;
+    confirmationResult.confirm(code)
+      .then(result => {
+        alert("تم تسجيل الدخول");
+        console.log(result.user);
+      })
+      .catch(err => alert(err.message));
+  }
+</script>
+
 </body>
 </html>
