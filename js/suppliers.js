@@ -1,215 +1,177 @@
-/* ===============================
-   Helpers
-================================ */
-function getData(key) {
+/* ===== Helpers ===== */
+function getData(key){
   return JSON.parse(localStorage.getItem(key)) || [];
 }
-
-function setData(key, data) {
+function setData(key,data){
   localStorage.setItem(key, JSON.stringify(data));
 }
 
-/* ===============================
-   Load suppliers on page load
-================================ */
+/* ===== تحميل ===== */
 document.addEventListener("DOMContentLoaded", renderSuppliers);
 
-/* ===============================
-   Save / Update Supplier
-================================ */
-function saveSupplier() {
-  const id = document.getElementById("supplierId").value;
-  const name = document.getElementById("supplierName").value.trim();
-  const phone = document.getElementById("supplierPhone").value.trim();
-  const company = document.getElementById("supplierCompany").value.trim();
-  const balance = Number(document.getElementById("supplierBalance").value || 0);
-
-  if (!name) {
-    alert("اسم المورد مطلوب");
-    return;
-  }
+/* ===== حفظ / تعديل مورد ===== */
+function saveSupplier(){
+  const id = supplierId.value;
+  const name = supplierName.value.trim();
+  if(!name){ alert("اسم المورد مطلوب"); return; }
 
   let suppliers = getData("suppliers");
+  let balance = Number(supplierBalance.value || 0);
 
-  if (id) {
-    // تعديل
-    const supplier = suppliers.find(s => s.id == id);
-    supplier.name = name;
-    supplier.phone = phone;
-    supplier.company = company;
+  if(id){
+    let s = suppliers.find(x=>x.id==id);
+    s.name = name;
+    s.phone = supplierPhone.value;
+    s.company = supplierCompany.value;
   } else {
-    // إضافة
     suppliers.push({
-      id: Date.now(),
+      id:Date.now(),
       name,
-      phone,
-      company,
+      phone:supplierPhone.value,
+      company:supplierCompany.value,
       balance
     });
 
-    // حركة افتتاحية
     addSupplierTransaction({
-      supplierName: name,
-      type: "opening",
-      amount: balance
+      supplierName:name,
+      type:"opening",
+      amount:balance
     });
   }
 
-  setData("suppliers", suppliers);
+  setData("suppliers",suppliers);
   clearForm();
   renderSuppliers();
 }
 
-/* ===============================
-   Render suppliers table
-================================ */
-function renderSuppliers() {
-  const suppliers = getData("suppliers");
-  const tbody = document.getElementById("suppliersTable");
-  tbody.innerHTML = "";
+/* ===== عرض الموردين ===== */
+function renderSuppliers(){
+  let suppliers = getData("suppliers");
+  suppliersTable.innerHTML = "";
 
-  suppliers.forEach(s => {
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${s.name}</td>
-      <td>${s.company || "-"}</td>
-      <td>${s.phone || "-"}</td>
-      <td>${s.balance.toFixed(2)}</td>
-      <td class="actions">
-        <button onclick="editSupplier(${s.id})">✏️</button>
-        <button onclick="showSupplierStatement(${s.id})">📄</button>
-      </td>
-    `;
-
-    tbody.appendChild(tr);
-  });
-}
-
-/* ===============================
-   Edit supplier
-================================ */
-function editSupplier(id) {
-  const suppliers = getData("suppliers");
-  const s = suppliers.find(x => x.id == id);
-
-  document.getElementById("supplierId").value = s.id;
-  document.getElementById("supplierName").value = s.name;
-  document.getElementById("supplierPhone").value = s.phone;
-  document.getElementById("supplierCompany").value = s.company;
-  document.getElementById("supplierBalance").value = s.balance;
-}
-
-/* ===============================
-   Clear form
-================================ */
-function clearForm() {
-  document.getElementById("supplierId").value = "";
-  document.getElementById("supplierName").value = "";
-  document.getElementById("supplierPhone").value = "";
-  document.getElementById("supplierCompany").value = "";
-  document.getElementById("supplierBalance").value = "";
-}
-
-/* ===============================
-   Supplier Transactions (GLOBAL)
-================================ */
-function addSupplierTransaction(tx) {
-  let transactions = getData("supplierTransactions");
-
-  transactions.push({
-    id: Date.now(),
-    supplierName: tx.supplierName,
-    type: tx.type, // opening | purchase | payment | return
-    amount: tx.amount,
-    date: new Date().toLocaleString()
-  });
-
-  setData("supplierTransactions", transactions);
-}
-
-/* ===============================
-   Show Supplier Statement
-================================ */
-function showSupplierStatement(supplierId) {
-  const suppliers = getData("suppliers");
-  const supplier = suppliers.find(s => s.id == supplierId);
-  const transactions = getData("supplierTransactions")
-    .filter(t => t.supplierName === supplier.name);
-
-  let html = `
-    <h3>كشف حساب المورد: ${supplier.name}</h3>
-    <table border="1" width="100%" style="margin-top:10px">
+  suppliers.forEach(s=>{
+    suppliersTable.innerHTML += `
       <tr>
-        <th>التاريخ</th>
-        <th>البيان</th>
-        <th>مدين</th>
-        <th>دائن</th>
-      </tr>
-  `;
+        <td>${s.name}</td>
+        <td>${s.company||"-"}</td>
+        <td>${s.phone||"-"}</td>
+        <td>${s.balance.toFixed(2)}</td>
+        <td class="actions">
+          <button onclick="editSupplier(${s.id})">✏️</button>
+          <button onclick="showSupplierStatement(${s.id})">📄</button>
+          <button onclick="openPayModal(${s.id})">💰</button>
+        </td>
+      </tr>`;
+  });
+}
 
-  transactions.forEach(t => {
-    html += `
-      <tr>
-        <td>${t.date}</td>
-        <td>${t.type}</td>
-        <td>${t.type === "purchase" ? t.amount : ""}</td>
-        <td>${t.type === "payment" ? t.amount : ""}</td>
-      </tr>
-    `;
+/* ===== تعديل ===== */
+function editSupplier(id){
+  let s = getData("suppliers").find(x=>x.id==id);
+  supplierId.value=s.id;
+  supplierName.value=s.name;
+  supplierPhone.value=s.phone;
+  supplierCompany.value=s.company;
+  supplierBalance.value=s.balance;
+}
+
+/* ===== تنظيف ===== */
+function clearForm(){
+  supplierId.value="";
+  supplierName.value="";
+  supplierPhone.value="";
+  supplierCompany.value="";
+  supplierBalance.value="";
+}
+
+/* ===== حركات المورد ===== */
+function addSupplierTransaction(tx){
+  let arr = getData("supplierTransactions");
+  arr.push({
+    id:Date.now(),
+    supplierName:tx.supplierName,
+    type:tx.type,
+    amount:tx.amount,
+    date:new Date().toLocaleString()
+  });
+  setData("supplierTransactions",arr);
+}
+
+/* ===== كشف حساب ===== */
+function showSupplierStatement(id){
+  let s = getData("suppliers").find(x=>x.id==id);
+  let txs = getData("supplierTransactions")
+    .filter(t=>t.supplierName===s.name);
+
+  let html=`<h3>كشف حساب: ${s.name}</h3>
+  <table border="1" width="100%">
+  <tr><th>التاريخ</th><th>البيان</th><th>مدين</th><th>دائن</th></tr>`;
+
+  txs.forEach(t=>{
+    html+=`<tr>
+      <td>${t.date}</td>
+      <td>${t.type}</td>
+      <td>${t.type==="purchase"?t.amount:""}</td>
+      <td>${t.type==="payment"?t.amount:""}</td>
+    </tr>`;
   });
 
-  html += "</table>";
-  const w = window.open("", "", "width=600,height=500");
+  html+="</table>";
+  let w=window.open("","","width=600,height=500");
   w.document.write(html);
 }
 
-/* ===============================
-   🔗 ربط مع المشتريات
-   (ينادى عليها من purchases.js)
-================================ */
-function onPurchaseSaved(purchase) {
-  const suppliers = getData("suppliers");
-  const supplier = suppliers.find(s => s.id == purchase.supplierId);
-
-  const remain = purchase.total - purchase.paid;
-  supplier.balance += remain;
-
-  addSupplierTransaction({
-    supplierName: supplier.name,
-    type: "purchase",
-    amount: purchase.total
-  });
-
-  setData("suppliers", suppliers);
+/* ===== دفع مورد ===== */
+function openPayModal(id){
+  paySupplierId.value=id;
+  payAmount.value="";
+  payModal.style.display="block";
 }
+function closePayModal(){
+  payModal.style.display="none";
+}
+function confirmPaySupplier(){
+  let id=Number(paySupplierId.value);
+  let amount=Number(payAmount.value);
+  if(amount<=0){alert("مبلغ غير صحيح");return;}
 
-/* ===============================
-   🔗 ربط مع الخزنة
-   (دفع لمورد)
-================================ */
-function paySupplier(supplierId, amount) {
-  const suppliers = getData("suppliers");
-  const treasury = getData("treasury");
+  let suppliers=getData("suppliers");
+  let treasury=getData("treasury")||{balance:0};
 
-  const supplier = suppliers.find(s => s.id == supplierId);
-  supplier.balance -= amount;
+  if(treasury.balance<amount){
+    alert("رصيد الخزنة لا يكفي"); return;
+  }
 
-  treasury.balance -= amount;
+  let s=suppliers.find(x=>x.id===id);
+  s.balance-=amount;
+  treasury.balance-=amount;
 
   addSupplierTransaction({
-    supplierName: supplier.name,
-    type: "payment",
+    supplierName:s.name,
+    type:"payment",
     amount
   });
 
-  setData("suppliers", suppliers);
-  setData("treasury", treasury);
+  setData("suppliers",suppliers);
+  setData("treasury",treasury);
+
+  closePayModal();
+  renderSuppliers();
+  alert("تم الدفع بنجاح");
 }
 
-/* ===============================
-   🔗 ربط مع التقارير
-================================ */
-function getSuppliersReport() {
-  return getData("suppliers");
+/* ===== ربط مع المشتريات ===== */
+function onPurchaseSaved(purchase){
+  let suppliers=getData("suppliers");
+  let s=suppliers.find(x=>x.id===purchase.supplierId);
+  let remain=purchase.total-purchase.paid;
+  s.balance+=remain;
+
+  addSupplierTransaction({
+    supplierName:s.name,
+    type:"purchase",
+    amount:purchase.total
+  });
+
+  setData("suppliers",suppliers);
 }
