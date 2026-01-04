@@ -11,42 +11,57 @@ import {
 
 let confirmationResult;
 
-window.onload = () => {
-  window.recaptchaVerifier = new RecaptchaVerifier(
-    auth,
-    "recaptcha-container",
-    { size: "invisible" }
-  );
-};
+window.recaptchaVerifier = new RecaptchaVerifier(
+  auth,
+  "recaptcha-container",
+  {
+    size: "invisible",
+    callback: () => {}
+  }
+);
 
-document.getElementById("sendCode").onclick = async () => {
-  const phone = document.getElementById("phone").value;
-  confirmationResult = await signInWithPhoneNumber(
-    auth,
-    phone,
-    window.recaptchaVerifier
-  );
-  alert("تم إرسال الكود");
-};
+document.getElementById("sendCode").addEventListener("click", async () => {
+  const phone = document.getElementById("phone").value.trim();
 
-document.getElementById("verifyCode").onclick = async () => {
-  const code = document.getElementById("code").value;
-  const result = await confirmationResult.confirm(code);
-  const uid = result.user.uid;
-
-  const userRef = doc(db, "users", uid);
-  const snap = await getDoc(userRef);
-
-  if (!snap.exists()) {
-    alert("غير مسجل في النظام");
+  if (!phone) {
+    alert("اكتب رقم التليفون");
     return;
   }
 
-  const role = snap.data().role;
-
-  if (role === "admin") {
-    location.href = "pages/dashboard.html";
-  } else {
-    location.href = "pages/sales.html";
+  try {
+    confirmationResult = await signInWithPhoneNumber(
+      auth,
+      phone,
+      window.recaptchaVerifier
+    );
+    alert("تم إرسال الكود");
+  } catch (e) {
+    alert("خطأ في إرسال الكود");
+    console.error(e);
   }
-};
+});
+
+document.getElementById("verifyCode").addEventListener("click", async () => {
+  const code = document.getElementById("code").value.trim();
+
+  if (!code || !confirmationResult) {
+    alert("أدخل الكود");
+    return;
+  }
+
+  try {
+    const result = await confirmationResult.confirm(code);
+    const uid = result.user.uid;
+
+    const snap = await getDoc(doc(db, "users", uid));
+
+    if (!snap.exists()) {
+      alert("غير مسجل في النظام");
+      return;
+    }
+
+    location.href = "pages/sales.html";
+  } catch (e) {
+    alert("كود غير صحيح");
+  }
+});
