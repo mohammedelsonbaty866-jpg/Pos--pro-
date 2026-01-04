@@ -1,62 +1,54 @@
+import { auth, db } from "./firebase.js";
+
 import {
   RecaptchaVerifier,
   signInWithPhoneNumber
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-import { auth } from "./firebase.js";
+import {
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-let confirmationResult;
-
-// reCAPTCHA
 window.recaptchaVerifier = new RecaptchaVerifier(
-  auth,
-  "recaptcha-container",
-  {
-    size: "invisible",
-    callback: () => {}
-  }
+  "recaptcha",
+  { size: "normal" },
+  auth
 );
 
-// إرسال الكود
-document.getElementById("sendCodeBtn").addEventListener("click", () => {
+window.sendCode = async function () {
   const phone = document.getElementById("phone").value;
 
-  if (!phone.startsWith("+")) {
-    alert("اكتب الرقم بصيغة دولية مثال: +2010xxxxxxx");
+  if (!phone) {
+    alert("اكتب رقم الموبايل");
     return;
   }
 
-  signInWithPhoneNumber(auth, phone, window.recaptchaVerifier)
-    .then((result) => {
-      confirmationResult = result;
-      alert("تم إرسال الكود");
-    })
-    .catch((error) => {
-      console.error(error);
-      alert("خطأ في إرسال الكود");
-    });
-});
+  // 🔍 تحقق أن المستخدم مضاف من الأدمن
+  const ref = doc(db, "users", phone);
+  const snap = await getDoc(ref);
 
-// تأكيد الكود
-document.getElementById("verifyCodeBtn").addEventListener("click", () => {
+  if (!snap.exists() || snap.data().active !== true) {
+    alert("غير مسموح بالدخول");
+    return;
+  }
+
+  window.confirmationResult =
+    await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
+
+  alert("تم إرسال كود التفعيل");
+};
+
+window.confirmCode = async function () {
   const code = document.getElementById("code").value;
 
-  if (!confirmationResult) {
-    alert("ابعت الكود الأول");
+  if (!code) {
+    alert("اكتب الكود");
     return;
   }
 
-  confirmationResult
-    .confirm(code)
-    .then((result) => {
-      const user = result.user;
-      alert("تم تسجيل الدخول ✔️");
+  await window.confirmationResult.confirm(code);
 
-      // مثال تحويل
-      // window.location.href = "dashboard.html";
-    })
-    .catch((error) => {
-      console.error(error);
-      alert("كود غير صحيح");
-    });
-});
+  // ✔️ بعد الدخول
+  window.location.href = "pages/admin-users.html";
+};
