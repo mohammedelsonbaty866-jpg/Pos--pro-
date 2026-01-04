@@ -1,117 +1,23 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <title>POS PRO | تسجيل الدخول</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <style>
-    body{
-      margin:0;
-      font-family: Arial, Tahoma;
-      background:#f4f6f9;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      height:100vh;
-    }
-    .login-box{
-      background:#fff;
-      width:320px;
-      padding:25px;
-      border-radius:12px;
-      box-shadow:0 10px 30px rgba(0,0,0,.1);
-      text-align:center;
-    }
-    h2{
-      margin-bottom:20px;
-    }
-    input{
-      width:100%;
-      padding:10px;
-      margin-bottom:12px;
-      border:1px solid #ccc;
-      border-radius:6px;
-      font-size:15px;
-    }
-    button{
-      width:100%;
-      padding:10px;
-      background:#2563eb;
-      border:none;
-      border-radius:6px;
-      color:#fff;
-      font-size:16px;
-      cursor:pointer;
-    }
-    button:hover{
-      background:#1e4ed8;
-    }
-    .error{
-      color:red;
-      margin-top:10px;
-      font-size:14px;
-      display:none;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <title>تسجيل الدخول</title>
+  <script type="module" src="js/auth.js"></script>
 </head>
 <body>
 
-<div class="login-box">
-  <h2>دخول النظام</h2>
+  <h2>تسجيل الدخول</h2>
 
-  <input type="text" id="username" placeholder="اسم المستخدم">
-  <input type="password" id="password" placeholder="كلمة المرور">
+  <input id="phone" placeholder="+2010xxxxxxxx" />
+  <button id="sendCode">إرسال الكود</button>
 
-  <button onclick="login()">دخول</button>
+  <br><br>
 
-  <div class="error" id="error">بيانات الدخول غير صحيحة</div>
-</div>
+  <input id="code" placeholder="كود التحقق" />
+  <button id="verifyCode">دخول</button>
 
-<script>
-/* ===== إنشاء مستخدمين افتراضيين لو أول مرة ===== */
-if(!localStorage.getItem("users")){
-  localStorage.setItem("users", JSON.stringify([
-    {
-      id:1,
-      username:"admin",
-      password:"admin",
-      role:"admin",
-      name:"المدير"
-    },
-    {
-      id:2,
-      username:"rep",
-      password:"1234",
-      role:"rep",
-      name:"مندوب 1"
-    }
-  ]));
-}
-
-/* ===== تسجيل الدخول ===== */
-function login(){
-  const u = document.getElementById("username").value.trim();
-  const p = document.getElementById("password").value.trim();
-  const error = document.getElementById("error");
-
-  const users = JSON.parse(localStorage.getItem("users")) || [];
-  const user = users.find(x => x.username === u && x.password === p);
-
-  if(!user){
-    error.style.display = "block";
-    return;
-  }
-
-  localStorage.setItem("currentUser", JSON.stringify(user));
-
-  if(user.role === "admin"){
-    window.location.href = "pages/sales.html";
-  }else{
-    window.location.href = "pages/rep-sales.html";
-  }
-}
-</script>
+  <div id="recaptcha-container"></div>
 
 </body>
 </html>
