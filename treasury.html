@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>الخزنة</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f5f6fa;
+}
+
+/* ===== المنيو ===== */
+.sidebar{
+  position:fixed;
+  right:0;
+  top:0;
+  width:240px;
+  height:100vh;
+  background:#0f1f3a;
+  padding:10px;
+}
+.menu-item{
+  background:#1b2d4a;
+  color:#fff;
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:8px;
+  cursor:pointer;
+}
+.menu-item:hover{background:#284b8f;}
+.menu-item.active{background:#2f6df6}
+
+/* ===== الصفحة ===== */
+.page{
+  margin-right:260px;
+  padding:15px;
+}
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:10px;
+}
+.card{
+  background:#fff;
+  border-radius:12px;
+  padding:15px;
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+.card h3{margin:0;font-size:15px}
+.card .value{font-size:20px;margin-top:8px}
+
+input,select{
+  width:100%;
+  padding:10px;
+  margin-bottom:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+button{
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+.btn-primary{background:#2f6df6;color:#fff}
+.btn-success{background:#27ae60;color:#fff}
+.btn-danger{background:#e74c3c;color:#fff}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+}
+th,td{
+  padding:8px;
+  border-bottom:1px solid #ddd;
+  text-align:center;
+  font-size:14px;
+}
+.in{color:green;font-weight:bold}
+.out{color:red;font-weight:bold}
+</style>
+</head>
+
+<body>
+
+<!-- ===== المنيو ===== -->
+<div class="sidebar">
+  <div class="menu-item" onclick="go('sales.html')">المبيعات</div>
+  <div class="menu-item" onclick="go('purchases.html')">المشتريات</div>
+  <div class="menu-item" onclick="go('suppliers.html')">الموردين</div>
+  <div class="menu-item" onclick="go('customers.html')">العملاء</div>
+  <div class="menu-item active">الخزنة</div>
+  <div class="menu-item" onclick="go('reports.html')">التقارير</div>
+  <div class="menu-item" onclick="go('settings.html')">الإعدادات</div>
+</div>
+
+<div class="page">
+
+<!-- ===== ملخص الخزنة ===== -->
+<div class="cards">
+  <div class="card">
+    <h3>💰 رصيد الخزنة</h3>
+    <div class="value" id="balance">0</div>
+  </div>
+  <div class="card">
+    <h3>⬆ المقبوضات</h3>
+    <div class="value" id="totalIn">0</div>
+  </div>
+  <div class="card">
+    <h3>⬇ المصروفات</h3>
+    <div class="value" id="totalOut">0</div>
+  </div>
+</div>
+
+<!-- ===== إضافة حركة ===== -->
+<div class="card" style="margin-top:15px">
+<h3>إضافة حركة خزنة</h3>
+
+<select id="type">
+  <option value="in">قبض</option>
+  <option value="out">صرف</option>
+</select>
+
+<input id="amount" type="number" placeholder="المبلغ">
+<input id="note" placeholder="البيان">
+
+<button class="btn-primary" onclick="addTransaction()">💾 حفظ الحركة</button>
+</div>
+
+<!-- ===== جدول الحركات ===== -->
+<div class="card">
+<h3>حركات الخزنة</h3>
+<table>
+<thead>
+<tr>
+<th>التاريخ</th>
+<th>النوع</th>
+<th>البيان</th>
+<th>المبلغ</th>
+<th>الرصيد</th>
+</tr>
+</thead>
+<tbody id="table"></tbody>
+</table>
+</div>
+
+</div>
+
+<script>
+function go(p){location.href=p}
+
+function get(k){return JSON.parse(localStorage.getItem(k))||[]}
+function set(k,v){localStorage.setItem(k,JSON.stringify(v))}
+
+function initTreasury(){
+  let t=get("treasury")
+  if(!t.balance){ set("treasury",{balance:0}) }
+}
+initTreasury()
+
+document.addEventListener("DOMContentLoaded",render)
+
+function render(){
+  let treasury=get("treasury")
+  let tx=get("treasuryTx")
+
+  balance.innerText=treasury.balance.toFixed(2)
+
+  let totalIn=0,totalOut=0,run=0
+  table.innerHTML=""
+
+  tx.forEach(t=>{
+    if(t.type=="in") totalIn+=t.amount
+    else totalOut+=t.amount
+
+    run+=t.type=="in"?t.amount:-t.amount
+
+    table.innerHTML+=`
+      <tr>
+        <td>${t.date}</td>
+        <td class="${t.type}">${t.type=="in"?"قبض":"صرف"}</td>
+        <td>${t.note}</td>
+        <td>${t.amount}</td>
+        <td>${run.toFixed(2)}</td>
+      </tr>`
+  })
+
+  totalInEl.innerText=totalIn.toFixed(2)
+  totalOutEl.innerText=totalOut.toFixed(2)
+}
+
+const totalInEl=document.getElementById("totalIn")
+const totalOutEl=document.getElementById("totalOut")
+
+function addTransaction(){
+  let type=document.getElementById("type").value
+  let amount=Number(document.getElementById("amount").value)
+  let note=document.getElementById("note").value
+
+  if(amount<=0) return alert("ادخل مبلغ صحيح")
+
+  let treasury=get("treasury")
+  let tx=get("treasuryTx")
+
+  if(type=="out" && treasury.balance<amount){
+    return alert("رصيد الخزنة لا يكفي")
+  }
+
+  treasury.balance+= type=="in"?amount:-amount
+
+  tx.push({
+    id:Date.now(),
+    type,
+    amount,
+    note,
+    date:new Date().toLocaleString()
+  })
+
+  set("treasury",treasury)
+  set("treasuryTx",tx)
+
+  amount.value=""
+  note.value=""
+
+  render()
+}
+</script>
+
+</body>
+</html>
