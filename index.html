@@ -1,94 +1,39 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>POS Pro - تسجيل الدخول</title>
+  <title>تسجيل الدخول</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+  <link rel="stylesheet" href="css/style.css" />
 
-    .login-box {
-      background: #1e1e1e;
-      padding: 25px;
-      border-radius: 10px;
-      width: 320px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.6);
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 12px;
-      border-radius: 5px;
-      border: none;
-      outline: none;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px;
-      background: #0d6efd;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    button:hover {
-      background: #0b5ed7;
-    }
-
-    .hidden {
-      display: none;
-    }
-  </style>
+  <!-- Firebase SDKs -->
+  <script type="module" src="js/firebase.js"></script>
+  <script type="module" src="js/auth.js"></script>
 </head>
-
 <body>
 
-  <div class="login-box">
+  <div class="login-container">
     <h2>تسجيل الدخول</h2>
 
-    <!-- رقم الهاتف -->
     <input
       type="tel"
       id="phone"
       placeholder="+2010xxxxxxxx"
     />
 
-    <button id="sendCode">إرسال كود</button>
+    <div id="recaptcha-container"></div>
 
-    <!-- كود التحقق -->
+    <button id="sendCodeBtn">إرسال كود</button>
+
     <input
       type="text"
       id="code"
-      class="hidden"
-      placeholder="اكتب كود التحقق"
+      placeholder="كود التحقق"
     />
 
-    <button id="login" class="hidden">دخول</button>
-
-    <!-- reCAPTCHA -->
-    <div id="recaptcha-container"></div>
+    <button id="verifyCodeBtn">دخول</button>
   </div>
-
-  <!-- ملفات Firebase -->
-  <script type="module" src="./js/auth.js"></script>
 
 </body>
 </html>
