@@ -1,9 +1,4 @@
-const firebaseConfig = {
-  apiKey: "API_KEY",
-  authDomain: "pos-pro-996f0.firebaseapp.com",
-  projectId: "pos-pro-996f0",
-  appId: "APP_ID"
-};
+
 // js/firebase.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
