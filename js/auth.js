@@ -1,67 +1,63 @@
-import { auth, db } from "./firebase.js";
 import {
-  signInWithPhoneNumber,
-  RecaptchaVerifier
+  RecaptchaVerifier,
+  signInWithPhoneNumber
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
   doc,
-  getDoc
+  setDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-let confirmationResult;
+import { auth, db } from "./firebase.js";
 
 window.recaptchaVerifier = new RecaptchaVerifier(
-  auth,
   "recaptcha-container",
-  {
-    size: "invisible",
-    callback: () => {}
-  }
+  { size: "normal" },
+  auth
 );
 
-document.getElementById("sendCode").addEventListener("click", async () => {
-  const phone = document.getElementById("phone").value.trim();
+// إرسال الكود
+window.sendCode = async function () {
+  let phone = document.getElementById("phone").value.trim();
 
-  if (!phone) {
-    alert("اكتب رقم التليفون");
-    return;
+  if (phone.startsWith("0")) {
+    phone = "+20" + phone.slice(1);
   }
 
   try {
-    confirmationResult = await signInWithPhoneNumber(
+    const confirmationResult = await signInWithPhoneNumber(
       auth,
       phone,
       window.recaptchaVerifier
     );
+
+    window.confirmationResult = confirmationResult;
     alert("تم إرسال الكود");
-  } catch (e) {
+  } catch (err) {
+    console.error(err);
     alert("خطأ في إرسال الكود");
-    console.error(e);
   }
-});
+};
 
-document.getElementById("verifyCode").addEventListener("click", async () => {
-  const code = document.getElementById("code").value.trim();
-
-  if (!code || !confirmationResult) {
-    alert("أدخل الكود");
-    return;
-  }
+// تأكيد الكود + حفظ المستخدم
+window.verifyCode = async function () {
+  const code = document.getElementById("code").value;
 
   try {
-    const result = await confirmationResult.confirm(code);
-    const uid = result.user.uid;
+    const result = await window.confirmationResult.confirm(code);
+    const user = result.user;
 
-    const snap = await getDoc(doc(db, "users", uid));
+    await setDoc(doc(db, "users", user.uid), {
+      phone: user.phoneNumber,
+      role: "cashier",
+      createdAt: serverTimestamp()
+    }, { merge: true });
 
-    if (!snap.exists()) {
-      alert("غير مسجل في النظام");
-      return;
-    }
+    alert("تم تسجيل الدخول بنجاح");
+    console.log("UID:", user.uid);
 
-    location.href = "pages/sales.html";
   } catch (e) {
     alert("كود غير صحيح");
   }
-});
+};
