@@ -1,5 +1,4 @@
 import { auth, db } from "./firebase.js";
-
 import {
   RecaptchaVerifier,
   signInWithPhoneNumber
@@ -7,49 +6,90 @@ import {
 
 import {
   doc,
-  getDoc
+  getDoc,
+  updateDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-console.log("auth.js loaded ✅");
+const phoneInput = document.getElementById("phone");
+const codeInput  = document.getElementById("code");
+const btn        = document.getElementById("mainBtn");
+const msg        = document.getElementById("msg");
 
+let confirmationResult = null;
+
+// reCAPTCHA
 window.recaptchaVerifier = new RecaptchaVerifier(
   "recaptcha",
   { size: "normal" },
   auth
 );
 
-document.getElementById("sendBtn").onclick = async () => {
-  const phone = document.getElementById("phone").value;
+// زر واحد فقط
+btn.onclick = async () => {
+  // المرحلة 1: إرسال الكود
+  if (!confirmationResult) {
+    const phone = phoneInput.value.trim();
 
-  if (!phone) {
-    alert("اكتب رقم الموبايل");
-    return;
+    if (!phone) {
+      msg.innerText = "❌ اكتب رقم الموبايل";
+      return;
+    }
+
+    const userRef = doc(db, "users", phone);
+    const snap = await getDoc(userRef);
+
+    // 2️⃣ رقم غير مسجل
+    if (!snap.exists()) {
+      msg.innerText = "❌ الرقم غير مسجل في النظام";
+      return;
+    }
+
+    const userData = snap.data();
+
+    // 4️⃣ منع الدخول لو غير نشط
+    if (userData.active === false) {
+      msg.innerText = "⛔ الحساب موقوف";
+      return;
+    }
+
+    confirmationResult = await signInWithPhoneNumber(
+      auth,
+      phone,
+      window.recaptchaVerifier
+    );
+
+    codeInput.style.display = "block";
+    btn.innerText = "تأكيد الدخول";
+    msg.innerText = "📩 تم إرسال كود التفعيل";
   }
 
-  const ref = doc(db, "users", phone);
-  const snap = await getDoc(ref);
+  // المرحلة 2: تأكيد الكود
+  else {
+    const code = codeInput.value.trim();
 
-  if (!snap.exists()) {
-    alert("الرقم غير مسجل");
-    return;
+    if (!code) {
+      msg.innerText = "❌ اكتب كود التفعيل";
+      return;
+    }
+
+    const result = await confirmationResult.confirm(code);
+    const phone = result.user.phoneNumber;
+
+    const userRef = doc(db, "users", phone);
+    const snap = await getDoc(userRef);
+    const userData = snap.data();
+
+    // 3️⃣ حفظ آخر دخول
+    await updateDoc(userRef, {
+      lastLogin: serverTimestamp()
+    });
+
+    // 5️⃣ تحويل حسب الدور
+    if (userData.role === "admin") {
+      window.location.href = "pages/dashboard.html";
+    } else {
+      window.location.href = "pages/rep-sales.html";
+    }
   }
-
-  window.confirmationResult =
-    await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
-
-  alert("تم إرسال الكود");
-};
-
-document.getElementById("loginBtn").onclick = async () => {
-  const code = document.getElementById("code").value;
-
-  if (!code) {
-    alert("اكتب الكود");
-    return;
-  }
-
-  await window.confirmationResult.confirm(code);
-
-  alert("تم تسجيل الدخول");
-  window.location.href = "pages/admin-users.html";
 };
