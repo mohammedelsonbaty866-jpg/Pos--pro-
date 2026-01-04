@@ -3,21 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <title>تسجيل الدخول</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/login.css">
 </head>
-
 <body>
 
-<h3>تسجيل الدخول</h3>
+<div class="login-box">
+  <h2>تسجيل الدخول</h2>
 
-<input id="phone" placeholder="+2010xxxxxxxx">
-<div id="recaptcha"></div>
+  <input id="phone" placeholder="+2010xxxxxxxx">
 
-<button id="sendBtn">إرسال الكود</button>
+  <div id="recaptcha"></div>
 
-<input id="code" placeholder="كود التفعيل">
-<button id="loginBtn">دخول</button>
+  <input id="code" placeholder="كود التفعيل" style="display:none">
 
-<script type="module" src="./js/auth.js"></script>
+  <button id="mainBtn">إرسال كود</button>
+
+  <p id="msg" class="note"></p>
+</div>
+
+<script type="module" src="js/auth.js"></script>
 </body>
 </html>
