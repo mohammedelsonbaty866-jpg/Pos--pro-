@@ -10,13 +10,15 @@ import {
   getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+console.log("auth.js loaded ✅");
+
 window.recaptchaVerifier = new RecaptchaVerifier(
   "recaptcha",
   { size: "normal" },
   auth
 );
 
-window.sendCode = async function () {
+document.getElementById("sendBtn").onclick = async () => {
   const phone = document.getElementById("phone").value;
 
   if (!phone) {
@@ -24,22 +26,21 @@ window.sendCode = async function () {
     return;
   }
 
-  // 🔍 تحقق أن المستخدم مضاف من الأدمن
   const ref = doc(db, "users", phone);
   const snap = await getDoc(ref);
 
-  if (!snap.exists() || snap.data().active !== true) {
-    alert("غير مسموح بالدخول");
+  if (!snap.exists()) {
+    alert("الرقم غير مسجل");
     return;
   }
 
   window.confirmationResult =
     await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
 
-  alert("تم إرسال كود التفعيل");
+  alert("تم إرسال الكود");
 };
 
-window.confirmCode = async function () {
+document.getElementById("loginBtn").onclick = async () => {
   const code = document.getElementById("code").value;
 
   if (!code) {
@@ -49,6 +50,6 @@ window.confirmCode = async function () {
 
   await window.confirmationResult.confirm(code);
 
-  // ✔️ بعد الدخول
+  alert("تم تسجيل الدخول");
   window.location.href = "pages/admin-users.html";
 };
