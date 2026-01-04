@@ -1,52 +1,57 @@
-const auth = firebase.auth();
+// js/auth.js
+import {
+  signInWithPhoneNumber,
+  RecaptchaVerifier
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-const phoneInput = document.getElementById("phone");
-const codeInput = document.getElementById("code");
-const sendBtn = document.getElementById("sendCode");
-const verifyBtn = document.getElementById("verifyCode");
-const loader = document.getElementById("loader");
+import { auth } from "./firebase.js";
 
-window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(
-  'recaptcha-container',
-  { size: 'invisible' }
+window.recaptchaVerifier = new RecaptchaVerifier(
+  auth,
+  "recaptcha-container",
+  {
+    size: "invisible"
+  }
 );
 
-sendBtn.onclick = () => {
-  sendBtn.disabled = true;
-  loader.style.display = "block";
+const sendBtn = document.getElementById("sendCode");
+const loginBtn = document.getElementById("loginBtn");
 
-  auth.signInWithPhoneNumber(phoneInput.value, window.recaptchaVerifier)
-    .then(confirmationResult => {
-      window.confirmationResult = confirmationResult;
-      codeInput.disabled = false;
-      verifyBtn.disabled = false;
-      alert("تم إرسال الكود");
-    })
-    .catch(err => {
-      alert(err.message);
-      sendBtn.disabled = false;
-    })
-    .finally(() => loader.style.display = "none");
-};
+let confirmationResultGlobal = null;
 
-verifyBtn.onclick = () => {
-  loader.style.display = "block";
-  verifyBtn.disabled = true;
-
-  window.confirmationResult.confirm(codeInput.value)
-    .then(() => {
-      window.location.href = "dashboard.html";
-    })
-    .catch(() => {
-      alert("كود غير صحيح");
-      verifyBtn.disabled = false;
-    })
-    .finally(() => loader.style.display = "none");
-};
-
-// 🔥 ده المهم
-auth.onAuthStateChanged(user => {
-  if (user) {
-    window.location.href = "dashboard.html";
+sendBtn.onclick = async () => {
+  const phone = document.getElementById("phone").value.trim();
+  if (!phone) {
+    alert("اكتب رقم التليفون");
+    return;
   }
-});
+
+  try {
+    confirmationResultGlobal = await signInWithPhoneNumber(
+      auth,
+      phone,
+      window.recaptchaVerifier
+    );
+    alert("تم إرسال الكود");
+  } catch (e) {
+    alert(e.message);
+  }
+};
+
+loginBtn.onclick = async () => {
+  const code = document.getElementById("code").value.trim();
+  if (!confirmationResultGlobal) {
+    alert("ابعت الكود الأول");
+    return;
+  }
+
+  try {
+    const result = await confirmationResultGlobal.confirm(code);
+    alert("تم تسجيل الدخول");
+
+    // 👇 هنا تدخل على السيستم
+    window.location.href = "dashboard.html";
+  } catch (e) {
+    alert("كود غلط");
+  }
+};
