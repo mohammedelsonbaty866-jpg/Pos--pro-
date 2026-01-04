@@ -1,232 +1,80 @@
-/*********************************
- * تحميل البيانات
- *********************************/
-let products   = JSON.parse(localStorage.getItem("products"))   || [];
-let stock      = JSON.parse(localStorage.getItem("stock"))      || [];
-let customers  = JSON.parse(localStorage.getItem("customers"))  || [];
-let sales      = JSON.parse(localStorage.getItem("sales"))      || [];
-let reports    = JSON.parse(localStorage.getItem("reports"))    || [];
+import { db } from "./firebase.js";
+import {
+  collection,
+  addDoc,
+  doc,
+  updateDoc,
+  increment,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 let saleItems = [];
-let discount = 0;
+let saleTotal = 0;
 
-/*********************************
- * عناصر الصفحة
- *********************************/
-const customerInput   = document.getElementById("saleCustomer");
-const saleTypeInput   = document.getElementById("saleType"); // نقدي / آجل
-const productInput    = document.getElementById("saleProduct");
-const qtyInput        = document.getElementById("saleQty");
-const discountInput   = document.getElementById("saleDiscount");
-const tableBody       = document.getElementById("saleTableBody");
-const totalSpan       = document.getElementById("saleTotal");
-
-/*********************************
- * تحميل العملاء في البحث
- *********************************/
-function loadCustomers() {
-  customers.forEach(c => {
-    const opt = document.createElement("option");
-    opt.value = c.name;
-    customerInput.appendChild(opt);
-  });
-}
-
-/*********************************
- * تحميل الأصناف في البحث
- *********************************/
-function loadProducts() {
-  productInput.innerHTML = "";
-  products.forEach(p => {
-    const opt = document.createElement("option");
-    opt.value = p.name;
-    productInput.appendChild(opt);
-  });
-}
-// تحميل الأصناف
-const items = JSON.parse(localStorage.getItem("items")) || [];
-
-function searchItems(text) {
-  const list = document.getElementById("itemsList");
-  list.innerHTML = "";
-
-  if (!text) return;
-
-  const results = items.filter(i =>
-    i.name.includes(text)
-  );
-
-  results.forEach(item => {
-    const div = document.createElement("div");
-    div.innerText = item.name;
-    div.onclick = () => selectItem(item);
-    list.appendChild(div);
-  });
-}
-
-function selectItem(item) {
-  document.getElementById("itemSearch").value = item.name;
-  document.getElementById("price").value = item.price || 0;
-  document.getElementById("itemsList").innerHTML = "";
-}
-/*********************************
- * إضافة صنف للفاتورة
- *********************************/
-function addItem() {
-  const name = itemSearch.value;
-  const q = Number(qty.value);
-  const p = Number(price.value);
-
-  if (!name || q <= 0 || p <= 0)
-    return alert("بيانات غير صحيحة");
-
-  invoice.push({
-    name,
-    qty: q,
-    price: p,
-    total: q * p
-  });
-
-  render();
-}
-
-  const product = products.find(p => p.name === name);
-  if (!product) {
-    alert("الصنف غير موجود");
-    return;
-  }
-
-  const stockItem = stock.find(s => s.name === name);
-  if (!stockItem || stockItem.qty < qty) {
-    alert("الكمية غير متوفرة في المخزون");
-    return;
-  }
-
-  const total = qty * product.price;
-
-  saleItems.push({
-    name,
-    unit: product.unit,
-    qty,
-    price: product.price,
-    total
-  });
-
-  renderTable();
-}
-
-/*********************************
- * عرض الفاتورة
- *********************************/
-function renderTable() {
-  tableBody.innerHTML = "";
-  let sum = 0;
-
-  saleItems.forEach((item, index) => {
-    sum += item.total;
-
-    tableBody.innerHTML += `
-      <tr>
-        <td>${index + 1}</td>
-        <td>${item.name}</td>
-        <td>${item.unit}</td>
-        <td>${item.qty}</td>
-        <td>${item.price}</td>
-        <td>${item.total}</td>
-        <td>
-          <button onclick="removeItem(${index})">❌</button>
-        </td>
-      </tr>
-    `;
-  });
-
-  discount = Number(discountInput.value) || 0;
-  sum -= discount;
-
-  totalSpan.innerText = sum.toFixed(2);
-}
-
-/*********************************
- * حذف صنف
- *********************************/
-function removeItem(index) {
-  saleItems.splice(index, 1);
-  renderTable();
-}
-
-/*********************************
- * حفظ الفاتورة
- *********************************/
-function saveSale() {
+// 🔥 حفظ الفاتورة
+document.getElementById("saveSaleBtn").onclick = async () => {
   if (saleItems.length === 0) {
     alert("الفاتورة فاضية");
     return;
   }
 
-  const saleType = saleTypeInput.value;
-  const customer = customerInput.value;
+  const customerId = document.getElementById("customerId").value || null;
+  const customerName = document.getElementById("customerName").value || "نقدي";
+  const paidType = document.querySelector("input[name='paidType']:checked").value;
 
-  if (saleType === "آجل" && !customer) {
-    alert("اسم العميل إجباري في البيع الآجل");
-    return;
+  // 1️⃣ حفظ الفاتورة
+  const saleRef = await addDoc(collection(db, "sales"), {
+    customerId,
+    customerName,
+    repId: localStorage.getItem("repId") || null,
+    items: saleItems,
+    total: saleTotal,
+    paidType,
+    treasuryId: "main",
+    date: serverTimestamp()
+  });
+
+  // 2️⃣ تحديث المخزون
+  for (const item of saleItems) {
+    await updateDoc(doc(db, "products", item.productId), {
+      stock: increment(-item.qty)
+    });
   }
 
-  const total = Number(totalSpan.innerText);
+  // 3️⃣ تحديث الخزنة لو نقدي
+  if (paidType === "cash") {
+    await addDoc(collection(db, "cash"), {
+      amount: saleTotal,
+      type: "in",
+      source: "sale",
+      sourceId: saleRef.id,
+      treasuryId: "main",
+      date: serverTimestamp()
+    });
+  }
 
-  const sale = {
-    id: Date.now(),
-    date: new Date().toLocaleString(),
-    type: saleType,
-    customer: customer || "نقدي",
-    items: saleItems,
-    discount,
-    total
-  };
+  // 4️⃣ تحديث كشف حساب العميل لو أجل
+  if (paidType === "credit" && customerId) {
+    await updateDoc(doc(db, "customers", customerId), {
+      balance: increment(saleTotal)
+    });
+  }
 
-  /******** تحديث المخزون ********/
-  saleItems.forEach(item => {
-    const s = stock.find(x => x.name === item.name);
-    s.qty -= item.qty;
-  });
+  alert("تم حفظ الفاتورة وربطها بكل السيستم ✅");
 
-  /******** حفظ البيانات ********/
-  sales.push(sale);
-  reports.push({
-    type: "sale",
-    date: sale.date,
-    total: sale.total
-  });
-
-  localStorage.setItem("sales", JSON.stringify(sales));
-  localStorage.setItem("stock", JSON.stringify(stock));
-  localStorage.setItem("reports", JSON.stringify(reports));
-
-  alert("تم حفظ الفاتورة بنجاح");
-
-  resetSale();
-}
-
-/*********************************
- * إعادة ضبط الشاشة
- *********************************/
-function resetSale() {
+  // Reset
   saleItems = [];
-  discountInput.value = "";
-  customerInput.value = "";
-  qtyInput.value = 1;
-  renderTable();
+  saleTotal = 0;
+  renderSale();
+};
+
+// 👇 مثال إضافة صنف
+function addItem(product) {
+  saleItems.push(product);
+  saleTotal += product.price * product.qty;
+  renderSale();
 }
 
-/*********************************
- * طباعة
- *********************************/
-function printSale() {
-  window.print();
+function renderSale() {
+  document.getElementById("total").innerText = saleTotal;
 }
-
-/*********************************
- * تشغيل أولي
- *********************************/
-loadCustomers();
-loadProducts();
-renderTable();
