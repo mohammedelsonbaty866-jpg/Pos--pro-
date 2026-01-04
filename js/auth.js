@@ -1,30 +1,62 @@
-import { auth } from "./firebase.js";
 import {
   RecaptchaVerifier,
   signInWithPhoneNumber
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
+import { auth } from "./firebase.js";
+
+let confirmationResult;
+
+// reCAPTCHA
 window.recaptchaVerifier = new RecaptchaVerifier(
-  'recaptcha-container',
-  { size: 'invisible' },
-  auth
+  auth,
+  "recaptcha-container",
+  {
+    size: "invisible",
+    callback: () => {}
+  }
 );
 
-document.getElementById("sendCode").addEventListener("click", async () => {
+// إرسال الكود
+document.getElementById("sendCodeBtn").addEventListener("click", () => {
   const phone = document.getElementById("phone").value;
 
-  const confirmationResult = await signInWithPhoneNumber(
-    auth,
-    phone,
-    window.recaptchaVerifier
-  );
+  if (!phone.startsWith("+")) {
+    alert("اكتب الرقم بصيغة دولية مثال: +2010xxxxxxx");
+    return;
+  }
 
-  window.confirmationResult = confirmationResult;
-  alert("تم إرسال الكود");
+  signInWithPhoneNumber(auth, phone, window.recaptchaVerifier)
+    .then((result) => {
+      confirmationResult = result;
+      alert("تم إرسال الكود");
+    })
+    .catch((error) => {
+      console.error(error);
+      alert("خطأ في إرسال الكود");
+    });
 });
 
-document.getElementById("login").addEventListener("click", async () => {
+// تأكيد الكود
+document.getElementById("verifyCodeBtn").addEventListener("click", () => {
   const code = document.getElementById("code").value;
-  await window.confirmationResult.confirm(code);
-  alert("تم تسجيل الدخول");
+
+  if (!confirmationResult) {
+    alert("ابعت الكود الأول");
+    return;
+  }
+
+  confirmationResult
+    .confirm(code)
+    .then((result) => {
+      const user = result.user;
+      alert("تم تسجيل الدخول ✔️");
+
+      // مثال تحويل
+      // window.location.href = "dashboard.html";
+    })
+    .catch((error) => {
+      console.error(error);
+      alert("كود غير صحيح");
+    });
 });
