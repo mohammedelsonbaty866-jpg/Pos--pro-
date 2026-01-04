@@ -1,43 +1,52 @@
-function login() {
-  const u = username.value;
-  const p = password.value;
+import { auth, db } from "./firebase.js";
+import {
+  signInWithPhoneNumber,
+  RecaptchaVerifier
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-  const tx = db.transaction("users", "readonly");
-  const store = tx.objectStore("users");
-  const req = store.getAll();
+import {
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  req.onsuccess = () => {
-    const user = req.result.find(
-      x => x.username === u && x.password === p
-    );
+let confirmationResult;
 
-    if (!user) {
-      alert("بيانات غير صحيحة");
-      return;
-    }
+window.onload = () => {
+  window.recaptchaVerifier = new RecaptchaVerifier(
+    auth,
+    "recaptcha-container",
+    { size: "invisible" }
+  );
+};
 
-    localStorage.setItem("user", JSON.stringify(user));
+document.getElementById("sendCode").onclick = async () => {
+  const phone = document.getElementById("phone").value;
+  confirmationResult = await signInWithPhoneNumber(
+    auth,
+    phone,
+    window.recaptchaVerifier
+  );
+  alert("تم إرسال الكود");
+};
 
-    if (user.role === "admin") {
-      location.href = "../dashboard.html";
-    } else {
-      location.href = "agents.html";
-    }
-  };
-}
+document.getElementById("verifyCode").onclick = async () => {
+  const code = document.getElementById("code").value;
+  const result = await confirmationResult.confirm(code);
+  const uid = result.user.uid;
 
-function currentUser() {
-  return JSON.parse(localStorage.getItem("user"));
-}
-function login(){
-  const u=username.value;
-  const p=password.value;
+  const userRef = doc(db, "users", uid);
+  const snap = await getDoc(userRef);
 
-  const reps=JSON.parse(localStorage.getItem("reps"))||[];
-  const rep=reps.find(r=>r.username===u && r.password===p);
+  if (!snap.exists()) {
+    alert("غير مسجل في النظام");
+    return;
+  }
 
-  if(!rep) return alert("بيانات غير صحيحة");
+  const role = snap.data().role;
 
-  localStorage.setItem("currentRep",JSON.stringify(rep));
-  location.href="sales-rep.html";
-}
+  if (role === "admin") {
+    location.href = "pages/dashboard.html";
+  } else {
+    location.href = "pages/sales.html";
+  }
+};
