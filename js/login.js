@@ -1,42 +1,45 @@
-console.log("login.js loaded ✅");
-import { auth } from "./firebase-init.js";
-import {
-  signInWithEmailAndPassword,
-  sendPasswordResetEmail
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { auth, db } from "./firebase-init.js";
+import { signInWithEmailAndPassword } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { doc, getDoc } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const loginBtn = document.getElementById("loginBtn");
-const resetBtn = document.getElementById("reset");
-const error = document.getElementById("error");
+const errorBox = document.getElementById("error");
 
 loginBtn.addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
 
   if (!email || !password) {
-    error.innerText = "من فضلك أدخل البيانات";
+    errorBox.textContent = "من فضلك أدخل البيانات";
     return;
   }
-
-  loginBtn.innerText = "جاري الدخول...";
-  loginBtn.disabled = true;
 
   try {
-    await signInWithEmailAndPassword(auth, email, password);
-    window.location.href = "dashboard.html";
-  } catch (e) {
-    error.innerText = "بيانات الدخول غير صحيحة";
-    loginBtn.innerText = "دخول";
-    loginBtn.disabled = false;
-  }
-});
+    // تسجيل الدخول
+    const userCred = await signInWithEmailAndPassword(auth, email, password);
+    const uid = userCred.user.uid;
 
-resetBtn.addEventListener("click", async () => {
-  const email = document.getElementById("email").value.trim();
-  if (!email) {
-    alert("اكتب البريد الإلكتروني أولاً");
-    return;
+    // جلب بيانات المستخدم من Firestore
+    const userDoc = await getDoc(doc(db, "users", uid));
+
+    if (!userDoc.exists()) {
+      errorBox.textContent = "لا يوجد صلاحية لهذا الحساب";
+      return;
+    }
+
+    const role = userDoc.data().role;
+
+    // توجيه حسب الصلاحية
+    if (role === "admin") {
+      window.location.href = "dashboard.html";
+    } else {
+      window.location.href = "rep-sales.html";
+    }
+
+  } catch (err) {
+    errorBox.textContent = "بيانات الدخول غير صحيحة";
+    console.error(err);
   }
-  await sendPasswordResetEmail(auth, email);
-  alert("تم إرسال رابط إعادة تعيين كلمة المرور");
 });
