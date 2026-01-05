@@ -1,133 +1,82 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Dashboard</title>
 
-  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
 </head>
 <body>
 
-<!-- الشريط العلوي -->
-<div class="top-bar">
-  <span id="userName">...</span>
-  <span id="status" class="online">● Online</span>
-</div>
+<!-- Top Bar -->
+<header class="topbar">
+  <div class="status">
+    <span class="dot"></span> متصل
+  </div>
+  <div class="user">
+    <i class="fa-solid fa-user-shield"></i>
+    <span id="userName">Admin</span>
+  </div>
+</header>
 
-<!-- الداش بورد -->
-<div class="dashboard">
+<!-- Dashboard -->
+<main class="dashboard">
 
-  <!-- التشغيل -->
-  <div class="card pos" onclick="go('pos.html')">
+  <div class="card primary" onclick="go('pos.html')">
     <i class="fa-solid fa-cash-register"></i>
     <span>نقطة البيع</span>
   </div>
 
-  <div class="card purchases admin" onclick="go('purchases.html')">
-    <i class="fa-solid fa-cart-shopping"></i>
-    <span>المشتريات</span>
+  <div class="card" onclick="go('invoice.html')">
+    <i class="fa-solid fa-file-invoice"></i>
+    <span>الفواتير</span>
   </div>
 
-  <!-- العملاء والموردين -->
-  <div class="card customers" onclick="go('customers.html')">
+  <div class="card" onclick="go('customers.html')">
     <i class="fa-solid fa-users"></i>
     <span>العملاء</span>
   </div>
 
-  <div class="card suppliers admin" onclick="go('suppliers.html')">
+  <div class="card admin" onclick="go('suppliers.html')">
     <i class="fa-solid fa-truck"></i>
     <span>الموردين</span>
   </div>
 
-  <!-- الأصناف والمخزون -->
-  <div class="card products admin" onclick="go('products.html')">
+  <div class="card admin" onclick="go('products.html')">
     <i class="fa-solid fa-box"></i>
     <span>الأصناف</span>
   </div>
 
-  <div class="card stock admin" onclick="go('stock.html')">
+  <div class="card admin" onclick="go('stock.html')">
     <i class="fa-solid fa-warehouse"></i>
     <span>المخزون</span>
   </div>
 
-  <!-- مرتجعات / مصروفات -->
-  <div class="card returns" onclick="go('returns.html')">
-    <i class="fa-solid fa-rotate-left"></i>
-    <span>المرتجعات</span>
-  </div>
-
-  <div class="card expenses admin" onclick="go('expenses.html')">
+  <div class="card admin" onclick="go('expenses.html')">
     <i class="fa-solid fa-money-bill-wave"></i>
     <span>المصروفات</span>
   </div>
 
-  <!-- كشف حساب / فواتير -->
-  <div class="card accounts" onclick="go('accounts.html')">
-    <i class="fa-solid fa-file-invoice"></i>
-    <span>كشف الحساب</span>
-  </div>
-
-  <div class="card invoices" onclick="go('invoices.html')">
-    <i class="fa-solid fa-receipt"></i>
-    <span>الفواتير</span>
-  </div>
-
-  <!-- إضافات ذكية -->
-  <div class="card offers admin" onclick="go('offers.html')">
-    <i class="fa-solid fa-tags"></i>
-    <span>العروض</span>
-  </div>
-
-  <div class="card barcode admin" onclick="go('barcode.html')">
-    <i class="fa-solid fa-barcode"></i>
-    <span>الباركود</span>
-  </div>
-
-  <div class="card alerts admin" onclick="go('alerts.html')">
-    <i class="fa-solid fa-bell"></i>
-    <span>التنبيهات</span>
-  </div>
-
-  <!-- نظام -->
-  <div class="card branches admin" onclick="go('branches.html')">
-    <i class="fa-solid fa-store"></i>
-    <span>الفروع</span>
-  </div>
-
-  <div class="card activity admin" onclick="go('activity-log.html')">
-    <i class="fa-solid fa-clock-rotate-left"></i>
-    <span>سجل النشاط</span>
-  </div>
-
-  <!-- مالية وتقارير -->
-  <div class="card treasury admin" onclick="go('treasury.html')">
+  <div class="card admin" onclick="go('treasury.html')">
     <i class="fa-solid fa-wallet"></i>
     <span>الخزنة</span>
   </div>
 
-  <div class="card reports admin" onclick="go('reports.html')">
+  <div class="card admin" onclick="go('reports.html')">
     <i class="fa-solid fa-chart-line"></i>
     <span>التقارير</span>
   </div>
 
-  <!-- إعدادات -->
-  <div class="card settings admin" onclick="go('settings.html')">
+  <div class="card" onclick="go('settings.html')">
     <i class="fa-solid fa-gear"></i>
     <span>الإعدادات</span>
   </div>
 
-  <!-- خروج -->
-  <div class="card logout" onclick="logout()">
-    <i class="fa-solid fa-right-from-bracket"></i>
-    <span>تسجيل الخروج</span>
-  </div>
+</main>
 
-</div>
-
-<script type="module" src="js/firebase-init.js"></script>
-<script type="module" src="js/dashboard.js"></script>
+<script src="js/dashboard.js"></script>
 </body>
 </html>
