@@ -1,24 +1,71 @@
-import { auth } from "./firebase.js";
-import { signInWithEmailAndPassword } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>تسجيل الدخول</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-const form = document.getElementById("loginForm");
+  <style>
+    body {
+      background:#0d1b2a;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+      font-family: Arial;
+      margin:0;
+    }
+    .card {
+      background:#1b2a41;
+      padding:25px;
+      border-radius:12px;
+      width:300px;
+      box-shadow:0 10px 30px rgba(0,0,0,.3);
+    }
+    h2 {
+      color:#fff;
+      text-align:center;
+      margin-bottom:20px;
+    }
+    input {
+      width:100%;
+      padding:12px;
+      margin-bottom:12px;
+      border-radius:8px;
+      border:none;
+      font-size:14px;
+    }
+    button {
+      width:100%;
+      padding:12px;
+      background:#3a6df0;
+      color:#fff;
+      border:none;
+      border-radius:8px;
+      font-size:16px;
+      cursor:pointer;
+    }
+    button:active {
+      transform: scale(.98);
+    }
+  </style>
+</head>
 
-form.addEventListener("submit", async (e) => {
-  e.preventDefault(); // 🔥 ده كان ناقص
+<body>
 
-  const phone = document.getElementById("phone").value.trim();
-  const password = document.getElementById("password").value.trim();
+  <div class="card">
+    <h2>تسجيل الدخول</h2>
 
-  // تحويل رقم التليفون لإيميل وهمي
-  const email = phone + "@pos.com";
+    <input type="email" id="email" placeholder="الإيميل">
+    <input type="password" id="password" placeholder="كلمة المرور">
 
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    alert("تم تسجيل الدخول");
-    window.location.href = "dashboard.html";
-  } catch (err) {
-    alert("خطأ في الدخول");
-    console.log(err.message);
-  }
-});
+    <!-- الربط هنا -->
+    <button onclick="login()">دخول</button>
+  </div>
+
+  <!-- لازم يكونوا Module -->
+  <script type="module" src="js/firebase.js"></script>
+  <script type="module" src="js/auth.js"></script>
+
+</body>
+</html>
