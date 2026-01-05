@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>الدفع - تحويل</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  font-family: Tahoma, Arial;
+  background:#f4f6f8;
+  margin:0;
+}
+.header{
+  background:#111;
+  color:#fff;
+  padding:15px;
+  text-align:center;
+  font-size:18px;
+}
+.container{
+  padding:15px;
+}
+.box{
+  background:#fff;
+  border-radius:12px;
+  padding:15px;
+  margin-bottom:15px;
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+.row{
+  margin-bottom:12px;
+}
+label{
+  display:block;
+  margin-bottom:6px;
+  font-weight:bold;
+}
+input, select{
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:15px;
+}
+.methods{
+  display:flex;
+  gap:10px;
+}
+.method{
+  flex:1;
+  padding:15px;
+  border-radius:10px;
+  border:2px solid #ddd;
+  text-align:center;
+  cursor:pointer;
+  font-weight:bold;
+}
+.method.active{
+  border-color:#0d6efd;
+  background:#eef4ff;
+}
+.total{
+  font-size:20px;
+  font-weight:bold;
+  color:#0d6efd;
+}
+.actions{
+  display:flex;
+  gap:10px;
+}
+.btn{
+  flex:1;
+  padding:14px;
+  font-size:16px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+}
+.save{
+  background:#0d6efd;
+  color:#fff;
+}
+.cancel{
+  background:#dc3545;
+  color:#fff;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  الدفع عن طريق تحويل
+</div>
+
+<div class="container">
+
+  <!-- اختيار نوع التحويل -->
+  <div class="box">
+    <label>نوع التحويل</label>
+    <div class="methods">
+      <div class="method" onclick="selectMethod('vodafone')">Vodafone Cash</div>
+      <div class="method" onclick="selectMethod('instapay')">InstaPay</div>
+    </div>
+  </div>
+
+  <!-- بيانات التحويل -->
+  <div class="box">
+    <div class="row">
+      <label>رقم المحفظة / الحساب</label>
+      <input type="text" id="account" placeholder="مثال: 010xxxxxxx">
+    </div>
+
+    <div class="row">
+      <label>رقم المرجع (اختياري)</label>
+      <input type="text" id="ref" placeholder="Reference">
+    </div>
+
+    <div class="row">
+      <label>المبلغ</label>
+      <input type="number" id="amount" readonly>
+    </div>
+
+    <div class="row">
+      <label>التاريخ</label>
+      <input type="date" id="date">
+    </div>
+
+    <div class="row total">
+      الإجمالي: <span id="totalText">0</span> جنيه
+    </div>
+  </div>
+
+  <!-- أزرار -->
+  <div class="actions">
+    <button class="btn save" onclick="saveTransfer()">حفظ الدفع</button>
+    <button class="btn cancel" onclick="window.close()">إلغاء</button>
+  </div>
+
+</div>
+
+<script>
+let paymentMethod = "";
+
+/* تحميل بيانات الفاتورة من POS */
+const invoice = JSON.parse(localStorage.getItem("currentInvoice")) || {
+  total:0,
+  invoiceNo:""
+};
+
+document.getElementById("amount").value = invoice.total;
+document.getElementById("totalText").innerText = invoice.total;
+document.getElementById("date").valueAsDate = new Date();
+
+function selectMethod(method){
+  paymentMethod = method;
+  document.querySelectorAll(".method").forEach(m=>m.classList.remove("active"));
+  event.target.classList.add("active");
+}
+
+function saveTransfer(){
+  if(!paymentMethod){
+    alert("اختر نوع التحويل");
+    return;
+  }
+  if(!account.value){
+    alert("ادخل رقم الحساب");
+    return;
+  }
+
+  const transferData = {
+    invoiceNo: invoice.invoiceNo,
+    amount: invoice.total,
+    method: paymentMethod,
+    account: account.value,
+    ref: ref.value,
+    date: date.value,
+    type: "transfer"
+  };
+
+  /* حفظ في الخزنة */
+  let treasury = JSON.parse(localStorage.getItem("treasury")) || [];
+  treasury.push(transferData);
+  localStorage.setItem("treasury", JSON.stringify(treasury));
+
+  /* ربط مع الفاتورة */
+  invoice.payment = transferData;
+  localStorage.setItem("currentInvoice", JSON.stringify(invoice));
+
+  /* سجل النشاط */
+  let logs = JSON.parse(localStorage.getItem("activityLog")) || [];
+  logs.push({
+    text:`تم دفع فاتورة ${invoice.invoiceNo} عن طريق تحويل`,
+    date:new Date().toLocaleString()
+  });
+  localStorage.setItem("activityLog", JSON.stringify(logs));
+
+  alert("تم حفظ الدفع بنجاح");
+  window.close();
+}
+</script>
+
+</body>
+</html>
