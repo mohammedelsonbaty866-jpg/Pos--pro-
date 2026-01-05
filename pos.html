@@ -2,8 +2,10 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>POS</title>
-<link rel="stylesheet" href="../css/pos.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نقطة البيع POS</title>
+
+<link rel="stylesheet" href="css/pos.css">
 <link rel="stylesheet"
  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
@@ -11,11 +13,11 @@
 <body>
 
 <header class="pos-header">
-  <span>🟢 Online</span>
-  <span>نقطة البيع</span>
+  <div>🟢 Online</div>
+  <div>نقطة البيع</div>
 </header>
 
-<section class="top-controls">
+<section class="top-bar">
   <select id="paymentType">
     <option value="cash">نقدي</option>
     <option value="credit">آجل</option>
@@ -25,15 +27,13 @@
 </section>
 
 <section class="search">
-  <input id="searchProduct" placeholder="🔍 اسم الصنف أو باركود">
+  <input id="searchInput" placeholder="🔍 اسم الصنف أو باركود">
 </section>
 
-<!-- ✅ شبكة الأصناف -->
 <section class="products-grid" id="productsGrid">
-  <!-- ديناميك -->
+  <!-- الأصناف -->
 </section>
 
-<!-- ✅ الفاتورة -->
 <section class="invoice">
   <table>
     <thead>
@@ -49,16 +49,15 @@
 
   <div class="totals">
     <div>الإجمالي: <span id="total">0</span> ج</div>
-    <input id="discount" placeholder="خصم">
+    <input id="discount" type="number" placeholder="خصم">
     <div class="net">الصافي: <span id="net">0</span> ج</div>
   </div>
 
-  <button class="save-btn" onclick="saveSale()">
-    💾 حفظ الفاتورة
+  <button class="save-btn" onclick="saveInvoice()">
+    <i class="fa-solid fa-floppy-disk"></i> حفظ الفاتورة
   </button>
 </section>
 
-<script type="module" src="../js/firebase-init.js"></script>
-<script type="module" src="../js/pos.js"></script>
+<script src="js/pos.js"></script>
 </body>
 </html>
