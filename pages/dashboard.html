@@ -1,17 +1,133 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>POS System</title>
+  <meta charset="UTF-8" />
+  <title>لوحة التحكم - POS Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBZwWxWIIE0exAPoL9P8pbmp19gnBFxQq0",
+      authDomain: "pos-pro-996f0.firebaseapp.com",
+      projectId: "pos-pro-996f0",
+      storageBucket: "pos-pro-996f0.appspot.com",
+      messagingSenderId: "591451935128",
+      appId: "1:591451935128:web:683495139e62fb9b1e1bed"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // حماية الصفحة
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "../index.html";
+        return;
+      }
+
+      // جلب بيانات المستخدم
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists() || userSnap.data().active !== true) {
+        alert("لا يوجد صلاحيات");
+        await signOut(auth);
+        window.location.href = "../index.html";
+        return;
+      }
+
+      document.getElementById("username").innerText =
+        userSnap.data().name || "مستخدم";
+    });
+
+    // تسجيل الخروج
+    window.logout = async function () {
+      await signOut(auth);
+      window.location.href = "../index.html";
+    };
+  </script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Tahoma, Arial;
+      background: #0f172a;
+      color: #fff;
+    }
+
+    header {
+      background: #020617;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 18px;
+      margin: 0;
+    }
+
+    header button {
+      background: #ef4444;
+      border: none;
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    main {
+      padding: 20px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .card:hover {
+      background: #334155;
+      transform: translateY(-3px);
+    }
+  </style>
 </head>
+
 <body>
 
-<h2>تم تسجيل الدخول بنجاح ✅</h2>
+  <header>
+    <h1>مرحبًا، <span id="username">...</span></h1>
+    <button onclick="logout()">تسجيل الخروج</button>
+  </header>
 
-<script>
-  const user = localStorage.getItem("user");
-  if (!user) location.href = "index.html";
-</script>
+  <main>
+    <h2>لوحة التحكم</h2>
+
+    <div class="cards">
+      <div class="card" onclick="location.href='customers.html'">العملاء</div>
+      <div class="card" onclick="location.href='invoice.html'">الفواتير</div>
+      <div class="card" onclick="location.href='expenses.html'">المصروفات</div>
+      <div class="card" onclick="location.href='agents.html'">المندوبين</div>
+      <div class="card" onclick="location.href='admin-users.html'">المستخدمين</div>
+    </div>
+  </main>
 
 </body>
 </html>
