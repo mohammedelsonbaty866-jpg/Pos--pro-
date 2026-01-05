@@ -1,0 +1,80 @@
+body{
+ margin:0;
+ font-family:tahoma;
+ background:#f1f5f9;
+}
+
+.pos-header{
+ background:#0f172a;
+ color:#fff;
+ padding:14px;
+ display:flex;
+ justify-content:space-between;
+ font-size:18px;
+}
+
+.top-controls, .search{
+ padding:10px;
+ display:flex;
+ gap:10px;
+}
+
+input, select{
+ flex:1;
+ padding:12px;
+ font-size:16px;
+ border-radius:10px;
+ border:1px solid #ccc;
+}
+
+.products-grid{
+ display:grid;
+ grid-template-columns:repeat(2,1fr);
+ gap:12px;
+ padding:10px;
+}
+
+.product-card{
+ background:#fff;
+ border-radius:14px;
+ padding:16px;
+ text-align:center;
+ font-size:18px;
+ box-shadow:0 4px 10px rgba(0,0,0,.08);
+}
+
+.product-card:active{
+ transform:scale(.97);
+}
+
+.invoice{
+ background:#fff;
+ padding:10px;
+ border-top:2px solid #e5e7eb;
+}
+
+table{
+ width:100%;
+ text-align:center;
+}
+
+.totals{
+ margin-top:10px;
+ font-size:18px;
+}
+
+.net{
+ font-weight:bold;
+ color:#16a34a;
+}
+
+.save-btn{
+ width:100%;
+ padding:16px;
+ margin-top:10px;
+ background:#2563eb;
+ color:#fff;
+ border:none;
+ border-radius:14px;
+ font-size:20px;
+}
