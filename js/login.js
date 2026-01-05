@@ -1,41 +1,41 @@
-import { auth, db } from "./firebase.js";
-import { signInWithEmailAndPassword } from
-  "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { doc, getDoc } from
-  "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { auth } from "./firebase-init.js";
+import {
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-const btn = document.getElementById("loginBtn");
-const loader = document.getElementById("loader");
+const loginBtn = document.getElementById("loginBtn");
+const resetBtn = document.getElementById("reset");
+const error = document.getElementById("error");
 
-btn.addEventListener("click", async () => {
+loginBtn.addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
 
   if (!email || !password) {
-    alert("أدخل البيانات كاملة");
+    error.innerText = "من فضلك أدخل البيانات";
     return;
   }
 
-  loader.style.display = "block";
-  btn.disabled = true;
+  loginBtn.innerText = "جاري الدخول...";
+  loginBtn.disabled = true;
 
   try {
-    const res = await signInWithEmailAndPassword(auth, email, password);
-    const uid = res.user.uid;
-
-    const userDoc = await getDoc(doc(db, "users", uid));
-    if (!userDoc.exists()) {
-      alert("لا يوجد صلاحيات");
-      return;
-    }
-
-    localStorage.setItem("user", JSON.stringify(userDoc.data()));
+    await signInWithEmailAndPassword(auth, email, password);
     window.location.href = "dashboard.html";
-
   } catch (e) {
-    alert("بيانات غير صحيحة");
-  } finally {
-    loader.style.display = "none";
-    btn.disabled = false;
+    error.innerText = "بيانات الدخول غير صحيحة";
+    loginBtn.innerText = "دخول";
+    loginBtn.disabled = false;
   }
+});
+
+resetBtn.addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  if (!email) {
+    alert("اكتب البريد الإلكتروني أولاً");
+    return;
+  }
+  await sendPasswordResetEmail(auth, email);
+  alert("تم إرسال رابط إعادة تعيين كلمة المرور");
 });
