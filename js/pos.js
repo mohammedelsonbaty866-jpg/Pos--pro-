@@ -82,3 +82,47 @@ function saveInvoice(){
  renderCart();
  discountInput.value="";
 }
+import { db, auth } from "./firebase-init.js";
+import {
+  collection,
+  addDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+window.saveInvoice = async function () {
+
+  if(cart.length === 0){
+    alert("الفاتورة فاضية");
+    return;
+  }
+
+  if(saleType.value === "credit" && !customer.value){
+    alert("اسم العميل إجباري في الآجل");
+    return;
+  }
+
+  const user = auth.currentUser;
+  if(!user){
+    alert("يجب تسجيل الدخول");
+    return;
+  }
+
+  const invoiceData = {
+    items: cart,
+    total: Number(document.getElementById("total").innerText),
+    customer: customer.value || "نقدي",
+    saleType: saleType.value,
+    payment: paymentType,
+    cashierId: user.uid,
+    createdAt: serverTimestamp()
+  };
+
+  try{
+    await addDoc(collection(db, "sales"), invoiceData);
+    alert("✅ تم حفظ الفاتورة أونلاين");
+    location.reload();
+  }catch(e){
+    console.error(e);
+    alert("❌ خطأ في الحفظ");
+  }
+};
