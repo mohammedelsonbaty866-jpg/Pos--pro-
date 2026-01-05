@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>نقطة البيع</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+
+<style>
+*{box-sizing:border-box;font-family:Cairo,Arial}
+body{margin:0;background:#020617;color:#e5e7eb}
+
+/* Header */
+.header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px;background:#020617;border-bottom:1px solid #1e293b
+}
+
+/* Sections */
+.section{padding:12px}
+
+/* Inputs */
+input,select,textarea{
+  width:100%;padding:12px;
+  background:#020617;color:#fff;
+  border:1px solid #1e293b;border-radius:14px;
+  font-size:16px;margin-bottom:8px
+}
+
+/* Buttons */
+.btn{
+  padding:14px;border-radius:14px;
+  border:none;font-size:16px;font-weight:700;
+  cursor:pointer;width:100%
+}
+.btn-primary{background:#2563eb}
+.btn-success{background:#16a34a}
+.btn-danger{background:#dc2626}
+
+/* Invoice items */
+.item{
+  display:flex;justify-content:space-between;
+  background:#020617;padding:10px;
+  border-radius:14px;margin-bottom:6px;
+  align-items:center;border:1px solid #1e293b
+}
+.qty button{
+  background:#2563eb;border:none;color:#fff;
+  padding:6px 10px;border-radius:8px
+}
+
+/* Footer */
+.footer{
+  position:fixed;bottom:0;left:0;right:0;
+  display:flex;gap:8px;
+  padding:10px;background:#020617;border-top:1px solid #1e293b
+}
+.footer button{flex:1}
+
+.total{
+  font-size:18px;font-weight:bold;text-align:center
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <strong>نقطة البيع</strong>
+  <span id="netStatus">Online</span>
+</div>
+
+<!-- Sale Type -->
+<div class="section">
+  <select id="saleType" onchange="toggleCustomer()">
+    <option value="cash">نقدي</option>
+    <option value="credit">آجل</option>
+  </select>
+
+  <input id="customerName" placeholder="اسم العميل (إجباري في الآجل)" style="display:none">
+</div>
+
+<!-- Product -->
+<div class="section">
+  <input id="productSearch" placeholder="بحث عن الصنف / باركود">
+  <select id="unit">
+    <option value="piece">قطعة</option>
+    <option value="box">كرتونة</option>
+  </select>
+  <button class="btn btn-primary" onclick="addItem()">إضافة صنف</button>
+</div>
+
+<!-- Invoice -->
+<div class="section" id="invoice"></div>
+
+<!-- Note -->
+<div class="section">
+  <textarea id="note" placeholder="ملاحظة على الفاتورة"></textarea>
+</div>
+
+<div class="section total">
+  الإجمالي: <span id="total">0</span> ج
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <button class="btn btn-success" onclick="saveSale()">حفظ</button>
+  <button class="btn btn-primary" onclick="printInvoice()">طباعة</button>
+  <button class="btn btn-danger" onclick="refund()">مرتجع</button>
+</div>
+
+<script>
+/* ====== حالة الشبكة ====== */
+function updateNet(){
+  document.getElementById("netStatus").innerText =
+    navigator.onLine ? "Online" : "Offline";
+}
+window.addEventListener("online",updateNet);
+window.addEventListener("offline",updateNet);
+updateNet();
+
+/* ====== بيانات مؤقتة (بدل Firestore الآن) ====== */
+let products = {
+  "سكر": {price:25,min:23,max:28,stock:100,boxQty:12},
+  "زيت": {price:60,min:55,max:70,stock:50,boxQty:6}
+};
+
+let items=[];
+
+/* ====== عميل آجل ====== */
+function toggleCustomer(){
+  customerName.style.display =
+    saleType.value==="credit" ? "block":"none";
+}
+
+/* ====== إضافة صنف ====== */
+function addItem(){
+  const name=productSearch.value.trim();
+  if(!products[name]){
+    alert("الصنف غير موجود");
+    return;
+  }
+
+  const p=products[name];
+  const unitVal=unit.value;
+  const qty=1;
+  const deduct = unitVal==="box" ? p.boxQty : 1;
+
+  if(p.stock < deduct){
+    alert("المخزون غير كافي");
+    return;
+  }
+
+  items.push({
+    name,
+    qty,
+    unit:unitVal,
+    price:p.price,
+    min:p.min,
+    max:p.max,
+    deduct
+  });
+
+  render();
+}
+
+/* ====== عرض الفاتورة ====== */
+function render(){
+  invoice.innerHTML="";
+  let total=0;
+
+  items.forEach((i,idx)=>{
+    total += i.qty * i.price;
+    invoice.innerHTML+=`
+      <div class="item">
+        <div>
+          <strong>${i.name}</strong><br>
+          <small>${i.unit}</small>
+        </div>
+        <div class="qty">
+          <button onclick="changeQty(${idx},-1)">-</button>
+          ${i.qty}
+          <button onclick="changeQty(${idx},1)">+</button>
+        </div>
+      </div>`;
+  });
+
+  totalEl.innerText = total;
+}
+const totalEl=document.getElementById("total");
+
+/* ====== تغيير كمية ====== */
+function changeQty(i,d){
+  items[i].qty+=d;
+  if(items[i].qty<=0)items.splice(i,1);
+  render();
+}
+
+/* ====== حفظ البيع (مربوط) ====== */
+function saveSale(){
+  if(items.length===0){
+    alert("الفاتورة فارغة");
+    return;
+  }
+
+  if(saleType.value==="credit" && !customerName.value){
+    alert("اسم العميل إجباري في البيع الآجل");
+    return;
+  }
+
+  const sale={
+    id:Date.now(),
+    type:saleType.value,
+    customer:customerName.value||"نقدي",
+    items,
+    note:note.value,
+    total:totalEl.innerText,
+    date:new Date().toLocaleString(),
+    synced:navigator.onLine
+  };
+
+  // خصم مخزون
+  items.forEach(i=>{
+    products[i.name].stock -= i.deduct * i.qty;
+  });
+
+  // Offline
+  if(!navigator.onLine){
+    const pending = JSON.parse(localStorage.getItem("pendingSales"))||[];
+    pending.push(sale);
+    localStorage.setItem("pendingSales",JSON.stringify(pending));
+  }
+
+  alert("تم حفظ الفاتورة");
+  items=[];
+  render();
+}
+
+/* ====== طباعة ====== */
+function printInvoice(){
+  window.print();
+}
+
+/* ====== مرتجع ====== */
+function refund(){
+  alert("فتح شاشة المرتجعات");
+}
+</script>
+
+</body>
+</html>
