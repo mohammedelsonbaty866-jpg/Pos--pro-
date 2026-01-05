@@ -1,3 +1,12 @@
+import { auth } from "./firebase-init.js";
+import { onAuthStateChanged, signOut } from 
+"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.href = "index.html";
+  }
+});
 import { auth, db } from "./firebase-init.js";
 import {
   doc, getDoc
