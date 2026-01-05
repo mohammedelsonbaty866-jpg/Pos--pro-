@@ -1,268 +1,139 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>نقطة البيع POS</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نقطة البيع</title>
 
-<style>
-body{
-  margin:0;
-  font-family:Tahoma, Arial;
-  background:#f2f4f7;
-}
-.header{
-  background:#111;
-  color:#fff;
-  padding:12px;
-  text-align:center;
-  font-size:18px;
-}
-.container{ padding:10px; }
+  <!-- Icons -->
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
-/* inputs */
-input, select{
-  width:100%;
-  padding:10px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  margin-bottom:8px;
-  font-size:15px;
-}
-
-/* products */
-.products{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(90px,1fr));
-  gap:8px;
-}
-.product{
-  background:#fff;
-  border-radius:10px;
-  padding:10px;
-  text-align:center;
-  font-size:14px;
-  cursor:pointer;
-  box-shadow:0 2px 5px rgba(0,0,0,.1);
-}
-
-/* invoice */
-.invoice{
-  background:#fff;
-  border-radius:12px;
-  padding:10px;
-  margin-top:10px;
-}
-.invoice-item{
-  display:flex;
-  justify-content:space-between;
-  font-size:14px;
-  margin-bottom:5px;
-}
-.total{
-  font-size:18px;
-  font-weight:bold;
-  color:#0d6efd;
-  text-align:center;
-  margin-top:8px;
-}
-
-/* buttons */
-.actions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-  margin-top:10px;
-}
-.btn{
-  padding:14px;
-  border:none;
-  border-radius:10px;
-  font-size:16px;
-  cursor:pointer;
-}
-.pay{ background:#0d6efd; color:#fff; }
-.print{ background:#198754; color:#fff; }
-
-/* modal */
-.modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.5);
-  justify-content:center;
-  align-items:center;
-}
-.modal-box{
-  background:#fff;
-  width:90%;
-  max-width:420px;
-  border-radius:14px;
-  padding:15px;
-}
-.methods{
-  display:flex;
-  gap:8px;
-}
-.method{
-  flex:1;
-  padding:12px;
-  text-align:center;
-  border:2px solid #ddd;
-  border-radius:10px;
-  cursor:pointer;
-}
-.method.active{
-  border-color:#0d6efd;
-  background:#eef4ff;
-}
-.modal-actions{
-  display:flex;
-  gap:8px;
-  margin-top:10px;
-}
-.close{ background:#dc3545; color:#fff; }
-.save{ background:#0d6efd; color:#fff; }
-</style>
+  <!-- POS Style -->
+  <link rel="stylesheet" href="css/pos.css">
 </head>
 
-<body>
+<body class="dark">
 
-<div class="header">نقطة البيع</div>
-
-<div class="container">
-
-  <!-- بيانات البيع -->
-  <select id="saleType">
-    <option value="cash">نقدي</option>
-    <option value="credit">آجل</option>
-  </select>
-
-  <input id="customer" placeholder="اسم العميل (إجباري في الآجل)">
-
-  <input id="search" placeholder="بحث سريع عن صنف">
-
-  <!-- الأصناف -->
-  <div class="products" id="products"></div>
-
-  <!-- الفاتورة -->
-  <div class="invoice">
-    <div id="invoiceItems"></div>
-    <div class="total">الإجمالي: <span id="total">0</span> جنيه</div>
+<!-- ===== Top Bar ===== -->
+<header class="pos-header">
+  <div class="store-name">
+    <i class="fa-solid fa-store"></i>
+    <span id="storeName">اسم المتجر</span>
   </div>
 
-  <!-- أزرار -->
-  <div class="actions">
-    <button class="btn pay" onclick="openPayment()">الدفع</button>
-    <button class="btn print" onclick="printInvoice()">طباعة</button>
+  <div class="user-info">
+    <span id="cashierName">كاشير</span>
+    <span class="status online">●</span>
+  </div>
+</header>
+
+<!-- ===== Search Product ===== -->
+<section class="search-section">
+  <input
+    type="text"
+    id="productSearch"
+    placeholder="بحث سريع عن الصنف أو الباركود"
+    oninput="searchProduct(this.value)"
+  />
+</section>
+
+<!-- ===== Cart ===== -->
+<section class="cart-section">
+  <table>
+    <thead>
+      <tr>
+        <th>الصنف</th>
+        <th>الوحدة</th>
+        <th>الكمية</th>
+        <th>السعر</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="cartBody">
+      <!-- items -->
+    </tbody>
+  </table>
+</section>
+
+<!-- ===== Customer & Payment ===== -->
+<section class="info-section">
+
+  <!-- Customer -->
+  <div class="field">
+    <label>العميل</label>
+    <input
+      type="text"
+      id="customerName"
+      placeholder="نقدي / اسم العميل"
+    />
   </div>
 
+  <!-- Sale Type -->
+  <div class="field">
+    <label>نوع البيع</label>
+    <select id="saleType" onchange="handleSaleType()">
+      <option value="cash">نقدي</option>
+      <option value="credit">آجل</option>
+    </select>
+  </div>
+
+  <!-- Payment -->
+  <div class="field">
+    <label>طريقة الدفع</label>
+    <select id="paymentType" onchange="handlePaymentType()">
+      <option value="cash">نقدي</option>
+      <option value="transfer">تحويل</option>
+    </select>
+  </div>
+
+</section>
+
+<!-- ===== Total ===== -->
+<section class="total-section">
+  <span>الإجمالي</span>
+  <strong id="totalAmount">0.00</strong>
+</section>
+
+<!-- ===== Actions ===== -->
+<section class="actions">
+  <button class="btn save" onclick="saveInvoice()">
+    <i class="fa-solid fa-floppy-disk"></i>
+    حفظ
+  </button>
+
+  <button class="btn print" onclick="printInvoice()">
+    <i class="fa-solid fa-print"></i>
+    طباعة
+  </button>
+
+  <button class="btn cancel" onclick="clearCart()">
+    <i class="fa-solid fa-xmark"></i>
+    إلغاء
+  </button>
+</section>
+
+<!-- ===== Transfer Modal ===== -->
+<div id="transferModal" class="modal hidden">
+  <div class="modal-content">
+    <h3>بيانات التحويل</h3>
+
+    <select id="transferType">
+      <option value="vodafone">Vodafone Cash</option>
+      <option value="instapay">InstaPay</option>
+    </select>
+
+    <input type="text" id="transferAccount" placeholder="رقم الحساب / المحفظة">
+    <input type="text" id="transferRef" placeholder="رقم المرجع (اختياري)">
+
+    <button class="btn save" onclick="confirmTransfer()">تأكيد</button>
+    <button class="btn cancel" onclick="closeTransfer()">إلغاء</button>
+  </div>
 </div>
 
-<!-- Modal الدفع -->
-<div class="modal" id="paymentModal">
-  <div class="modal-box">
-    <h3>طريقة الدفع</h3>
-
-    <div class="methods">
-      <div class="method" onclick="selectPay('cash')">نقدي</div>
-      <div class="method" onclick="selectPay('transfer')">تحويل</div>
-    </div>
-
-    <div id="transferBox" style="display:none">
-      <input id="transferAccount" placeholder="رقم Vodafone / InstaPay">
-      <select id="transferType">
-        <option value="vodafone">Vodafone Cash</option>
-        <option value="instapay">InstaPay</option>
-      </select>
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn save" onclick="saveInvoice()">حفظ</button>
-      <button class="btn close" onclick="closePayment()">إلغاء</button>
-    </div>
-  </div>
-</div>
-
-<script>
-/* بيانات */
-const productsData=[
- {id:1,name:"صنف 1",price:10,min:8,max:12},
- {id:2,name:"صنف 2",price:20,min:18,max:25}
-];
-
-let cart=[];
-let paymentType="cash";
-
-/* تحميل الأصناف */
-const productsDiv=document.getElementById("products");
-productsData.forEach(p=>{
-  const d=document.createElement("div");
-  d.className="product";
-  d.innerHTML=`${p.name}<br>${p.price}ج`;
-  d.onclick=()=>addItem(p);
-  productsDiv.appendChild(d);
-});
-
-function addItem(p){
-  cart.push(p);
-  renderInvoice();
-}
-
-function renderInvoice(){
-  const box=document.getElementById("invoiceItems");
-  box.innerHTML="";
-  let total=0;
-  cart.forEach(i=>{
-    total+=i.price;
-    box.innerHTML+=`<div class="invoice-item"><span>${i.name}</span><span>${i.price}</span></div>`;
-  });
-  document.getElementById("total").innerText=total;
-}
-
-/* الدفع */
-function openPayment(){
-  if(saleType.value==="credit" && !customer.value){
-    alert("اسم العميل إجباري في البيع الآجل");
-    return;
-  }
-  paymentModal.style.display="flex";
-}
-
-function closePayment(){
-  paymentModal.style.display="none";
-}
-
-function selectPay(type){
-  paymentType=type;
-  document.querySelectorAll(".method").forEach(m=>m.classList.remove("active"));
-  event.target.classList.add("active");
-  transferBox.style.display = type==="transfer" ? "block":"none";
-}
-
-function saveInvoice(){
-  const invoice={
-    id:Date.now(),
-    items:cart,
-    total:document.getElementById("total").innerText,
-    customer:customer.value,
-    saleType:saleType.value,
-    payment:paymentType,
-    date:new Date().toLocaleString()
-  };
-
-  let invoices=JSON.parse(localStorage.getItem("invoices"))||[];
-  invoices.push(invoice);
-  localStorage.setItem("invoices",JSON.stringify(invoices));
-
-  alert("تم حفظ الفاتورة");
-  location.reload();
-}
-
-function printInvoice(){
-  window.print();
-}
-</script>
+<!-- ===== Scripts ===== -->
+<script type="module" src="js/firebase-init.js"></script>
+<script type="module" src="js/pos.logic.js"></script>
 
 </body>
 </html>
