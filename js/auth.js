@@ -1,46 +1,50 @@
-// js/auth.js
-import { auth } from "./firebase.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-  signInWithPhoneNumber,
-  RecaptchaVerifier
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-window.recaptchaVerifier = new RecaptchaVerifier(
-  "recaptcha-container",
-  { size: "invisible" },
-  auth
-);
-
-let confirmationResult;
-
-window.sendCode = async () => {
-  const phone = document.getElementById("phone").value;
-
-  if (!phone.startsWith("+")) {
-    alert("اكتب رقم الموبايل مع كود الدولة +20");
-    return;
-  }
-
-  try {
-    confirmationResult = await signInWithPhoneNumber(
-      auth,
-      phone,
-      window.recaptchaVerifier
-    );
-    document.getElementById("code-box").style.display = "block";
-    alert("تم إرسال الكود");
-  } catch (e) {
-    alert(e.message);
-  }
+const firebaseConfig = {
+  apiKey: "AIzaSyBZwWxWIIE0exAPoL9P8pbmp19gnBFxQq0",
+  authDomain: "pos-pro-996f0.firebaseapp.com",
+  projectId: "pos-pro-996f0"
 };
 
-window.verifyCode = async () => {
-  const code = document.getElementById("code").value;
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-  try {
-    await confirmationResult.confirm(code);
-window.location.href = "pages/dashboard.html";
-  } catch {
-    alert("كود غير صحيح");
-  }
+let isLogin = true;
+
+window.toggleMode = function(){
+  isLogin = !isLogin;
+  document.getElementById("title").innerText =
+    isLogin ? "تسجيل الدخول" : "إنشاء حساب";
+};
+
+window.login = function(){
+  const email = email.value;
+  const password = document.getElementById("password").value;
+  const remember = document.getElementById("rememberMe").checked;
+
+  const persistence = remember
+    ? browserLocalPersistence
+    : browserSessionPersistence;
+
+  setPersistence(auth, persistence).then(()=>{
+    if(isLogin){
+      return signInWithEmailAndPassword(auth,email,password);
+    }else{
+      return createUserWithEmailAndPassword(auth,email,password);
+    }
+  })
+  .then(()=>{
+    window.location.href="dashboard.html";
+  })
+  .catch(err=>{
+    alert(err.message);
+  });
 };
