@@ -1,25 +1,46 @@
+// js/auth.js
 import { auth } from "./firebase.js";
-import { signInWithEmailAndPassword } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  signInWithPhoneNumber,
+  RecaptchaVerifier
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-window.login = async function () {
+window.recaptchaVerifier = new RecaptchaVerifier(
+  "recaptcha-container",
+  { size: "invisible" },
+  auth
+);
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+let confirmationResult;
 
-  if (!email || !password) {
-    alert("من فضلك أدخل البيانات");
+window.sendCode = async () => {
+  const phone = document.getElementById("phone").value;
+
+  if (!phone.startsWith("+")) {
+    alert("اكتب رقم الموبايل مع كود الدولة +20");
     return;
   }
 
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    confirmationResult = await signInWithPhoneNumber(
+      auth,
+      phone,
+      window.recaptchaVerifier
+    );
+    document.getElementById("code-box").style.display = "block";
+    alert("تم إرسال الكود");
+  } catch (e) {
+    alert(e.message);
+  }
+};
 
-    // نجاح ✔️
-    window.location.href = "index.html";
+window.verifyCode = async () => {
+  const code = document.getElementById("code").value;
 
-  } catch (error) {
-    alert("بيانات الدخول غير صحيحة");
-    console.error(error.message);
+  try {
+    await confirmationResult.confirm(code);
+    window.location.href = "dashboard.html";
+  } catch {
+    alert("كود غير صحيح");
   }
 };
