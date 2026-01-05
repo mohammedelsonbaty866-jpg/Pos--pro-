@@ -1,99 +1,171 @@
+:root{
+  --bg:#0f172a;
+  --card:#111827;
+  --border:#1f2933;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --main:#22c55e;
+  --danger:#ef4444;
+}
+
 *{
- box-sizing:border-box;
- font-family:tahoma;
+  box-sizing:border-box;
+  font-family: "Cairo", sans-serif;
 }
 
-body{
- margin:0;
- background:#f1f5f9;
+body.dark{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
 }
 
+/* ===== Header ===== */
 .pos-header{
- background:#0f172a;
- color:#fff;
- padding:15px;
- display:flex;
- justify-content:space-between;
- font-size:18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 16px;
+  background:#020617;
+  border-bottom:1px solid var(--border);
 }
 
-.top-bar, .search{
- display:flex;
- gap:10px;
- padding:10px;
+.store-name{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:18px;
+  font-weight:bold;
 }
 
-input, select{
- flex:1;
- padding:14px;
- font-size:16px;
- border-radius:12px;
- border:1px solid #cbd5e1;
+.user-info{
+  font-size:14px;
+  color:var(--muted);
 }
 
-.products-grid{
- display:grid;
- grid-template-columns:repeat(2,1fr);
- gap:12px;
- padding:10px;
+.status.online{ color:#22c55e }
+
+/* ===== Search ===== */
+.search-section{
+  padding:12px;
 }
 
-.product-card{
- background:#fff;
- border-radius:16px;
- padding:18px;
- text-align:center;
- font-size:18px;
- box-shadow:0 4px 12px rgba(0,0,0,.1);
- cursor:pointer;
- transition:.2s;
+.search-section input{
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  border:none;
+  background:var(--card);
+  color:var(--text);
+  font-size:16px;
 }
 
-.product-card small{
- display:block;
- color:#475569;
- margin-top:6px;
-}
-
-.product-card:active{
- transform:scale(.96);
-}
-
-.invoice{
- background:#fff;
- padding:12px;
- border-top:2px solid #e5e7eb;
+/* ===== Cart ===== */
+.cart-section{
+  padding:10px;
 }
 
 table{
- width:100%;
- text-align:center;
- border-collapse:collapse;
+  width:100%;
+  border-collapse:collapse;
 }
 
 th,td{
- padding:8px;
- font-size:16px;
+  padding:8px;
+  text-align:center;
+  border-bottom:1px solid var(--border);
+  font-size:14px;
 }
 
-.totals{
- margin-top:10px;
- font-size:18px;
+/* ===== Info ===== */
+.info-section{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:10px;
+  padding:10px;
 }
 
-.net{
- font-weight:bold;
- color:#16a34a;
- margin-top:6px;
+.field label{
+  display:block;
+  font-size:13px;
+  margin-bottom:4px;
+  color:var(--muted);
 }
 
-.save-btn{
- width:100%;
- margin-top:12px;
- padding:18px;
- font-size:20px;
- background:#2563eb;
- color:#fff;
- border:none;
- border-radius:16px;
+.field input,
+.field select{
+  width:100%;
+  padding:10px;
+  background:var(--card);
+  border:none;
+  border-radius:10px;
+  color:var(--text);
+}
+
+/* ===== Total ===== */
+.total-section{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px;
+  font-size:18px;
+  background:#020617;
+}
+
+/* ===== Actions ===== */
+.actions{
+  display:flex;
+  gap:10px;
+  padding:10px;
+}
+
+.btn{
+  flex:1;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  font-size:16px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.btn.save{ background:var(--main); color:#000 }
+.btn.print{ background:#2563eb; color:#fff }
+.btn.cancel{ background:var(--danger); color:#fff }
+
+.btn:active{ transform:scale(.95) }
+
+/* ===== Modal ===== */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.modal.hidden{ display:none }
+
+.modal-content{
+  background:var(--card);
+  padding:20px;
+  border-radius:16px;
+  width:90%;
+  max-width:360px;
+}
+
+.modal-content h3{
+  text-align:center;
+  margin-bottom:12px;
+}
+
+.modal-content input,
+.modal-content select{
+  width:100%;
+  margin-bottom:10px;
+  padding:12px;
+  border-radius:10px;
+  border:none;
+  background:#020617;
+  color:var(--text);
 }
