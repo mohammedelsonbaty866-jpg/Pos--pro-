@@ -33,7 +33,7 @@ loginBtn.addEventListener("click", async () => {
 
     // توجيه حسب الصلاحية
     if (role === "admin") {
-      window.location.href = "dashboard.html";
+      window.location.href = "pages/dashboard.html";
     } else {
       window.location.href = "rep-sales.html";
     }
