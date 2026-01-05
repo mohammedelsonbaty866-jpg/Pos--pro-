@@ -2,132 +2,132 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>لوحة التحكم - POS Pro</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard</title>
 
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBZwWxWIIE0exAPoL9P8pbmp19gnBFxQq0",
-      authDomain: "pos-pro-996f0.firebaseapp.com",
-      projectId: "pos-pro-996f0",
-      storageBucket: "pos-pro-996f0.appspot.com",
-      messagingSenderId: "591451935128",
-      appId: "1:591451935128:web:683495139e62fb9b1e1bed"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    // حماية الصفحة
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "../index.html";
-        return;
-      }
-
-      // جلب بيانات المستخدم
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists() || userSnap.data().active !== true) {
-        alert("لا يوجد صلاحيات");
-        await signOut(auth);
-        window.location.href = "../index.html";
-        return;
-      }
-
-      document.getElementById("username").innerText =
-        userSnap.data().name || "مستخدم";
-    });
-
-    // تسجيل الخروج
-    window.logout = async function () {
-      await signOut(auth);
-      window.location.href = "../index.html";
-    };
-  </script>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Tahoma, Arial;
-      background: #0f172a;
-      color: #fff;
-    }
-
-    header {
-      background: #020617;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    header h1 {
-      font-size: 18px;
-      margin: 0;
-    }
-
-    header button {
-      background: #ef4444;
-      border: none;
-      color: #fff;
-      padding: 8px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    main {
-      padding: 20px;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 15px;
-      margin-top: 20px;
-    }
-
-    .card {
-      background: #1e293b;
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .card:hover {
-      background: #334155;
-      transform: translateY(-3px);
-    }
-  </style>
 </head>
-
 <body>
 
-  <header>
-    <h1>مرحبًا، <span id="username">...</span></h1>
-    <button onclick="logout()">تسجيل الخروج</button>
-  </header>
+<!-- الشريط العلوي -->
+<div class="top-bar">
+  <span id="userName">...</span>
+  <span id="status" class="online">● Online</span>
+</div>
 
-  <main>
-    <h2>لوحة التحكم</h2>
+<!-- الداش بورد -->
+<div class="dashboard">
 
-    <div class="cards">
-      <div class="card" onclick="location.href='customers.html'">العملاء</div>
-      <div class="card" onclick="location.href='invoice.html'">الفواتير</div>
-      <div class="card" onclick="location.href='expenses.html'">المصروفات</div>
-      <div class="card" onclick="location.href='agents.html'">المندوبين</div>
-      <div class="card" onclick="location.href='admin-users.html'">المستخدمين</div>
-    </div>
-  </main>
+  <!-- التشغيل -->
+  <div class="card pos" onclick="go('pos.html')">
+    <i class="fa-solid fa-cash-register"></i>
+    <span>نقطة البيع</span>
+  </div>
 
+  <div class="card purchases admin" onclick="go('purchases.html')">
+    <i class="fa-solid fa-cart-shopping"></i>
+    <span>المشتريات</span>
+  </div>
+
+  <!-- العملاء والموردين -->
+  <div class="card customers" onclick="go('customers.html')">
+    <i class="fa-solid fa-users"></i>
+    <span>العملاء</span>
+  </div>
+
+  <div class="card suppliers admin" onclick="go('suppliers.html')">
+    <i class="fa-solid fa-truck"></i>
+    <span>الموردين</span>
+  </div>
+
+  <!-- الأصناف والمخزون -->
+  <div class="card products admin" onclick="go('products.html')">
+    <i class="fa-solid fa-box"></i>
+    <span>الأصناف</span>
+  </div>
+
+  <div class="card stock admin" onclick="go('stock.html')">
+    <i class="fa-solid fa-warehouse"></i>
+    <span>المخزون</span>
+  </div>
+
+  <!-- مرتجعات / مصروفات -->
+  <div class="card returns" onclick="go('returns.html')">
+    <i class="fa-solid fa-rotate-left"></i>
+    <span>المرتجعات</span>
+  </div>
+
+  <div class="card expenses admin" onclick="go('expenses.html')">
+    <i class="fa-solid fa-money-bill-wave"></i>
+    <span>المصروفات</span>
+  </div>
+
+  <!-- كشف حساب / فواتير -->
+  <div class="card accounts" onclick="go('accounts.html')">
+    <i class="fa-solid fa-file-invoice"></i>
+    <span>كشف الحساب</span>
+  </div>
+
+  <div class="card invoices" onclick="go('invoices.html')">
+    <i class="fa-solid fa-receipt"></i>
+    <span>الفواتير</span>
+  </div>
+
+  <!-- إضافات ذكية -->
+  <div class="card offers admin" onclick="go('offers.html')">
+    <i class="fa-solid fa-tags"></i>
+    <span>العروض</span>
+  </div>
+
+  <div class="card barcode admin" onclick="go('barcode.html')">
+    <i class="fa-solid fa-barcode"></i>
+    <span>الباركود</span>
+  </div>
+
+  <div class="card alerts admin" onclick="go('alerts.html')">
+    <i class="fa-solid fa-bell"></i>
+    <span>التنبيهات</span>
+  </div>
+
+  <!-- نظام -->
+  <div class="card branches admin" onclick="go('branches.html')">
+    <i class="fa-solid fa-store"></i>
+    <span>الفروع</span>
+  </div>
+
+  <div class="card activity admin" onclick="go('activity-log.html')">
+    <i class="fa-solid fa-clock-rotate-left"></i>
+    <span>سجل النشاط</span>
+  </div>
+
+  <!-- مالية وتقارير -->
+  <div class="card treasury admin" onclick="go('treasury.html')">
+    <i class="fa-solid fa-wallet"></i>
+    <span>الخزنة</span>
+  </div>
+
+  <div class="card reports admin" onclick="go('reports.html')">
+    <i class="fa-solid fa-chart-line"></i>
+    <span>التقارير</span>
+  </div>
+
+  <!-- إعدادات -->
+  <div class="card settings admin" onclick="go('settings.html')">
+    <i class="fa-solid fa-gear"></i>
+    <span>الإعدادات</span>
+  </div>
+
+  <!-- خروج -->
+  <div class="card logout" onclick="logout()">
+    <i class="fa-solid fa-right-from-bracket"></i>
+    <span>تسجيل الخروج</span>
+  </div>
+
+</div>
+
+<script type="module" src="js/firebase-init.js"></script>
+<script type="module" src="js/dashboard.js"></script>
 </body>
 </html>
