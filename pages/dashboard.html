@@ -1,9 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
+  <meta charset="UTF-8">
   <title>POS System</title>
 </head>
 <body>
-  <h1>مرحبا، تم تسجيل الدخول بنجاح ✅</h1>
+
+<h2>تم تسجيل الدخول بنجاح ✅</h2>
+
+<script>
+  const user = localStorage.getItem("user");
+  if (!user) location.href = "index.html";
+</script>
+
 </body>
 </html>
