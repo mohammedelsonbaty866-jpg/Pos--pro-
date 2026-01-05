@@ -1,24 +1,6 @@
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-  <meta charset="UTF-8">
-  <title>تسجيل الدخول</title>
-</head>
-<body>
+<input id="email" type="email" placeholder="البريد الإلكتروني">
+<input id="password" type="password" placeholder="كلمة المرور">
 
-<h2>تسجيل الدخول</h2>
+<button id="loginBtn">دخول</button>
 
-<input id="phone" placeholder="+2010xxxxxxx">
-<button onclick="sendCode()">إرسال الكود</button>
-
-<div id="code-box" style="display:none">
-  <input id="code" placeholder="كود التحقق">
-  <button onclick="verifyCode()">دخول</button>
-</div>
-
-<div id="recaptcha-container"></div>
-
-<script type="module" src="js/firebase.js"></script>
-<script type="module" src="js/auth.js"></script>
-</body>
-</html>
+<script type="module" src="js/login.js"></script>
