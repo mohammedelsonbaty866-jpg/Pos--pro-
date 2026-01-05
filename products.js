@@ -1,31 +1,34 @@
 import { db } from "./firebase-init.js";
 import {
-  collection, addDoc, getDocs,
-  updateDoc, doc, serverTimestamp
+  collection, addDoc, getDocs, updateDoc,
+  doc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const colRef = collection(db, "products");
+const col = collection(db, "products");
 let editId = null;
 
 window.saveProduct = async () => {
-  const data = {
+  const product = {
     name: name.value,
     barcode: barcode.value,
-    category: category.value,
+    unit: {
+      main: mainUnit.value,
+      sub: subUnit.value,
+      factor: +unitFactor.value || 1
+    },
     buyPrice: +buyPrice.value,
     sellPrice: +sellPrice.value,
     minSellPrice: +minSell.value,
     maxSellPrice: +maxSell.value,
     stock: +stock.value,
-    active: true,
     createdAt: serverTimestamp()
   };
 
   if (editId) {
-    await updateDoc(doc(db, "products", editId), data);
+    await updateDoc(doc(db, "products", editId), product);
     editId = null;
   } else {
-    await addDoc(colRef, data);
+    await addDoc(col, product);
   }
 
   clearForm();
@@ -34,16 +37,17 @@ window.saveProduct = async () => {
 
 window.loadProducts = async () => {
   const q = search.value.toLowerCase();
-  const snap = await getDocs(colRef);
+  const snap = await getDocs(col);
   productsTable.innerHTML = "";
 
   snap.forEach(d => {
     const p = d.data();
-    if (!p.name.toLowerCase().includes(q) && !p.barcode.includes(q)) return;
+    if (!p.name.toLowerCase().includes(q)) return;
 
     productsTable.innerHTML += `
       <tr>
         <td>${p.name}</td>
+        <td>${p.unit.main}${p.unit.sub ? " / " + p.unit.sub : ""}</td>
         <td>${p.sellPrice}</td>
         <td>${p.stock}</td>
         <td>
@@ -55,7 +59,7 @@ window.loadProducts = async () => {
 };
 
 window.editProduct = async (id) => {
-  const snap = await getDocs(colRef);
+  const snap = await getDocs(col);
   snap.forEach(d => {
     if (d.id === id) {
       const p = d.data();
@@ -63,7 +67,9 @@ window.editProduct = async (id) => {
 
       name.value = p.name;
       barcode.value = p.barcode;
-      category.value = p.category;
+      mainUnit.value = p.unit.main;
+      subUnit.value = p.unit.sub;
+      unitFactor.value = p.unit.factor;
       buyPrice.value = p.buyPrice;
       sellPrice.value = p.sellPrice;
       minSell.value = p.minSellPrice;
