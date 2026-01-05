@@ -39,7 +39,7 @@ window.verifyCode = async () => {
 
   try {
     await confirmationResult.confirm(code);
-    window.location.href = "dashboard.html";
+window.location.href = "pages/dashboard.html";
   } catch {
     alert("كود غير صحيح");
   }
