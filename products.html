@@ -1,31 +1,49 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>الأصناف</title>
+<meta charset="UTF-8">
+<title>الأصناف</title>
 
-  <link rel="stylesheet" href="../css/products.css">
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="../css/products.css">
+<link rel="stylesheet"
+ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>
 <body>
 
-<!-- ===== Top Bar ===== -->
-<div class="top-bar">
-  <h2>إدارة الأصناف</h2>
-  <button class="btn back" onclick="location.href='../dashboard.html'">
-    <i class="fa fa-arrow-right"></i>
+<header class="top-bar">
+  <h2>الأصناف</h2>
+  <button onclick="location.href='../dashboard.html'">
+    <i class="fa fa-home"></i>
   </button>
-</div>
+</header>
 
-<!-- ===== Add Product ===== -->
-<div class="card form-card">
+<section class="product-form">
+
   <h3>إضافة / تعديل صنف</h3>
 
   <input id="name" placeholder="اسم الصنف">
-  <input id="barcode" placeholder="الباركود">
-  <input id="category" placeholder="التصنيف">
+  <input id="barcode" placeholder="باركود">
+
+  <div class="row">
+    <select id="mainUnit">
+      <option value="">الوحدة الأساسية</option>
+      <option>قطعة</option>
+      <option>كجم</option>
+      <option>لتر</option>
+      <option>متر</option>
+    </select>
+
+    <select id="subUnit">
+      <option value="">وحدة فرعية</option>
+      <option>علبة</option>
+      <option>كرتونة</option>
+      <option>جرام</option>
+      <option>مللي</option>
+    </select>
+  </div>
+
+  <input id="unitFactor" type="number" placeholder="عدد الوحدات في الفرعية (مثال 12)">
 
   <div class="row">
     <input id="buyPrice" type="number" placeholder="سعر الشراء">
@@ -33,33 +51,36 @@
   </div>
 
   <div class="row">
-    <input id="minSell" type="number" placeholder="أقل سعر بيع">
-    <input id="maxSell" type="number" placeholder="أقصى سعر بيع">
+    <input id="minSell" type="number" placeholder="أقل سعر">
+    <input id="maxSell" type="number" placeholder="أقصى سعر">
   </div>
 
-  <input id="stock" type="number" placeholder="الكمية بالمخزون">
+  <input id="stock" type="number" placeholder="الكمية بالمخزون (وحدة أساسية)">
 
-  <button onclick="saveProduct()" class="btn save">
-    <i class="fa fa-save"></i> حفظ الصنف
+  <button onclick="saveProduct()" class="btn-save">
+    <i class="fa fa-save"></i> حفظ
   </button>
-</div>
 
-<!-- ===== Products Table ===== -->
-<div class="card table-card">
-  <input id="search" placeholder="بحث سريع (اسم / باركود)" oninput="loadProducts()">
+</section>
+
+<section class="product-table">
+
+  <input id="search" placeholder="بحث سريع" oninput="loadProducts()">
 
   <table>
     <thead>
       <tr>
         <th>الصنف</th>
-        <th>البيع</th>
+        <th>الوحدة</th>
+        <th>سعر البيع</th>
         <th>المخزون</th>
-        <th>إجراءات</th>
+        <th></th>
       </tr>
     </thead>
     <tbody id="productsTable"></tbody>
   </table>
-</div>
+
+</section>
 
 <script type="module" src="../js/firebase-init.js"></script>
 <script type="module" src="../js/products.js"></script>
