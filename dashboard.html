@@ -1,36 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>لوحة التحكم</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+
+<style>
+:root{
+  --bg:#0f172a;
+  --card:#111827;
+  --card2:#0b1220;
+  --accent:#2563eb;
+  --text:#e5e7eb;
+  --muted:#94a3b8;
+}
+*{box-sizing:border-box;font-family:Cairo,Arial}
+body{
+  margin:0;background:linear-gradient(180deg,#020617,#020617 40%,#020617);
+  color:var(--text);
+}
+
+/* Top Bar */
+.topbar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 18px;background:#020617;position:sticky;top:0;z-index:10;
+  border-bottom:1px solid #020617;
+}
+.topbar .left{display:flex;gap:12px;align-items:center}
+.badge{background:#16a34a;color:#022c22;padding:4px 10px;border-radius:999px;font-size:12px}
+.user{color:var(--muted);font-size:14px}
+
+/* Grid */
+.dashboard{
+  padding:18px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:16px;
+}
+
+/* Card */
+.card{
+  background:linear-gradient(180deg,var(--card),var(--card2));
+  border-radius:18px;
+  padding:22px 16px;
+  text-align:center;
+  cursor:pointer;
+  transition:.25s ease;
+  border:1px solid #020617;
+  position:relative;
+  overflow:hidden;
+}
+.card::after{
+  content:"";position:absolute;inset:auto -40% -60% auto;
+  width:120%;height:120%;background:radial-gradient(ellipse at center,rgba(37,99,235,.15),transparent 60%);
+  transform:rotate(12deg);
+}
+.card:hover{
+  transform:translateY(-6px) scale(1.02);
+  border-color:rgba(37,99,235,.4);
+}
+.card i{
+  font-size:34px;margin-bottom:12px;color:#60a5fa;
+}
+.card span{
+  display:block;font-size:15px;font-weight:600;
+}
+
+/* Special */
+.card.logout i{color:#f87171}
+.card.settings i{color:#fbbf24}
+
+/* Footer note */
+.note{
+  padding:10px 18px;color:var(--muted);font-size:12px
+}
+
+/* Responsive */
+@media(max-width:600px){
+  .dashboard{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="left">
+    <strong>لوحة التحكم</strong>
+    <span class="badge">Online</span>
+  </div>
+  <div class="user" id="userName">مرحبًا 👋</div>
+</div>
+
 <div class="dashboard">
 
-  <div class="card primary" onclick="go('pos.html')">
+  <!-- نقطة البيع -->
+  <div class="card" onclick="go('pos.html')">
     <i class="fa-solid fa-cash-register"></i>
     <span>نقطة البيع</span>
   </div>
 
-  <div class="card" onclick="go('invoice.html')">
+  <div class="card" onclick="go('invoices.html')">
     <i class="fa-solid fa-file-invoice"></i>
     <span>الفواتير</span>
   </div>
 
-  <div class="card" onclick="go('invoice-print.html')">
-    <i class="fa-solid fa-print"></i>
-    <span>طباعة فاتورة</span>
+  <div class="card" onclick="go('returns.html')">
+    <i class="fa-solid fa-rotate-left"></i>
+    <span>المرتجعات</span>
   </div>
 
-  <div class="card" onclick="go('customers.html')">
-    <i class="fa-solid fa-users"></i>
-    <span>العملاء</span>
+  <div class="card" onclick="go('offers.html')">
+    <i class="fa-solid fa-tags"></i>
+    <span>العروض</span>
   </div>
 
-  <div class="card" onclick="go('customer-statement.html')">
-    <i class="fa-solid fa-file-lines"></i>
-    <span>كشف حساب عميل</span>
+  <div class="card" onclick="go('barcode.html')">
+    <i class="fa-solid fa-barcode"></i>
+    <span>الباركود</span>
   </div>
 
-  <div class="card" onclick="go('agents.html')">
-    <i class="fa-solid fa-user-tie"></i>
-    <span>المندوبين</span>
-  </div>
-
-  <div class="card" onclick="go('items.html')">
+  <!-- الإدارة -->
+  <div class="card" onclick="go('products.html')">
     <i class="fa-solid fa-box"></i>
     <span>الأصناف</span>
   </div>
@@ -40,14 +133,35 @@
     <span>المخزون</span>
   </div>
 
-  <div class="card" onclick="go('expenses.html')">
-    <i class="fa-solid fa-money-bill-wave"></i>
-    <span>المصروفات</span>
+  <div class="card" onclick="go('purchases.html')">
+    <i class="fa-solid fa-cart-shopping"></i>
+    <span>المشتريات</span>
   </div>
 
+  <div class="card" onclick="go('suppliers.html')">
+    <i class="fa-solid fa-truck"></i>
+    <span>الموردين</span>
+  </div>
+
+  <div class="card" onclick="go('customers.html')">
+    <i class="fa-solid fa-users"></i>
+    <span>العملاء</span>
+  </div>
+
+  <div class="card" onclick="go('accounts.html')">
+    <i class="fa-solid fa-scale-balanced"></i>
+    <span>كشف الحساب</span>
+  </div>
+
+  <!-- المالية -->
   <div class="card" onclick="go('treasury.html')">
     <i class="fa-solid fa-wallet"></i>
     <span>الخزنة</span>
+  </div>
+
+  <div class="card" onclick="go('expenses.html')">
+    <i class="fa-solid fa-receipt"></i>
+    <span>المصروفات</span>
   </div>
 
   <div class="card" onclick="go('reports.html')">
@@ -55,14 +169,49 @@
     <span>التقارير</span>
   </div>
 
-  <div class="card admin" onclick="go('admin-users.html')">
-    <i class="fa-solid fa-user-shield"></i>
-    <span>إدارة المستخدمين</span>
+  <!-- تحكم -->
+  <div class="card" onclick="go('branches.html')">
+    <i class="fa-solid fa-code-branch"></i>
+    <span>الفروع</span>
   </div>
 
-  <div class="card" onclick="go('settings.html')">
+  <div class="card" onclick="go('alerts.html')">
+    <i class="fa-solid fa-bell"></i>
+    <span>التنبيهات</span>
+  </div>
+
+  <div class="card" onclick="go('activity.html')">
+    <i class="fa-solid fa-clock-rotate-left"></i>
+    <span>سجل النشاط</span>
+  </div>
+
+  <div class="card settings" onclick="go('settings.html')">
     <i class="fa-solid fa-gear"></i>
     <span>الإعدادات</span>
   </div>
 
+  <div class="card logout" onclick="logout()">
+    <i class="fa-solid fa-right-from-bracket"></i>
+    <span>تسجيل الخروج</span>
+  </div>
+
 </div>
+
+<div class="note">
+  © نظام نقاط بيع — كل الأزرار جاهزة للربط مع Firestore
+</div>
+
+<script>
+function go(page){
+  // تأكد إن الصفحة موجودة
+  window.location.href = page;
+}
+function logout(){
+  // هنا هنربطه بـ Firebase Auth
+  alert("تم تسجيل الخروج");
+  window.location.href="login.html";
+}
+</script>
+
+</body>
+</html>
