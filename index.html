@@ -1,64 +1,24 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
   <meta charset="UTF-8">
   <title>تسجيل الدخول</title>
-
-  <style>
-    body{
-      font-family: Arial;
-      background:#0f1f3a;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      height:100vh;
-      color:#fff;
-    }
-    .login-box{
-      background:#1b2d4a;
-      padding:30px;
-      border-radius:16px;
-      width:320px;
-    }
-    input,button{
-      width:100%;
-      padding:12px;
-      margin-top:10px;
-      border-radius:10px;
-      border:none;
-      font-size:16px;
-    }
-    button{
-      background:#2f6df6;
-      color:#fff;
-      cursor:pointer;
-    }
-  </style>
 </head>
 <body>
 
-  <div class="login-box">
-    <h2>تسجيل الدخول</h2>
+<h2>تسجيل الدخول</h2>
 
-    <form id="loginForm">
-      <input id="phone" type="text" placeholder="رقم الموبايل" required>
-      <input id="password" type="password" placeholder="كلمة المرور" required>
-      <button type="submit">دخول</button>
-    </form>
-  </div>
+<input id="phone" placeholder="+2010xxxxxxx">
+<button onclick="sendCode()">إرسال الكود</button>
 
-  <!-- مهم جدًا -->
-  <script type="module" src="js/login.js"></script>
-  <script type="module">
-import { auth } from "./js/firebase.js";
-import { onAuthStateChanged } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+<div id="code-box" style="display:none">
+  <input id="code" placeholder="كود التحقق">
+  <button onclick="verifyCode()">دخول</button>
+</div>
 
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    window.location.href = "login.html";
-  }
-});
-</script>
+<div id="recaptcha-container"></div>
+
+<script type="module" src="js/firebase.js"></script>
+<script type="module" src="js/auth.js"></script>
 </body>
 </html>
