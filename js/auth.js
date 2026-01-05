@@ -1,52 +1,25 @@
-// js/auth.js
-import { auth, db } from "./firebase.js";
-import {
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { auth } from "./firebase.js";
+import { signInWithEmailAndPassword } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-import {
-  doc,
-  getDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-// تسجيل الدخول
 window.login = async function () {
+
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
   if (!email || !password) {
-    alert("اكتب الإيميل والباسورد");
+    alert("من فضلك أدخل البيانات");
     return;
   }
 
   try {
-    const res = await signInWithEmailAndPassword(auth, email, password);
-    const uid = res.user.uid;
+    await signInWithEmailAndPassword(auth, email, password);
 
-    const userDoc = await getDoc(doc(db, "users", uid));
-    if (!userDoc.exists()) {
-      alert("المستخدم غير مسجل في النظام");
-      return;
-    }
-
+    // نجاح ✔️
     window.location.href = "index.html";
-  } catch (err) {
-    alert("خطأ في تسجيل الدخول");
-    console.error(err);
+
+  } catch (error) {
+    alert("بيانات الدخول غير صحيحة");
+    console.error(error.message);
   }
 };
-
-// تسجيل خروج
-window.logout = async function () {
-  await signOut(auth);
-  window.location.href = "login.html";
-};
-
-// مراقبة الجلسة
-onAuthStateChanged(auth, user => {
-  if (!user && !location.pathname.includes("login")) {
-    window.location.href = "login.html";
-  }
-});
