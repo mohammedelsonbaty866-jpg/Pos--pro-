@@ -1,89 +1,84 @@
-import { db } from "./firebase-init.js";
-import {
- collection, addDoc, Timestamp
-} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+const productsGrid = document.getElementById("productsGrid");
+const cartBody = document.getElementById("cartBody");
+const totalEl = document.getElementById("total");
+const netEl = document.getElementById("net");
+const discountInput = document.getElementById("discount");
 
 let cart = [];
-let total = 0;
 
-const tbody = document.querySelector("#cartTable tbody");
-
-window.addProduct = (p) => {
-  cart.push(p);
-  render();
-};
-
-function render(){
-  tbody.innerHTML="";
-  total=0;
-  cart.forEach((i,idx)=>{
-    total += i.price * i.qty;
-    tbody.innerHTML += `
-    <tr>
-      <td>${i.name}</td>
-      <td>${i.unit}</td>
-      <td>${i.qty}</td>
-      <td>${i.price}</td>
-      <td onclick="remove(${idx})">✖</td>
-    </tr>`;
-  });
-  document.getElementById("total").innerText=total;
-  calcNet();
-}
-
-window.remove = (i)=>{
-  cart.splice(i,1);
-  render();
-};
-
-document.getElementById("discount").oninput = calcNet;
-function calcNet(){
-  let d = Number(discount.value||0);
-  document.getElementById("net").innerText = total-d;
-}
-
-window.saveSale = async ()=>{
-  if(cart.length===0) return alert("الفاتورة فاضية");
-
-  const paymentType = paymentType.value;
-  const customer = customerName.value;
-
-  if(paymentType==="credit" && !customer)
-    return alert("اسم العميل إجباري");
-
-  const sale = {
-    customer: customer||"نقدي",
-    paymentType,
-    items: cart,
-    total,
-    discount: Number(discount.value||0),
-    net: total-Number(discount.value||0),
-    createdAt: Timestamp.now()
-  };
-const productsGrid = document.getElementById("productsGrid");
-
-const demoProducts = [
- {name:"بيبسي", price:10},
- {name:"مياه", price:5},
- {name:"شيبسي", price:7}
+// أصناف تجريبية (هتتربط بـ Firestore)
+const products = [
+ {id:1,name:"بيبسي",price:10},
+ {id:2,name:"مياه",price:5},
+ {id:3,name:"شيبسي",price:7},
+ {id:4,name:"عصير",price:12}
 ];
 
-demoProducts.forEach(p=>{
+products.forEach(p=>{
  productsGrid.innerHTML += `
-  <div class="product-card" onclick='addProduct(${JSON.stringify(p)})'>
-    ${p.name}<br>
+  <div class="product-card" onclick="addProduct(${p.id})">
+    ${p.name}
     <small>${p.price} ج</small>
-  </div>`;
+  </div>
+ `;
 });
-  try{
-    await addDoc(collection(db,"sales"), sale);
-    alert("تم الحفظ");
-    cart=[];
-    render();
-  }catch{
-    localStorage.setItem("offlineSale",JSON.stringify(sale));
-    alert("تم الحفظ Offline");
-  }
-};
 
-window.printInvoice=()=>window.print();
+function addProduct(id){
+ const p = products.find(x=>x.id===id);
+ const item = cart.find(x=>x.id===id);
+
+ if(item){
+  item.qty++;
+ }else{
+  cart.push({...p,qty:1});
+ }
+ renderCart();
+}
+
+function renderCart(){
+ cartBody.innerHTML="";
+ let total=0;
+
+ cart.forEach((i,idx)=>{
+  total+=i.qty*i.price;
+  cartBody.innerHTML+=`
+   <tr>
+    <td>${i.name}</td>
+    <td>${i.qty}</td>
+    <td>${i.price}</td>
+    <td onclick="removeItem(${idx})">❌</td>
+   </tr>
+  `;
+ });
+
+ totalEl.innerText=total;
+ calcNet();
+}
+
+function removeItem(i){
+ cart.splice(i,1);
+ renderCart();
+}
+
+discountInput.oninput=calcNet;
+
+function calcNet(){
+ const total=+totalEl.innerText;
+ const discount=+discountInput.value||0;
+ netEl.innerText= total-discount;
+}
+
+function saveInvoice(){
+ const type=document.getElementById("paymentType").value;
+ const customer=document.getElementById("customerName").value;
+
+ if(type==="credit" && !customer){
+  alert("اسم العميل مطلوب في البيع الآجل");
+  return;
+ }
+
+ alert("✔ تم حفظ الفاتورة (جاهز للربط مع Firebase)");
+ cart=[];
+ renderCart();
+ discountInput.value="";
+}
