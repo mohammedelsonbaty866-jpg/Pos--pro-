@@ -60,7 +60,21 @@ window.saveSale = async ()=>{
     net: total-Number(discount.value||0),
     createdAt: Timestamp.now()
   };
+const productsGrid = document.getElementById("productsGrid");
 
+const demoProducts = [
+ {name:"بيبسي", price:10},
+ {name:"مياه", price:5},
+ {name:"شيبسي", price:7}
+];
+
+demoProducts.forEach(p=>{
+ productsGrid.innerHTML += `
+  <div class="product-card" onclick='addProduct(${JSON.stringify(p)})'>
+    ${p.name}<br>
+    <small>${p.price} ج</small>
+  </div>`;
+});
   try{
     await addDoc(collection(db,"sales"), sale);
     alert("تم الحفظ");
