@@ -1,24 +1,30 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>تسجيل الدخول</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/login.css">
+<meta charset="UTF-8">
+<title>تسجيل الدخول</title>
+<link rel="stylesheet" href="css/auth.css">
 </head>
 <body>
 
-<div class="login-container">
-  <h2>تسجيل الدخول</h2>
+<div class="auth-box">
+  <h2 id="title">تسجيل الدخول</h2>
 
   <input type="email" id="email" placeholder="البريد الإلكتروني">
   <input type="password" id="password" placeholder="كلمة المرور">
 
-  <button id="loginBtn">دخول</button>
+  <label class="remember">
+    <input type="checkbox" id="rememberMe"> تذكّرني
+  </label>
 
-  <div id="loader"></div>
+  <button onclick="login()">دخول</button>
+
+  <p class="switch">
+    ليس لديك حساب؟
+    <span onclick="toggleMode()">إنشاء حساب</span>
+  </p>
 </div>
 
-<script type="module" src="js/login.js"></script>
+<script type="module" src="js/auth.js"></script>
 </body>
 </html>
