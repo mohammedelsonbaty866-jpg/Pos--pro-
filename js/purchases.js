@@ -5,10 +5,10 @@ import {
   addDoc,
   getDocs,
   deleteDoc,
-  doc,
-  query,
-  orderBy
+  doc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+import * as XLSX from "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBZwWxWIIE0exAPoL9P8pbmp19gnBFxQq0",
@@ -23,77 +23,86 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const productsRef = collection(db, "products");
 
-document.addEventListener("DOMContentLoaded", () => {
+const body = document.getElementById("productsBody");
+const addBtn = document.getElementById("addBtn");
+const exportBtn = document.getElementById("exportBtn");
+const importBtn = document.getElementById("importBtn");
+const importExcel = document.getElementById("importExcel");
 
-  const body = document.getElementById("productsBody");
-  const addBtn = document.getElementById("addBtn");
+async function loadProducts() {
+  body.innerHTML = "";
+  const snap = await getDocs(productsRef);
 
-  if (!body || !addBtn) {
-    console.error("عناصر الصفحة غير موجودة");
-    return;
-  }
+  snap.forEach(d => {
+    const p = d.data();
+    const tr = document.createElement("tr");
 
-  async function loadProducts() {
-    body.innerHTML = "";
+    tr.innerHTML = `
+      <td>${p.name}</td>
+      <td>${p.unit}</td>
+      <td>${p.buyPrice}</td>
+      <td>${p.minPrice}</td>
+      <td>${p.maxPrice}</td>
+      <td class="actions">
+        <button onclick="deleteProduct('${d.id}')">حذف</button>
+      </td>
+    `;
 
-    const q = query(productsRef, orderBy("createdAt", "desc"));
-    const snap = await getDocs(q);
+    body.appendChild(tr);
+  });
+}
 
-    snap.forEach(d => {
-      const p = d.data();
-      const tr = document.createElement("tr");
+addBtn.onclick = async () => {
+  const name = nameInput.value;
+  if (!name) return alert("اكتب اسم الصنف");
 
-      tr.innerHTML = `
-        <td>${p.name}</td>
-        <td>${p.unit}</td>
-        <td>${p.buyPrice}</td>
-        <td>${p.minPrice}</td>
-        <td>${p.maxPrice}</td>
-        <td>
-          <button class="del-btn">حذف</button>
-        </td>
-      `;
-
-      tr.querySelector(".del-btn").addEventListener("click", async () => {
-        if (confirm("حذف الصنف؟")) {
-          await deleteDoc(doc(db, "products", d.id));
-          loadProducts();
-        }
-      });
-
-      body.appendChild(tr);
-    });
-  }
-
-  addBtn.addEventListener("click", async () => {
-    const name = document.getElementById("name").value.trim();
-    const unit = document.getElementById("unit").value;
-    const buyPrice = Number(document.getElementById("buyPrice").value);
-    const minPrice = Number(document.getElementById("minPrice").value);
-    const maxPrice = Number(document.getElementById("maxPrice").value);
-
-    if (!name) {
-      alert("اسم الصنف مطلوب");
-      return;
-    }
-
-    if (minPrice > maxPrice) {
-      alert("الحد الأدنى أكبر من الأقصى");
-      return;
-    }
-
-    await addDoc(productsRef, {
-      name,
-      unit,
-      buyPrice,
-      minPrice,
-      maxPrice,
-      createdAt: Date.now()
-    });
-
-    document.querySelectorAll(".form input").forEach(i => i.value = "");
-    loadProducts();
+  await addDoc(productsRef, {
+    name,
+    unit: unit.value,
+    buyPrice: +buyPrice.value,
+    minPrice: +minPrice.value,
+    maxPrice: +maxPrice.value,
+    createdAt: Date.now()
   });
 
+  document.querySelectorAll("#productForm input").forEach(i => i.value = "");
   loadProducts();
-});
+};
+
+window.deleteProduct = async (id) => {
+  if (confirm("حذف الصنف؟")) {
+    await deleteDoc(doc(db, "products", id));
+    loadProducts();
+  }
+};
+
+// تصدير Excel
+exportBtn.onclick = async () => {
+  const snap = await getDocs(productsRef);
+  const data = [];
+  snap.forEach(d => data.push(d.data()));
+
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Products");
+  XLSX.writeFile(wb, "products.xlsx");
+};
+
+// استيراد Excel
+importBtn.onclick = () => importExcel.click();
+
+importExcel.onchange = async (e) => {
+  const file = e.target.files[0];
+  const data = await file.arrayBuffer();
+  const wb = XLSX.read(data);
+  const sheet = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(sheet);
+
+  for (const r of rows) {
+    await addDoc(productsRef, r);
+  }
+
+  loadProducts();
+};
+
+loadProducts();
