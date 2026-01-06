@@ -1,73 +1,103 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>الأصناف</title>
+<meta charset="UTF-8">
+<title>الأصناف</title>
 
-  <style>
-    body{margin:0;font-family:Tahoma;background:#0f172a;color:#fff}
-    h2{text-align:center;margin:12px 0}
-    .container{padding:14px}
-    .form{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-      gap:10px;margin-bottom:14px
-    }
-    input,select,button{
-      padding:10px;border-radius:10px;border:none;font-size:14px
-    }
-    input,select{background:#1e293b;color:#fff}
-    button{background:#2563eb;color:#fff;cursor:pointer}
-    button:hover{background:#1d4ed8}
-    table{width:100%;border-collapse:collapse;background:#020617}
-    th,td{
-      border:1px solid #334155;padding:8px;text-align:center;font-size:13px
-    }
-    th{background:#1e293b}
-    tr:hover{background:#020617}
-    .actions button{
-      margin:0 3px;background:#334155;border-radius:8px
-    }
-    .actions button:hover{background:#475569}
-    .badge{padding:3px 6px;border-radius:6px;background:#0ea5e9}
-  </style>
+<style>
+body{
+  margin:0;
+  font-family:tahoma;
+  background:#0f172a;
+  color:#fff;
+}
+h2{text-align:center;margin:15px}
+.container{padding:15px}
+input,select,button{
+  padding:8px;
+  border:none;
+  border-radius:6px;
+  background:#1e293b;
+  color:#fff;
+}
+button{cursor:pointer;background:#2563eb}
+button:hover{background:#1d4ed8}
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:#020617;
+}
+th,td{
+  border:1px solid #334155;
+  padding:6px;
+  text-align:center;
+}
+th{background:#1e293b}
+td input,td select{
+  width:100%;
+  background:#020617;
+  border:none;
+  color:#fff;
+  text-align:center;
+}
+.actions button{
+  background:#334155;
+  margin:2px;
+}
+.actions button:hover{background:#475569}
+.search{
+  margin-bottom:10px;
+}
+</style>
 </head>
+
 <body>
 
 <h2>إدارة الأصناف</h2>
 
 <div class="container">
 
-  <div class="form">
-    <input id="name" placeholder="اسم الصنف">
-    <select id="unit">
-      <option value="قطعة">قطعة</option>
-      <option value="علبة">علبة</option>
-      <option value="كرتونة">كرتونة</option>
-      <option value="كيلو">كيلو</option>
-    </select>
-    <input id="buyPrice" type="number" placeholder="سعر الشراء">
-    <input id="minPrice" type="number" placeholder="أقل سعر بيع">
-    <input id="maxPrice" type="number" placeholder="أقصى سعر بيع">
-       <button id="addBtn">إضافة صنف</button>
+  <div class="search">
+    <input id="search" placeholder="بحث سريع...">
   </div>
-
+<div style="display:flex;gap:10px;margin-bottom:10px">
+  <input type="file" id="excelFile" accept=".xlsx,.xls">
+  <button onclick="importExcel()">استيراد Excel</button>
+  <button onclick="exportExcel()">تصدير Excel</button>
+</div>
   <table>
     <thead>
       <tr>
-        <th>الصنف</th>
+        <th>اسم الصنف</th>
         <th>الوحدة</th>
         <th>شراء</th>
-        <th>أدنى</th>
-        <th>أقصى</th>
+        <th>أدنى بيع</th>
+        <th>أقصى بيع</th>
         <th>إجراء</th>
       </tr>
     </thead>
     <tbody id="productsBody"></tbody>
   </table>
 
-</div>
+  <br>
 
-<script type="module" src="js/products.js"></script>
+  <h3>➕ إضافة صنف</h3>
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px">
+    <input id="name" placeholder="اسم الصنف">
+    <select id="unit">
+      <option>قطعة</option>
+      <option>علبة</option>
+      <option>كرتونة</option>
+      <option>كيلو</option>
+    </select>
+    <input id="buyPrice" type="number" placeholder="شراء">
+    <input id="minPrice" type="number" placeholder="أدنى">
+    <input id="maxPrice" type="number" placeholder="أقصى">
+    <button onclick="addProduct()">إضافة</button>
+  </div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script type="module" src="./js/products.js"></script>
 </body>
 </html>
