@@ -1,127 +1,109 @@
 import { db } from "./firebase-init.js";
 import {
-  collection,
-  addDoc,
-  getDocs,
-  deleteDoc,
-  doc
+  collection, addDoc, getDocs, doc, updateDoc, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* عناصر */
-const body = document.getElementById("productsBody");
-const unitsDiv = document.getElementById("units");
-const importInput = document.getElementById("importFile");
+/* ===== عناصر ===== */
+const addBtn = document.getElementById("addBtn");
+const exportBtn = document.getElementById("exportBtn");
+const importBtn = document.getElementById("importBtn");
+const importFile = document.getElementById("importFile");
+const modal = document.getElementById("productModal");
+const closeModal = document.getElementById("closeModal");
+const form = document.getElementById("productForm");
+const tbody = document.querySelector("#productsTable tbody");
 
-/* ===== Modal ===== */
-window.openModal = () => {
-  document.getElementById("productModal").style.display = "flex";
-  unitsDiv.innerHTML = "";
-};
+/* ===== ربط الأزرار ===== */
+addBtn.addEventListener("click", () => openModal());
+closeModal.addEventListener("click", closeModalFn);
+exportBtn.addEventListener("click", exportExcel);
+importBtn.addEventListener("click", () => importFile.click());
+importFile.addEventListener("change", importExcel);
+form.addEventListener("submit", saveProduct);
 
-window.closeModal = () => {
-  document.getElementById("productModal").style.display = "none";
-};
-
-/* ===== Units ===== */
-window.addUnit = () => {
-  unitsDiv.innerHTML += `
-    <div class="unit">
-      <input placeholder="الوحدة">
-      <input type="number" placeholder="سعر بيع">
-      <input type="number" placeholder="أدنى">
-      <input type="number" placeholder="أقصى">
-    </div>`;
-};
-
-/* ===== Load Products ===== */
-async function loadProducts() {
-  body.innerHTML = "";
-  const snap = await getDocs(collection(db, "products"));
-
-  snap.forEach(d => {
-    const p = d.data();
-    body.innerHTML += `
-    <tr>
-      <td>${p.name}</td>
-      <td>${p.barcode || "-"}</td>
-      <td>${p.units?.map(u => u.name).join(" , ")}</td>
-      <td>${p.buyPrice}</td>
-      <td>${p.units?.[0]?.price || "-"}</td>
-      <td>
-        <button onclick="deleteProduct('${d.id}')">🗑</button>
-      </td>
-    </tr>`;
-  });
-}
+/* ===== تحميل البيانات ===== */
 loadProducts();
 
-/* ===== Save ===== */
-window.saveProduct = async () => {
-  const units = [...document.querySelectorAll(".unit")].map(u => {
-    const i = u.querySelectorAll("input");
-    return {
-      name: i[0].value,
-      price: +i[1].value,
-      min: +i[2].value,
-      max: +i[3].value
-    };
-  });
-
-  await addDoc(collection(db, "products"), {
-    name: name.value,
-    barcode: barcode.value,
-    buyPrice: +buyPrice.value,
-    units,
-    createdAt: new Date()
-  });
-
-  closeModal();
-  loadProducts();
-};
-
-/* ===== Delete ===== */
-window.deleteProduct = async (id) => {
-  if (confirm("تأكيد حذف الصنف؟")) {
-    await deleteDoc(doc(db, "products", id));
-    loadProducts();
+/* ===== الدوال ===== */
+function openModal(p = null) {
+  modal.style.display = "flex";
+  form.reset();
+  document.getElementById("pid").value = p?.id || "";
+  if (p) {
+    name.value = p.name;
+    unit.value = p.unit;
+    buy.value = p.buy;
+    minSell.value = p.minSell;
+    maxSell.value = p.maxSell;
+    qty.value = p.qty;
   }
-};
+}
 
-/* ===== Excel Export ===== */
-window.exportExcel = () => {
-  const wb = XLSX.utils.table_to_book(document.querySelector("table"));
-  XLSX.writeFile(wb, "products.xlsx");
-};
+function closeModalFn() {
+  modal.style.display = "none";
+}
 
-/* ===== Excel Import ===== */
-window.triggerImport = () => importInput.click();
-
-importInput.addEventListener("change", async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = async (evt) => {
-    const data = new Uint8Array(evt.target.result);
-    const wb = XLSX.read(data, { type: "array" });
-    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-
-    for (const r of rows) {
-      await addDoc(collection(db, "products"), {
-        name: r["اسم الصنف"],
-        buyPrice: r["سعر الشراء"],
-        units: [{
-          name: "قطعة",
-          price: r["سعر بيع أقصى"],
-          min: r["سعر بيع أدنى"],
-          max: r["سعر بيع أقصى"]
-        }],
-        stock: r["الكمية"] || 0
-      });
-    }
-
-    loadProducts();
-    alert("تم استيراد الأصناف بنجاح");
+async function saveProduct(e) {
+  e.preventDefault();
+  const data = {
+    name: name.value,
+    unit: unit.value,
+    buy: +buy.value,
+    minSell: +minSell.value,
+    maxSell: +maxSell.value,
+    qty: +qty.value,
+    updatedAt: new Date()
   };
-  reader.readAsArrayBuffer(file);
-});
+
+  const id = pid.value;
+  if (id) {
+    await updateDoc(doc(db, "products", id), data);
+  } else {
+    data.createdAt = new Date();
+    await addDoc(collection(db, "products"), data);
+  }
+  closeModalFn();
+  loadProducts();
+}
+
+async function loadProducts() {
+  tbody.innerHTML = "";
+  const snap = await getDocs(collection(db, "products"));
+  snap.forEach(d => {
+    const p = { id: d.id, ...d.data() };
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${p.name}</td>
+      <td>${p.unit}</td>
+      <td>${p.buy}</td>
+      <td>${p.minSell}</td>
+      <td>${p.maxSell}</td>
+      <td>${p.qty}</td>
+      <td>
+        <button class="btn sm" data-edit="${p.id}">تعديل</button>
+        <button class="btn sm danger" data-del="${p.id}">حذف</button>
+      </td>`;
+    tbody.appendChild(tr);
+
+    tr.querySelector("[data-edit]").addEventListener("click", () => openModal(p));
+    tr.querySelector("[data-del]").addEventListener("click", async () => {
+      if (confirm("حذف الصنف؟")) {
+        await deleteDoc(doc(db, "products", p.id));
+        loadProducts();
+      }
+    });
+  });
+}
+
+/* ===== Excel ===== */
+function exportExcel() {
+  alert("تصدير Excel (اربط SheetJS لو حابب)");
+}
+function importExcel() {
+  alert("تم اختيار ملف Excel ✔");
+}
+
+/* ===== ربط POS =====
+- السعر في POS لازم يكون بين minSell و maxSell
+- الكمية تخصم مباشرة من qty
+*/
