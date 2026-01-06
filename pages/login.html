@@ -3,42 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <title>تسجيل الدخول</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link rel="stylesheet" href="css/login.css">
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body{
+      margin:0;
+      height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(135deg,#020617,#020617,#0f172a);
+      font-family:Tahoma;
+      color:#fff;
+    }
+    .box{
+      width:90%;
+      max-width:360px;
+      background:#020617;
+      padding:25px;
+      border-radius:16px;
+      box-shadow:0 20px 60px rgba(0,0,0,.6);
+    }
+    h2{text-align:center;margin-bottom:20px}
+    input,button{
+      width:100%;
+      padding:14px;
+      margin-bottom:12px;
+      border-radius:12px;
+      border:none;
+      font-size:15px;
+    }
+    input{
+      background:#0f172a;
+      color:#fff;
+    }
+    button{
+      background:#2563eb;
+      color:#fff;
+      font-weight:bold;
+      cursor:pointer;
+    }
+    button:disabled{opacity:.6}
+    .links{
+      display:flex;
+      justify-content:space-between;
+      font-size:13px;
+    }
+    a{color:#93c5fd;text-decoration:none}
+  </style>
 </head>
+
 <body>
 
-<div class="login-container">
+<div class="box">
+  <h2>تسجيل الدخول</h2>
 
-  <div class="login-card">
-    <h2>تسجيل الدخول</h2>
+  <input id="email" type="email" placeholder="البريد الإلكتروني">
+  <input id="password" type="password" placeholder="كلمة المرور">
 
-    <div class="input-group">
-      <i class="fa fa-envelope"></i>
-      <input type="email" id="email" placeholder="البريد الإلكتروني">
-    </div>
+  <button id="loginBtn">دخول</button>
 
-    <div class="input-group">
-      <i class="fa fa-lock"></i>
-      <input type="password" id="password" placeholder="كلمة المرور">
-    </div>
-
-    <button id="loginBtn" type="button">
-      دخول
-    </button>
-
-    <p class="error" id="error"></p>
-
-    <div class="extra">
-      <a href="register.html">إنشاء حساب جديد</a>
-      <a href="#" id="reset">نسيت كلمة المرور؟</a>
-    </div>
+  <div class="links">
+    <a href="register.html">حساب جديد</a>
+    <a href="reset.html">نسيت كلمة المرور؟</a>
   </div>
-
 </div>
 
-<script type="module" src="js/login.js"></script>
+<script type="module" src="./js/login.js"></script>
 </body>
 </html>
