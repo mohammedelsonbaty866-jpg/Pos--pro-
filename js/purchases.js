@@ -1,106 +1,112 @@
 import { db } from "./firebase-init.js";
 import {
-  collection, addDoc, getDocs,
-  deleteDoc, doc
+ collection,addDoc,getDocs,deleteDoc,doc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const table = document.getElementById("productsTable");
-const modal = document.getElementById("modal");
-const importFile = document.getElementById("importFile");
+const table=document.getElementById("table");
+const modal=document.getElementById("modal");
+const importExcel=document.getElementById("importExcel");
 
-let editId = null;
+let cache=[];
 
-/* ===== تحميل ===== */
-async function loadProducts(){
-  table.innerHTML = "";
-  const snap = await getDocs(collection(db,"products"));
+/* باركود أرقام */
+function genBarcode(){
+  return Date.now().toString();
+}
+
+/* تحميل */
+async function load(){
+  table.innerHTML="";
+  cache=[];
+  const snap=await getDocs(collection(db,"products"));
   snap.forEach(d=>{
     const p=d.data();
+    p.id=d.id;
+    cache.push(p);
+  });
+  draw(cache);
+}
+load();
+
+function draw(arr){
+  table.innerHTML="";
+  arr.forEach(p=>{
     table.innerHTML+=`
-      <tr>
-        <td>${p.name}</td>
-        <td>${p.unit}</td>
-        <td>${p.buy}</td>
-        <td>${p.minSell}</td>
-        <td>${p.maxSell}</td>
-        <td>${p.qty}</td>
-        <td>
-          <button onclick="remove('${d.id}')">🗑</button>
-        </td>
-      </tr>
-    `;
+    <tr>
+      <td>${p.barcode}</td>
+      <td>${p.name}</td>
+      <td>${p.unit}</td>
+      <td>${p.buy}</td>
+      <td>${p.minSell}</td>
+      <td>${p.maxSell}</td>
+      <td>${p.qty}</td>
+      <td>
+        <button onclick="remove('${p.id}')">🗑</button>
+      </td>
+    </tr>`;
   });
 }
-loadProducts();
 
-/* ===== مودال ===== */
-window.openModal=()=>modal.style.display="flex";
-window.closeModal=()=>{modal.style.display="none";editId=null};
+window.search=(v)=>{
+  draw(cache.filter(p=>
+    p.name.includes(v)||p.barcode.includes(v)
+  ));
+};
 
-/* ===== حفظ ===== */
-window.saveProduct=async()=>{
-  const data={
+window.openModal=()=>{
+  modal.style.display="flex";
+  barcode.value=genBarcode();
+};
+
+window.closeModal=()=>modal.style.display="none";
+
+window.save=async()=>{
+  if(+minSell.value > +maxSell.value){
+    alert("الحد الأدنى أكبر من الأقصى");
+    return;
+  }
+  await addDoc(collection(db,"products"),{
     name:name.value,
+    barcode:barcode.value,
     unit:unit.value,
     buy:+buy.value,
     minSell:+minSell.value,
     maxSell:+maxSell.value,
     qty:+qty.value,
     createdAt:new Date()
-  };
-  await addDoc(collection(db,"products"),data);
-  closeModal(); loadProducts();
+  });
+  closeModal();
+  load();
 };
 
-/* ===== حذف ===== */
 window.remove=async(id)=>{
   if(confirm("حذف الصنف؟")){
     await deleteDoc(doc(db,"products",id));
-    loadProducts();
+    load();
   }
 };
 
-/* ===== تصدير Excel ===== */
-window.exportExcel=async()=>{
-  const snap=await getDocs(collection(db,"products"));
-  const arr=[];
-  snap.forEach(d=>{
-    const p=d.data();
-    arr.push({
-      "اسم الصنف":p.name,
-      "الوحدة":p.unit,
-      "سعر الشراء":p.buy,
-      "أدنى سعر بيع":p.minSell,
-      "أقصى سعر بيع":p.maxSell,
-      "الكمية":p.qty
-    });
-  });
-  const ws=XLSX.utils.json_to_sheet(arr);
+/* Excel */
+window.exportExcel=()=>{
+  const ws=XLSX.utils.json_to_sheet(cache);
   const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,"Products");
+  XLSX.utils.book_append_sheet(wb,ws,"products");
   XLSX.writeFile(wb,"products.xlsx");
 };
 
-/* ===== استيراد Excel ===== */
-importFile.addEventListener("change",async(e)=>{
-  const file=e.target.files[0];
-  const reader=new FileReader();
-  reader.onload=async(ev)=>{
+importExcel.addEventListener("change",e=>{
+  const r=new FileReader();
+  r.onload=async ev=>{
     const wb=XLSX.read(ev.target.result,{type:"array"});
     const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-    for(const r of rows){
+    for(const p of rows){
       await addDoc(collection(db,"products"),{
-        name:r["اسم الصنف"],
-        unit:r["الوحدة"],
-        buy:+r["سعر الشراء"],
-        minSell:+r["أدنى سعر بيع"],
-        maxSell:+r["أقصى سعر بيع"],
-        qty:+r["الكمية"],
+        ...p,
         createdAt:new Date()
       });
     }
-    loadProducts();
+    load();
     alert("✔ تم الاستيراد");
   };
-  reader.readAsArrayBuffer(file);
+  r.readAsArrayBuffer(e.target.files[0]);
 });
