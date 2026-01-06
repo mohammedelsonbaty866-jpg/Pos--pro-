@@ -3,58 +3,139 @@
 <head>
   <meta charset="UTF-8">
   <title>الأصناف</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/products.css">
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Cairo', sans-serif;
+      background: linear-gradient(180deg, #020617, #020617);
+      color: #e5e7eb;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+    }
+
+    .page-header h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .add-btn {
+      background: #22c55e;
+      border: none;
+      color: #020617;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .table-wrapper {
+      padding: 15px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #020617;
+      border-radius: 16px;
+      overflow: hidden;
+      min-width: 800px;
+    }
+
+    thead {
+      background: #020617;
+    }
+
+    th {
+      padding: 12px;
+      color: #22c55e;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    td {
+      padding: 10px;
+      border-top: 1px solid #1e293b;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    tr:hover {
+      background: #020617;
+    }
+
+    .actions {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+    }
+
+    .actions button {
+      border: none;
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .edit {
+      background: #3b82f6;
+      color: #fff;
+    }
+
+    .delete {
+      background: #ef4444;
+      color: #fff;
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="top-bar">
-  <h2>الأصناف</h2>
-  <button class="btn-add" onclick="openModal()">
-    <i class="fa fa-plus"></i> إضافة صنف
-  </button>
-</div>
-
-<div class="products-container" id="productsList"></div>
-
-<!-- Modal -->
-<div class="modal" id="productModal">
-  <div class="modal-content">
-
-    <h3>إضافة / تعديل صنف</h3>
-
-    <input id="name" placeholder="اسم الصنف">
-    <input id="barcode" placeholder="الباركود">
-    
-    <select id="unit">
-      <option value="">وحدة القياس</option>
-      <option>قطعة</option>
-      <option>علبة</option>
-      <option>كرتونة</option>
-      <option>كيلو</option>
-      <option>جرام</option>
-    </select>
-
-    <div class="prices">
-      <input id="minPrice" type="number" placeholder="أقل سعر بيع">
-      <input id="maxPrice" type="number" placeholder="أقصى سعر بيع">
-    </div>
-
-    <input id="cost" type="number" placeholder="سعر الشراء">
-    <input id="stock" type="number" placeholder="الكمية">
-
-    <div class="actions">
-      <button class="save" onclick="saveProduct()">حفظ</button>
-      <button class="cancel" onclick="closeModal()">إلغاء</button>
-    </div>
-
+  <!-- Header -->
+  <div class="page-header">
+    <h2>📦 الأصناف</h2>
+    <button class="add-btn" onclick="openProductModal()">+ إضافة صنف</button>
   </div>
-</div>
 
-<script type="module" src="js/firebase-init.js"></script>
-<script type="module" src="js/products.js"></script>
+  <!-- Table -->
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>الباركود</th>
+          <th>اسم الصنف</th>
+          <th>الوحدة</th>
+          <th>أقل سعر</th>
+          <th>أقصى سعر</th>
+          <th>سعر الشراء</th>
+          <th>المخزون</th>
+          <th>إجراءات</th>
+        </tr>
+      </thead>
+      <tbody id="productsList">
+        <!-- يتم الحقن من products.js -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- JS -->
+  <script src="js/firebase.js"></script>
+  <script src="js/products.js"></script>
+
 </body>
 </html>
