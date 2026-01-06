@@ -1,80 +1,87 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>الأصناف</title>
+  <meta charset="UTF-8">
+  <title>الأصناف</title>
 
-<link rel="stylesheet" href="css/products.css">
-<link rel="stylesheet"
- href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="css/products.css">
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
 </head>
 <body>
 
-<div class="page">
-
-  <header>
-    <h2>📦 إدارة الأصناف</h2>
-    <div class="actions">
-      <button onclick="openModal()">➕ إضافة صنف</button>
-      <button onclick="exportExcel()">⬇ Excel</button>
-      <label class="import">
-        ⬆ Excel
-        <input type="file" id="importExcel" hidden>
-      </label>
-    </div>
-  </header>
-
-  <input class="search" placeholder="🔍 بحث بالاسم أو الباركود" onkeyup="search(this.value)">
-
-  <div class="table">
-    <table>
-      <thead>
-        <tr>
-          <th>الباركود</th>
-          <th>الصنف</th>
-          <th>الوحدات</th>
-          <th>شراء</th>
-          <th>أدنى</th>
-          <th>أقصى</th>
-          <th>الكمية</th>
-          <th>إجراء</th>
-        </tr>
-      </thead>
-      <tbody id="table"></tbody>
-    </table>
-  </div>
+<!-- ===== TOP BAR ===== -->
+<div class="top-bar">
+  <h2>إدارة الأصناف</h2>
+  <button class="btn primary" onclick="openProductModal()">
+    <i class="fa fa-plus"></i> إضافة صنف
+  </button>
 </div>
 
-<!-- Modal -->
-<div class="modal" id="modal">
-  <div class="box">
-    <h3>إضافة / تعديل صنف</h3>
+<!-- ===== FILTERS ===== -->
+<div class="filters">
+  <input type="text" id="searchInput" placeholder="بحث باسم الصنف أو الباركود">
+  <select id="categoryFilter">
+    <option value="">كل الأقسام</option>
+    <option value="none">بدون قسم</option>
+  </select>
 
-    <input id="name" placeholder="اسم الصنف">
-    <input id="barcode" placeholder="الباركود" readonly>
+  <button class="btn" onclick="exportExcel()">تصدير Excel</button>
+  <input type="file" id="excelFile" hidden onchange="importExcel(event)">
+  <button class="btn" onclick="document.getElementById('excelFile').click()">استيراد Excel</button>
+</div>
 
-    <select id="unit">
-      <option>قطعة</option>
-      <option>علبة</option>
-      <option>كرتونة</option>
-      <option>كيلو</option>
-      <option>لتر</option>
+<!-- ===== TABLE ===== -->
+<div class="table-wrapper">
+<table>
+  <thead>
+    <tr>
+      <th>الصنف</th>
+      <th>الوحدة</th>
+      <th>سعر الشراء</th>
+      <th>أدنى بيع</th>
+      <th>أقصى بيع</th>
+      <th>الكمية</th>
+      <th>إجراءات</th>
+    </tr>
+  </thead>
+  <tbody id="productsTable"></tbody>
+</table>
+</div>
+
+<!-- ===== MODAL ===== -->
+<div class="modal" id="productModal">
+  <div class="modal-content">
+    <h3 id="modalTitle">إضافة صنف</h3>
+
+    <input id="pName" placeholder="اسم الصنف">
+    <input id="pBarcode" placeholder="الباركود">
+    
+    <select id="pUnit">
+      <option value="قطعة">قطعة</option>
+      <option value="كرتونة">كرتونة</option>
+      <option value="كيلو">كيلو</option>
+      <option value="جرام">جرام</option>
+      <option value="لتر">لتر</option>
     </select>
 
-    <input id="buy" type="number" placeholder="سعر الشراء">
-    <input id="minSell" type="number" placeholder="أدنى بيع">
-    <input id="maxSell" type="number" placeholder="أقصى بيع">
-    <input id="qty" type="number" placeholder="الكمية">
+    <input type="number" id="pBuy" placeholder="سعر الشراء">
+    <input type="number" id="pMin" placeholder="أدنى سعر بيع">
+    <input type="number" id="pMax" placeholder="أقصى سعر بيع">
+    <input type="number" id="pQty" placeholder="الكمية">
 
-    <div class="modal-actions">
-      <button onclick="save()">💾 حفظ</button>
-      <button class="cancel" onclick="closeModal()">إلغاء</button>
+    <select id="pCategory">
+      <option value="none">بدون قسم</option>
+    </select>
+
+    <div class="actions">
+      <button class="btn primary" onclick="saveProduct()">حفظ</button>
+      <button class="btn danger" onclick="closeModal()">إلغاء</button>
     </div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script type="module" src="js/firebase-init.js"></script>
 <script type="module" src="js/products.js"></script>
 </body>
