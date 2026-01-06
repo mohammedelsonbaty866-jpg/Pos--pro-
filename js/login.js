@@ -1,40 +1,61 @@
-import { initializeApp } from
-"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-
+// js/login.js
+import { auth } from "./firebase-init.js";
 import {
-  getAuth,
-  signInWithEmailAndPassword
-} from
-"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
+  sendEmailVerification
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBZwWxWIIE0exAPoL9P8pbmp19gnBFxQq0",
-  authDomain: "pos-pro-996f0.firebaseapp.com",
-  projectId: "pos-pro-996f0"
-};
+const email = document.getElementById("email");
+const password = document.getElementById("password");
+const loginBtn = document.getElementById("loginBtn");
+const registerBtn = document.getElementById("registerBtn");
+const remember = document.getElementById("remember");
+const msg = document.getElementById("msg");
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+async function setRemember() {
+  await setPersistence(
+    auth,
+    remember.checked ? browserLocalPersistence : browserSessionPersistence
+  );
+}
 
-const btn = document.getElementById("loginBtn");
-
-btn.addEventListener("click", async () => {
-  const email = email.value.trim();
-  const password = password.value;
-
-  if (!email || !password) {
-    alert("اكمل البيانات");
-    return;
-  }
-
-  btn.disabled = true;
-
+loginBtn.addEventListener("click", async () => {
+  msg.textContent = "";
   try {
-    await signInWithEmailAndPassword(auth, email, password);
-    window.location.href = "dashboard.html";
-  } catch (e) {
-    alert("بيانات غير صحيحة");
-  }
+    await setRemember();
+    const user = await signInWithEmailAndPassword(
+      auth,
+      email.value,
+      password.value
+    );
 
-  btn.disabled = false;
+    if (!user.user.emailVerified) {
+      msg.textContent = "يرجى تأكيد البريد الإلكتروني";
+      return;
+    }
+
+    location.href = "dashboard.html";
+  } catch (e) {
+    msg.textContent = "بيانات الدخول غير صحيحة";
+  }
+});
+
+registerBtn.addEventListener("click", async () => {
+  msg.textContent = "";
+  try {
+    const res = await createUserWithEmailAndPassword(
+      auth,
+      email.value,
+      password.value
+    );
+    await sendEmailVerification(res.user);
+    msg.style.color = "#4ade80";
+    msg.textContent = "تم إنشاء الحساب – راجع بريدك للتأكيد";
+  } catch {
+    msg.textContent = "خطأ في إنشاء الحساب";
+  }
 });
