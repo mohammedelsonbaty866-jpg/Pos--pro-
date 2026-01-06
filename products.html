@@ -4,66 +4,7 @@
   <meta charset="UTF-8">
   <title>الأصناف</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Tahoma;
-      background: #0f172a;
-      color: #fff;
-    }
-    h2 {
-      text-align: center;
-      margin: 15px 0;
-    }
-    .container {
-      padding: 15px;
-    }
-    .form {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-    input, select, button {
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      font-size: 14px;
-    }
-    input, select {
-      background: #1e293b;
-      color: #fff;
-    }
-    button {
-      background: #2563eb;
-      color: #fff;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #1d4ed8;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #020617;
-    }
-    th, td {
-      border: 1px solid #334155;
-      padding: 8px;
-      text-align: center;
-      font-size: 13px;
-    }
-    th {
-      background: #1e293b;
-    }
-    .actions button {
-      margin: 0 3px;
-      background: #334155;
-    }
-    .actions button:hover {
-      background: #475569;
-    }
-  </style>
+  <link rel="stylesheet" href="css/products.css">
 </head>
 
 <body>
@@ -72,18 +13,24 @@
 
 <div class="container">
 
-  <div class="form">
+  <div class="form" id="productForm">
     <input id="name" placeholder="اسم الصنف">
+    
     <select id="unit">
       <option value="قطعة">قطعة</option>
       <option value="علبة">علبة</option>
       <option value="كرتونة">كرتونة</option>
       <option value="كيلو">كيلو</option>
     </select>
-    <input id="buyPrice" type="number" placeholder="سعر الشراء">
-    <input id="minPrice" type="number" placeholder="أقل سعر بيع">
-    <input id="maxPrice" type="number" placeholder="أقصى سعر بيع">
-    <button id="addBtn">إضافة صنف</button>
+
+    <input id="buyPrice" type="number" min="0" placeholder="سعر الشراء">
+    <input id="minPrice" type="number" min="0" placeholder="أقل سعر بيع">
+    <input id="maxPrice" type="number" min="0" placeholder="أقصى سعر بيع">
+
+    <button id="addBtn" type="button">➕ إضافة صنف</button>
+    <button id="exportBtn" type="button">⬇ تصدير Excel</button>
+    <input type="file" id="importExcel" hidden>
+    <button id="importBtn" type="button">⬆ استيراد Excel</button>
   </div>
 
   <table>
@@ -102,6 +49,6 @@
 
 </div>
 
-<script type="module" src="./js/products.js"></script>
+<script type="module" src="js/products.js"></script>
 </body>
 </html>
