@@ -1,89 +1,86 @@
-body {
-  background: #0f172a;
-  color: #fff;
-  font-family: Tahoma;
-  padding: 20px;
+body{
+  margin:0;
+  background:#020617;
+  font-family:Tajawal;
+  color:#fff
 }
 
-.top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.page{padding:20px}
+
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center
 }
 
-.actions button {
-  margin: 5px;
-  padding: 10px 14px;
-  background: #2563eb;
-  border: none;
-  border-radius: 10px;
-  color: #fff;
-  cursor: pointer;
+.actions button,.import{
+  background:#2563eb;
+  padding:10px 14px;
+  border:none;
+  border-radius:10px;
+  color:#fff;
+  cursor:pointer;
+  margin-left:8px
 }
 
-table {
-  width: 100%;
-  margin-top: 20px;
-  border-collapse: collapse;
-  background: #020617;
+.search{
+  width:100%;
+  margin:15px 0;
+  padding:12px;
+  border-radius:10px;
+  border:none
 }
 
-th, td {
-  padding: 12px;
-  border-bottom: 1px solid #1e293b;
-  text-align: center;
+.table{
+  overflow:auto;
+  background:#020617;
+  border-radius:12px
 }
 
-th {
-  background: #020617;
+table{width:100%;border-collapse:collapse}
+th,td{
+  padding:12px;
+  border-bottom:1px solid #1e293b;
+  text-align:center
+}
+th{background:#020617}
+
+tr:hover{background:#020617}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  display:none;
+  align-items:center;
+  justify-content:center
 }
 
-button {
-  cursor: pointer;
+.box{
+  background:#020617;
+  padding:20px;
+  border-radius:14px;
+  width:350px;
+  animation:scale .2s
 }
 
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.6);
-  display: none;
-  justify-content: center;
-  align-items: center;
+.box input,select{
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border-radius:8px;
+  border:none
 }
 
-.box {
-  background: #020617;
-  padding: 20px;
-  width: 400px;
-  border-radius: 14px;
-  animation: scale .3s;
+.modal-actions{
+  display:flex;
+  justify-content:space-between;
+  margin-top:10px
 }
 
-@keyframes scale {
-  from {transform: scale(.8);}
-  to {transform: scale(1);}
-}
+.cancel{background:#475569}
 
-input {
-  width: 100%;
-  margin: 6px 0;
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-}
-
-.unit {
-  background: #020617;
-  padding: 10px;
-  margin-bottom: 8px;
-  border-radius: 10px;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: space-between;
-}
-
-.cancel {
-  background: #dc2626;
+@keyframes scale{
+  from{transform:scale(.8)}
+  to{transform:scale(1)}
 }
