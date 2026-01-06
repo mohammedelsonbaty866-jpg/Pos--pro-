@@ -1,74 +1,88 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>تسجيل الدخول</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>تسجيل الدخول</title>
 
-  <style>
-    body{
-      margin:0;
-      height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:linear-gradient(135deg,#020617,#020617,#0f172a);
-      font-family:Tahoma;
-      color:#fff;
-    }
-    .box{
-      width:90%;
-      max-width:360px;
-      background:#020617;
-      padding:25px;
-      border-radius:16px;
-      box-shadow:0 20px 60px rgba(0,0,0,.6);
-    }
-    h2{text-align:center;margin-bottom:20px}
-    input,button{
-      width:100%;
-      padding:14px;
-      margin-bottom:12px;
-      border-radius:12px;
-      border:none;
-      font-size:15px;
-    }
-    input{
-      background:#0f172a;
-      color:#fff;
-    }
-    button{
-      background:#2563eb;
-      color:#fff;
-      font-weight:bold;
-      cursor:pointer;
-    }
-    button:disabled{opacity:.6}
-    .links{
-      display:flex;
-      justify-content:space-between;
-      font-size:13px;
-    }
-    a{color:#93c5fd;text-decoration:none}
-  </style>
+<style>
+body{
+  margin:0;
+  height:100vh;
+  background:linear-gradient(135deg,#020617,#0f172a);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:Tahoma;
+  color:#fff;
+}
+.card{
+  width:340px;
+  background:#020617;
+  padding:25px;
+  border-radius:16px;
+  box-shadow:0 0 40px rgba(0,0,0,.6);
+}
+h2{text-align:center;margin-bottom:20px;}
+input{
+  width:100%;
+  padding:12px;
+  margin-bottom:12px;
+  border-radius:10px;
+  border:none;
+  background:#1e293b;
+  color:#fff;
+}
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:#2563eb;
+  color:#fff;
+  font-size:15px;
+  cursor:pointer;
+}
+button:hover{background:#1d4ed8}
+.row{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:13px;
+  margin-bottom:10px;
+}
+.secondary{
+  background:#334155;
+  margin-top:8px;
+}
+.msg{
+  margin-top:10px;
+  font-size:13px;
+  text-align:center;
+}
+.error{color:#f87171}
+.success{color:#4ade80}
+</style>
 </head>
 
 <body>
 
-<div class="box">
-  <h2>تسجيل الدخول</h2>
+<div class="card">
+  <h2>POS System</h2>
 
   <input id="email" type="email" placeholder="البريد الإلكتروني">
   <input id="password" type="password" placeholder="كلمة المرور">
 
-  <button id="loginBtn">دخول</button>
-
-  <div class="links">
-    <a href="register.html">حساب جديد</a>
-    <a href="reset.html">نسيت كلمة المرور؟</a>
+  <div class="row">
+    <input type="checkbox" id="remember">
+    <label for="remember">تذكرني</label>
   </div>
+
+  <button onclick="login()">تسجيل الدخول</button>
+  <button class="secondary" onclick="register()">إنشاء حساب</button>
+
+  <div id="msg" class="msg"></div>
 </div>
 
-<script type="module" src="./js/login.js"></script>
+<script type="module" src="./js/auth.js"></script>
 </body>
 </html>
