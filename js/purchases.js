@@ -1,112 +1,69 @@
 import { db } from "./firebase-init.js";
 import {
- collection,addDoc,getDocs,deleteDoc,doc
+  collection, addDoc, getDocs, deleteDoc, doc, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const table=document.getElementById("table");
-const modal=document.getElementById("modal");
-const importExcel=document.getElementById("importExcel");
+const table = document.getElementById("productsTable");
+let editId = null;
 
-let cache=[];
-
-/* باركود أرقام */
-function genBarcode(){
-  return Date.now().toString();
-}
-
-/* تحميل */
-async function load(){
-  table.innerHTML="";
-  cache=[];
-  const snap=await getDocs(collection(db,"products"));
+// ===== LOAD =====
+async function loadProducts(){
+  table.innerHTML = "";
+  const snap = await getDocs(collection(db,"products"));
   snap.forEach(d=>{
-    const p=d.data();
-    p.id=d.id;
-    cache.push(p);
-  });
-  draw(cache);
-}
-load();
-
-function draw(arr){
-  table.innerHTML="";
-  arr.forEach(p=>{
-    table.innerHTML+=`
-    <tr>
-      <td>${p.barcode}</td>
-      <td>${p.name}</td>
-      <td>${p.unit}</td>
-      <td>${p.buy}</td>
-      <td>${p.minSell}</td>
-      <td>${p.maxSell}</td>
-      <td>${p.qty}</td>
-      <td>
-        <button onclick="remove('${p.id}')">🗑</button>
-      </td>
-    </tr>`;
+    const p = d.data();
+    table.innerHTML += `
+      <tr>
+        <td>${p.name}</td>
+        <td>${p.unit}</td>
+        <td>${p.buy}</td>
+        <td>${p.min}</td>
+        <td>${p.max}</td>
+        <td>${p.qty}</td>
+        <td>
+          <button onclick="editProduct('${d.id}')">✏️</button>
+          <button onclick="deleteProduct('${d.id}')">🗑</button>
+        </td>
+      </tr>`;
   });
 }
+loadProducts();
 
-window.search=(v)=>{
-  draw(cache.filter(p=>
-    p.name.includes(v)||p.barcode.includes(v)
-  ));
+// ===== MODAL =====
+window.openProductModal = ()=>{
+  editId = null;
+  document.getElementById("productModal").style.display="flex";
+};
+window.closeModal = ()=>{
+  document.getElementById("productModal").style.display="none";
 };
 
-window.openModal=()=>{
-  modal.style.display="flex";
-  barcode.value=genBarcode();
-};
+// ===== SAVE =====
+window.saveProduct = async ()=>{
+  const data = {
+    name: pName.value,
+    barcode: pBarcode.value,
+    unit: pUnit.value,
+    buy: +pBuy.value,
+    min: +pMin.value,
+    max: +pMax.value,
+    qty: +pQty.value,
+    category: pCategory.value
+  };
 
-window.closeModal=()=>modal.style.display="none";
-
-window.save=async()=>{
-  if(+minSell.value > +maxSell.value){
-    alert("الحد الأدنى أكبر من الأقصى");
-    return;
+  if(editId){
+    await updateDoc(doc(db,"products",editId),data);
+  }else{
+    await addDoc(collection(db,"products"),data);
   }
-  await addDoc(collection(db,"products"),{
-    name:name.value,
-    barcode:barcode.value,
-    unit:unit.value,
-    buy:+buy.value,
-    minSell:+minSell.value,
-    maxSell:+maxSell.value,
-    qty:+qty.value,
-    createdAt:new Date()
-  });
   closeModal();
-  load();
+  loadProducts();
 };
 
-window.remove=async(id)=>{
+// ===== DELETE =====
+window.deleteProduct = async (id)=>{
   if(confirm("حذف الصنف؟")){
     await deleteDoc(doc(db,"products",id));
-    load();
+    loadProducts();
   }
 };
-
-/* Excel */
-window.exportExcel=()=>{
-  const ws=XLSX.utils.json_to_sheet(cache);
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,"products");
-  XLSX.writeFile(wb,"products.xlsx");
-};
-
-importExcel.addEventListener("change",e=>{
-  const r=new FileReader();
-  r.onload=async ev=>{
-    const wb=XLSX.read(ev.target.result,{type:"array"});
-    const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-    for(const p of rows){
-      await addDoc(collection(db,"products"),{
-        ...p,
-        createdAt:new Date()
-      });
-    }
-    load();
-    alert("✔ تم الاستيراد");
-  };
-  r.readAsArrayBuffer(e.target.files[0]);
-});
