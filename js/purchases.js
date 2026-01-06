@@ -1,69 +1,81 @@
-import { db } from "./firebase-init.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-  collection, addDoc, getDocs, deleteDoc, doc, updateDoc
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const table = document.getElementById("productsTable");
-let editId = null;
+const firebaseConfig = {
+  apiKey: "AIzaSyBZwWxWIIE0exAPoL9P8pbmp19gnBFxQq0",
+  authDomain: "pos-pro-996f0.firebaseapp.com",
+  projectId: "pos-pro-996f0",
+  storageBucket: "pos-pro-996f0.appspot.com",
+  messagingSenderId: "591451935128",
+  appId: "1:591451935128:web:683495139e62fb9b1e1bed"
+};
 
-// ===== LOAD =====
-async function loadProducts(){
-  table.innerHTML = "";
-  const snap = await getDocs(collection(db,"products"));
-  snap.forEach(d=>{
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const productsRef = collection(db, "products");
+
+const body = document.getElementById("productsBody");
+const addBtn = document.getElementById("addBtn");
+
+async function loadProducts() {
+  body.innerHTML = "";
+  const snap = await getDocs(productsRef);
+  snap.forEach(d => {
     const p = d.data();
-    table.innerHTML += `
-      <tr>
-        <td>${p.name}</td>
-        <td>${p.unit}</td>
-        <td>${p.buy}</td>
-        <td>${p.min}</td>
-        <td>${p.max}</td>
-        <td>${p.qty}</td>
-        <td>
-          <button onclick="editProduct('${d.id}')">✏️</button>
-          <button onclick="deleteProduct('${d.id}')">🗑</button>
-        </td>
-      </tr>`;
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${p.name}</td>
+      <td>${p.unit}</td>
+      <td>${p.buyPrice}</td>
+      <td>${p.minPrice}</td>
+      <td>${p.maxPrice}</td>
+      <td class="actions">
+        <button onclick="deleteProduct('${d.id}')">حذف</button>
+      </td>
+    `;
+
+    body.appendChild(tr);
   });
 }
-loadProducts();
 
-// ===== MODAL =====
-window.openProductModal = ()=>{
-  editId = null;
-  document.getElementById("productModal").style.display="flex";
-};
-window.closeModal = ()=>{
-  document.getElementById("productModal").style.display="none";
-};
+addBtn.onclick = async () => {
+  const name = document.getElementById("name").value;
+  const unit = document.getElementById("unit").value;
+  const buyPrice = +document.getElementById("buyPrice").value;
+  const minPrice = +document.getElementById("minPrice").value;
+  const maxPrice = +document.getElementById("maxPrice").value;
 
-// ===== SAVE =====
-window.saveProduct = async ()=>{
-  const data = {
-    name: pName.value,
-    barcode: pBarcode.value,
-    unit: pUnit.value,
-    buy: +pBuy.value,
-    min: +pMin.value,
-    max: +pMax.value,
-    qty: +pQty.value,
-    category: pCategory.value
-  };
-
-  if(editId){
-    await updateDoc(doc(db,"products",editId),data);
-  }else{
-    await addDoc(collection(db,"products"),data);
+  if (!name) {
+    alert("اكتب اسم الصنف");
+    return;
   }
-  closeModal();
+
+  await addDoc(productsRef, {
+    name,
+    unit,
+    buyPrice,
+    minPrice,
+    maxPrice,
+    createdAt: Date.now()
+  });
+
+  document.querySelectorAll("input").forEach(i => i.value = "");
   loadProducts();
 };
 
-// ===== DELETE =====
-window.deleteProduct = async (id)=>{
-  if(confirm("حذف الصنف؟")){
-    await deleteDoc(doc(db,"products",id));
+window.deleteProduct = async (id) => {
+  if (confirm("حذف الصنف؟")) {
+    await deleteDoc(doc(db, "products", id));
     loadProducts();
   }
 };
+
+loadProducts();
