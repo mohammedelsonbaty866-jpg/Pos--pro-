@@ -5,46 +5,59 @@ import {
   createUserWithEmailAndPassword,
   setPersistence,
   browserLocalPersistence,
-  browserSessionPersistence
+  browserSessionPersistence,
+  sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
+/* 🔴 حط إعدادات Firebase بتاعتك */
 const firebaseConfig = {
-  apiKey: "AIzaSyBZwWxWIIE0exAPoL9P8pbmp19gnBFxQq0",
-  authDomain: "pos-pro-996f0.firebaseapp.com",
-  projectId: "pos-pro-996f0"
+  apiKey: "API_KEY",
+  authDomain: "PROJECT_ID.firebaseapp.com",
+  projectId: "PROJECT_ID",
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-let isLogin = true;
+const msg = document.getElementById("msg");
 
-window.toggleMode = function(){
-  isLogin = !isLogin;
-  document.getElementById("title").innerText =
-    isLogin ? "تسجيل الدخول" : "إنشاء حساب";
+window.login = async () => {
+  try{
+    const email = email.value;
+    const pass = password.value;
+
+    await setPersistence(
+      auth,
+      remember.checked ? browserLocalPersistence : browserSessionPersistence
+    );
+
+    const userCred = await signInWithEmailAndPassword(auth,email,pass);
+
+    if(!userCred.user.emailVerified){
+      msg.innerHTML = "يرجى تأكيد البريد الإلكتروني";
+      msg.className = "msg error";
+      return;
+    }
+
+    location.href = "dashboard.html";
+  }catch(e){
+    msg.innerHTML = "بيانات الدخول غير صحيحة";
+    msg.className = "msg error";
+  }
 };
 
-window.login = function(){
-  const email = email.value;
-  const password = document.getElementById("password").value;
-  const remember = document.getElementById("rememberMe").checked;
+window.register = async () => {
+  try{
+    const emailVal = email.value;
+    const passVal = password.value;
 
-  const persistence = remember
-    ? browserLocalPersistence
-    : browserSessionPersistence;
+    const userCred = await createUserWithEmailAndPassword(auth,emailVal,passVal);
+    await sendEmailVerification(userCred.user);
 
-  setPersistence(auth, persistence).then(()=>{
-    if(isLogin){
-      return signInWithEmailAndPassword(auth,email,password);
-    }else{
-      return createUserWithEmailAndPassword(auth,email,password);
-    }
-  })
-  .then(()=>{
-    window.location.href="dashboard.html";
-  })
-  .catch(err=>{
-    alert(err.message);
-  });
+    msg.innerHTML = "تم إنشاء الحساب ✔️ تحقق من بريدك";
+    msg.className = "msg success";
+  }catch(e){
+    msg.innerHTML = "خطأ في إنشاء الحساب";
+    msg.className = "msg error";
+  }
 };
