@@ -1,44 +1,60 @@
 import { db } from "./firebase-init.js";
 import {
-  collection, addDoc, onSnapshot
+ collection, addDoc, getDocs
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const productsRef = collection(db, "products");
+const body = document.getElementById("productsBody");
+const unitsDiv = document.getElementById("units");
 
-const modal = document.getElementById("productModal");
-const list = document.getElementById("productsList");
+loadProducts();
 
-window.openModal = () => modal.style.display = "flex";
-window.closeModal = () => modal.style.display = "none";
+async function loadProducts(){
+  body.innerHTML = "";
+  const snap = await getDocs(collection(db,"products"));
+  snap.forEach(doc=>{
+    const p = doc.data();
+    body.innerHTML += `
+      <tr>
+        <td>${p.name}</td>
+        <td>${p.barcode}</td>
+        <td>${p.units.map(u=>u.name).join(" , ")}</td>
+        <td>${p.stock}</td>
+        <td><i class="fa fa-edit"></i></td>
+      </tr>`;
+  });
+}
 
-window.saveProduct = async () => {
-
-  const data = {
-    name: name.value,
-    barcode: barcode.value,
-    unit: unit.value,
-    minPrice: +minPrice.value,
-    maxPrice: +maxPrice.value,
-    cost: +cost.value,
-    stock: +stock.value,
-    createdAt: new Date()
-  };
-
-  await addDoc(productsRef, data);
-  closeModal();
+window.addUnit = ()=>{
+  unitsDiv.innerHTML += `
+  <div class="unit">
+    <input placeholder="الوحدة">
+    <input type="number" placeholder="تحويل">
+    <input type="number" placeholder="أدنى">
+    <input type="number" placeholder="أقصى">
+  </div>`;
 };
 
-onSnapshot(productsRef, snap => {
-  list.innerHTML = "";
-  snap.forEach(doc => {
-    const p = doc.data();
-    list.innerHTML += `
-      <div class="product-card">
-        <h4>${p.name}</h4>
-        <small>وحدة: ${p.unit}</small><br>
-        <small>سعر: ${p.minPrice} - ${p.maxPrice}</small><br>
-        <small>مخزون: ${p.stock}</small>
-      </div>
-    `;
+window.saveProduct = async ()=>{
+  const units = [...document.querySelectorAll(".unit")].map(u=>{
+    const i=u.querySelectorAll("input");
+    return {
+      name:i[0].value,
+      factor:+i[1].value,
+      minPrice:+i[2].value,
+      maxPrice:+i[3].value
+    };
   });
-});
+
+  await addDoc(collection(db,"products"),{
+    name:name.value,
+    barcode:barcode.value,
+    units,
+    stock:+stock.value
+  });
+
+  closeModal();
+  loadProducts();
+};
+
+window.openModal=()=>productModal.style.display="flex";
+window.closeModal=()=>productModal.style.display="none";
