@@ -11,21 +11,26 @@
 </head>
 <body>
 
-<header class="page-header">
+<header class="header">
   <h2>الأصناف</h2>
-  <button class="btn-add" onclick="openModal()">
-    <i class="fa fa-plus"></i> إضافة صنف
-  </button>
+  <div class="actions">
+    <button onclick="openModal()">➕ إضافة</button>
+    <button onclick="exportExcel()">📤 تصدير</button>
+    <input type="file" id="importFile" hidden onchange="importExcel(event)">
+    <button onclick="document.getElementById('importFile').click()">📥 استيراد</button>
+    <button onclick="window.print()">🖨 طباعة</button>
+  </div>
 </header>
 
-<table class="products-table">
+<table>
 <thead>
 <tr>
-  <th>الاسم</th>
-  <th>الباركود</th>
-  <th>الوحدات</th>
-  <th>المخزون</th>
-  <th>إجراءات</th>
+<th>الاسم</th>
+<th>الباركود</th>
+<th>الوحدات</th>
+<th>سعر الشراء</th>
+<th>البيع</th>
+<th>إجراءات</th>
 </tr>
 </thead>
 <tbody id="productsBody"></tbody>
@@ -33,26 +38,25 @@
 
 <!-- Modal -->
 <div class="modal" id="productModal">
-  <div class="modal-content">
-    <h3>إضافة صنف</h3>
+<div class="modal-box">
+<h3>إضافة صنف</h3>
 
-    <input id="name" placeholder="اسم الصنف">
-    <input id="barcode" placeholder="الباركود">
+<input id="name" placeholder="اسم الصنف">
+<input id="barcode" placeholder="الباركود">
+<input id="buyPrice" type="number" placeholder="سعر الشراء">
 
-    <h4>الوحدات</h4>
-    <div id="units"></div>
+<h4>وحدات القياس</h4>
+<div id="units"></div>
+<button onclick="addUnit()">➕ وحدة</button>
 
-    <button onclick="addUnit()">➕ إضافة وحدة</button>
-
-    <input id="stock" type="number" placeholder="المخزون">
-
-    <div class="modal-actions">
-      <button onclick="saveProduct()">حفظ</button>
-      <button class="cancel" onclick="closeModal()">إلغاء</button>
-    </div>
-  </div>
+<div class="modal-actions">
+<button onclick="saveProduct()">حفظ</button>
+<button class="cancel" onclick="closeModal()">إلغاء</button>
+</div>
+</div>
 </div>
 
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 <script type="module" src="js/products.js"></script>
 </body>
 </html>
