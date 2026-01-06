@@ -1,6 +1,7 @@
-// js/login.js
-import { auth } from "./firebase-init.js";
+// Firebase SDK
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
+  getAuth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   setPersistence,
@@ -9,53 +10,90 @@ import {
   sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-const email = document.getElementById("email");
-const password = document.getElementById("password");
-const loginBtn = document.getElementById("loginBtn");
-const registerBtn = document.getElementById("registerBtn");
-const remember = document.getElementById("remember");
+/* ===== Firebase Config ===== */
+
+Wepap pos pro
+
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBZwWxWIIE0exAPoL9P8pbmp19gnBFxQq0",
+  authDomain: "pos-pro-996f0.firebaseapp.com",
+  projectId: "pos-pro-996f0",
+  storageBucket: "pos-pro-996f0.firebasestorage.app",
+  messagingSenderId: "591451935128",
+  appId: "1:591451935128:web:683495139e62fb9b1e1bed"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+/* ===== Init ===== */
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+/* ===== Elements ===== */
+const emailInput = document.getElementById("email");
+const passInput = document.getElementById("password");
+const rememberCheck = document.getElementById("remember");
 const msg = document.getElementById("msg");
 
-async function setRemember() {
-  await setPersistence(
-    auth,
-    remember.checked ? browserLocalPersistence : browserSessionPersistence
-  );
-}
-
-loginBtn.addEventListener("click", async () => {
-  msg.textContent = "";
+/* ===== Login ===== */
+window.login = async () => {
   try {
-    await setRemember();
-    const user = await signInWithEmailAndPassword(
+    const email = emailInput.value.trim();
+    const password = passInput.value;
+
+    if (!email || !password) {
+      showMsg("اكتب البريد وكلمة المرور", "error");
+      return;
+    }
+
+    await setPersistence(
       auth,
-      email.value,
-      password.value
+      rememberCheck.checked
+        ? browserLocalPersistence
+        : browserSessionPersistence
     );
 
-    if (!user.user.emailVerified) {
-      msg.textContent = "يرجى تأكيد البريد الإلكتروني";
+    const userCred = await signInWithEmailAndPassword(auth, email, password);
+
+    if (!userCred.user.emailVerified) {
+      showMsg("من فضلك أكد البريد الإلكتروني أولاً", "error");
       return;
     }
 
     location.href = "dashboard.html";
-  } catch (e) {
-    msg.textContent = "بيانات الدخول غير صحيحة";
+  } catch (err) {
+    showMsg("بيانات الدخول غير صحيحة", "error");
   }
-});
+};
 
-registerBtn.addEventListener("click", async () => {
-  msg.textContent = "";
+/* ===== Register ===== */
+window.register = async () => {
   try {
-    const res = await createUserWithEmailAndPassword(
-      auth,
-      email.value,
-      password.value
-    );
-    await sendEmailVerification(res.user);
-    msg.style.color = "#4ade80";
-    msg.textContent = "تم إنشاء الحساب – راجع بريدك للتأكيد";
-  } catch {
-    msg.textContent = "خطأ في إنشاء الحساب";
+    const email = emailInput.value.trim();
+    const password = passInput.value;
+
+    if (!email || !password) {
+      showMsg("اكتب البريد وكلمة المرور", "error");
+      return;
+    }
+
+    const userCred = await createUserWithEmailAndPassword(auth, email, password);
+    await sendEmailVerification(userCred.user);
+
+    showMsg("تم إنشاء الحساب ✔️ تحقق من بريدك", "success");
+  } catch (err) {
+    showMsg("خطأ أثناء إنشاء الحساب", "error");
   }
-});
+};
+
+/* ===== Helper ===== */
+function showMsg(text, type) {
+  msg.textContent = text;
+  msg.className = `msg ${type}`;
+}
