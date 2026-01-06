@@ -1,78 +1,95 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>الأصناف</title>
-  <link rel="stylesheet" href="css/app.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    body{background:#0f172a;color:#fff;font-family:Tajawal}
+    .container{padding:20px}
+    h2{margin-bottom:15px}
+    .actions{display:flex;gap:10px;margin-bottom:15px}
+    button{padding:10px 14px;border:none;border-radius:8px;cursor:pointer}
+    .add{background:#22c55e}
+    .excel{background:#2563eb}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;border-bottom:1px solid #334155;text-align:center}
+    th{background:#1e293b}
+    tr:hover{background:#1f2937}
+    input,select{
+      padding:8px;border-radius:6px;border:none;width:100%
+    }
+    .modal{
+      position:fixed;top:0;left:0;width:100%;height:100%;
+      background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center
+    }
+    .modal-content{
+      background:#020617;padding:20px;border-radius:12px;width:400px
+    }
+  </style>
 </head>
-<body class="dark">
+<body>
 
-<header class="page-header">
-  <h2>الأصناف</h2>
+<div class="container">
+  <h2>📦 الأصناف</h2>
+
   <div class="actions">
-    <button id="addBtn" class="btn primary"><i class="fa fa-plus"></i> إضافة صنف</button>
-    <button id="exportBtn" class="btn"><i class="fa fa-file-excel"></i> تصدير Excel</button>
-    <button id="importBtn" class="btn"><i class="fa fa-file-import"></i> استيراد Excel</button>
-    <input type="file" id="importFile" accept=".xlsx,.xls" hidden>
-  </div>
-</header>
+    <button class="add" onclick="openModal()">➕ إضافة صنف</button>
+    <button class="excel" onclick="exportExcel()">⬇ تصدير Excel</button>
 
-<section class="table-wrap">
-  <table id="productsTable">
+    <label class="excel">
+      ⬆ استيراد Excel
+      <input type="file" id="importFile" hidden>
+    </label>
+  </div>
+
+  <table>
     <thead>
       <tr>
-        <th>الاسم</th>
+        <th>الصنف</th>
         <th>الوحدة</th>
         <th>سعر الشراء</th>
         <th>أدنى بيع</th>
         <th>أقصى بيع</th>
         <th>الكمية</th>
-        <th>إجراءات</th>
+        <th>إجراء</th>
       </tr>
     </thead>
-    <tbody></tbody>
+    <tbody id="productsTable"></tbody>
   </table>
-</section>
+</div>
 
-<!-- Modal -->
-<div id="productModal" class="modal">
+<!-- مودال -->
+<div class="modal" id="modal">
   <div class="modal-content">
-    <h3 id="modalTitle">إضافة صنف</h3>
-    <form id="productForm">
-      <input type="hidden" id="pid">
+    <h3>إضافة / تعديل صنف</h3>
 
-      <label>اسم الصنف</label>
-      <input id="name" required>
+    <input id="name" placeholder="اسم الصنف">
+    <select id="unit">
+      <option>قطعة</option>
+      <option>علبة</option>
+      <option>كرتونة</option>
+      <option>كيلو</option>
+      <option>جرام</option>
+      <option>لتر</option>
+    </select>
+    <input id="buy" placeholder="سعر الشراء" type="number">
+    <input id="minSell" placeholder="أدنى سعر بيع" type="number">
+    <input id="maxSell" placeholder="أقصى سعر بيع" type="number">
+    <input id="qty" placeholder="الكمية" type="number">
 
-      <label>وحدة القياس</label>
-      <select id="unit">
-        <option>قطعة</option>
-        <option>كرتونة</option>
-        <option>كيلو</option>
-        <option>جرام</option>
-        <option>لتر</option>
-      </select>
-
-      <label>سعر الشراء</label>
-      <input id="buy" type="number" step="0.01" required>
-
-      <label>أدنى سعر بيع</label>
-      <input id="minSell" type="number" step="0.01" required>
-
-      <label>أقصى سعر بيع</label>
-      <input id="maxSell" type="number" step="0.01" required>
-
-      <label>الكمية</label>
-      <input id="qty" type="number" required>
-
-      <div class="modal-actions">
-        <button type="submit" class="btn primary">حفظ</button>
-        <button type="button" id="closeModal" class="btn">إلغاء</button>
-      </div>
-    </form>
+    <br><br>
+    <button class="add" onclick="saveProduct()">💾 حفظ</button>
+    <button onclick="closeModal()">إلغاء</button>
   </div>
 </div>
+
+<!-- Excel -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <script type="module" src="js/firebase-init.js"></script>
 <script type="module" src="js/products.js"></script>
