@@ -4,85 +4,104 @@
   <meta charset="UTF-8">
   <title>الأصناف</title>
 
-  <link rel="stylesheet" href="css/products.css">
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-
+  <style>
+    body {
+      margin: 0;
+      font-family: Tahoma;
+      background: #0f172a;
+      color: #fff;
+    }
+    h2 {
+      text-align: center;
+      margin: 15px 0;
+    }
+    .container {
+      padding: 15px;
+    }
+    .form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    input, select, button {
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+    }
+    input, select {
+      background: #1e293b;
+      color: #fff;
+    }
+    button {
+      background: #2563eb;
+      color: #fff;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #020617;
+    }
+    th, td {
+      border: 1px solid #334155;
+      padding: 8px;
+      text-align: center;
+      font-size: 13px;
+    }
+    th {
+      background: #1e293b;
+    }
+    .actions button {
+      margin: 0 3px;
+      background: #334155;
+    }
+    .actions button:hover {
+      background: #475569;
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- ===== TOP BAR ===== -->
-<div class="top-bar">
-  <h2>إدارة الأصناف</h2>
-  <button class="btn primary" onclick="openProductModal()">
-    <i class="fa fa-plus"></i> إضافة صنف
-  </button>
-</div>
+<h2>إدارة الأصناف</h2>
 
-<!-- ===== FILTERS ===== -->
-<div class="filters">
-  <input type="text" id="searchInput" placeholder="بحث باسم الصنف أو الباركود">
-  <select id="categoryFilter">
-    <option value="">كل الأقسام</option>
-    <option value="none">بدون قسم</option>
-  </select>
+<div class="container">
 
-  <button class="btn" onclick="exportExcel()">تصدير Excel</button>
-  <input type="file" id="excelFile" hidden onchange="importExcel(event)">
-  <button class="btn" onclick="document.getElementById('excelFile').click()">استيراد Excel</button>
-</div>
-
-<!-- ===== TABLE ===== -->
-<div class="table-wrapper">
-<table>
-  <thead>
-    <tr>
-      <th>الصنف</th>
-      <th>الوحدة</th>
-      <th>سعر الشراء</th>
-      <th>أدنى بيع</th>
-      <th>أقصى بيع</th>
-      <th>الكمية</th>
-      <th>إجراءات</th>
-    </tr>
-  </thead>
-  <tbody id="productsTable"></tbody>
-</table>
-</div>
-
-<!-- ===== MODAL ===== -->
-<div class="modal" id="productModal">
-  <div class="modal-content">
-    <h3 id="modalTitle">إضافة صنف</h3>
-
-    <input id="pName" placeholder="اسم الصنف">
-    <input id="pBarcode" placeholder="الباركود">
-    
-    <select id="pUnit">
+  <div class="form">
+    <input id="name" placeholder="اسم الصنف">
+    <select id="unit">
       <option value="قطعة">قطعة</option>
+      <option value="علبة">علبة</option>
       <option value="كرتونة">كرتونة</option>
       <option value="كيلو">كيلو</option>
-      <option value="جرام">جرام</option>
-      <option value="لتر">لتر</option>
     </select>
-
-    <input type="number" id="pBuy" placeholder="سعر الشراء">
-    <input type="number" id="pMin" placeholder="أدنى سعر بيع">
-    <input type="number" id="pMax" placeholder="أقصى سعر بيع">
-    <input type="number" id="pQty" placeholder="الكمية">
-
-    <select id="pCategory">
-      <option value="none">بدون قسم</option>
-    </select>
-
-    <div class="actions">
-      <button class="btn primary" onclick="saveProduct()">حفظ</button>
-      <button class="btn danger" onclick="closeModal()">إلغاء</button>
-    </div>
+    <input id="buyPrice" type="number" placeholder="سعر الشراء">
+    <input id="minPrice" type="number" placeholder="أقل سعر بيع">
+    <input id="maxPrice" type="number" placeholder="أقصى سعر بيع">
+    <button id="addBtn">إضافة صنف</button>
   </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>اسم الصنف</th>
+        <th>الوحدة</th>
+        <th>شراء</th>
+        <th>أدنى</th>
+        <th>أقصى</th>
+        <th>إجراء</th>
+      </tr>
+    </thead>
+    <tbody id="productsBody"></tbody>
+  </table>
+
 </div>
 
-<script type="module" src="js/firebase-init.js"></script>
-<script type="module" src="js/products.js"></script>
+<script type="module" src="./js/products.js"></script>
 </body>
 </html>
