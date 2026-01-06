@@ -1,96 +1,80 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>الأصناف</title>
+<meta charset="UTF-8">
+<title>الأصناف</title>
 
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="css/products.css">
+<link rel="stylesheet"
+ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
-  <style>
-    body{background:#0f172a;color:#fff;font-family:Tajawal}
-    .container{padding:20px}
-    h2{margin-bottom:15px}
-    .actions{display:flex;gap:10px;margin-bottom:15px}
-    button{padding:10px 14px;border:none;border-radius:8px;cursor:pointer}
-    .add{background:#22c55e}
-    .excel{background:#2563eb}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:10px;border-bottom:1px solid #334155;text-align:center}
-    th{background:#1e293b}
-    tr:hover{background:#1f2937}
-    input,select{
-      padding:8px;border-radius:6px;border:none;width:100%
-    }
-    .modal{
-      position:fixed;top:0;left:0;width:100%;height:100%;
-      background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center
-    }
-    .modal-content{
-      background:#020617;padding:20px;border-radius:12px;width:400px
-    }
-  </style>
 </head>
 <body>
 
-<div class="container">
-  <h2>📦 الأصناف</h2>
+<div class="page">
 
-  <div class="actions">
-    <button class="add" onclick="openModal()">➕ إضافة صنف</button>
-    <button class="excel" onclick="exportExcel()">⬇ تصدير Excel</button>
+  <header>
+    <h2>📦 إدارة الأصناف</h2>
+    <div class="actions">
+      <button onclick="openModal()">➕ إضافة صنف</button>
+      <button onclick="exportExcel()">⬇ Excel</button>
+      <label class="import">
+        ⬆ Excel
+        <input type="file" id="importExcel" hidden>
+      </label>
+    </div>
+  </header>
 
-    <label class="excel">
-      ⬆ استيراد Excel
-      <input type="file" id="importFile" hidden>
-    </label>
+  <input class="search" placeholder="🔍 بحث بالاسم أو الباركود" onkeyup="search(this.value)">
+
+  <div class="table">
+    <table>
+      <thead>
+        <tr>
+          <th>الباركود</th>
+          <th>الصنف</th>
+          <th>الوحدات</th>
+          <th>شراء</th>
+          <th>أدنى</th>
+          <th>أقصى</th>
+          <th>الكمية</th>
+          <th>إجراء</th>
+        </tr>
+      </thead>
+      <tbody id="table"></tbody>
+    </table>
   </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th>الصنف</th>
-        <th>الوحدة</th>
-        <th>سعر الشراء</th>
-        <th>أدنى بيع</th>
-        <th>أقصى بيع</th>
-        <th>الكمية</th>
-        <th>إجراء</th>
-      </tr>
-    </thead>
-    <tbody id="productsTable"></tbody>
-  </table>
 </div>
 
-<!-- مودال -->
+<!-- Modal -->
 <div class="modal" id="modal">
-  <div class="modal-content">
+  <div class="box">
     <h3>إضافة / تعديل صنف</h3>
 
     <input id="name" placeholder="اسم الصنف">
+    <input id="barcode" placeholder="الباركود" readonly>
+
     <select id="unit">
       <option>قطعة</option>
       <option>علبة</option>
       <option>كرتونة</option>
       <option>كيلو</option>
-      <option>جرام</option>
       <option>لتر</option>
     </select>
-    <input id="buy" placeholder="سعر الشراء" type="number">
-    <input id="minSell" placeholder="أدنى سعر بيع" type="number">
-    <input id="maxSell" placeholder="أقصى سعر بيع" type="number">
-    <input id="qty" placeholder="الكمية" type="number">
 
-    <br><br>
-    <button class="add" onclick="saveProduct()">💾 حفظ</button>
-    <button onclick="closeModal()">إلغاء</button>
+    <input id="buy" type="number" placeholder="سعر الشراء">
+    <input id="minSell" type="number" placeholder="أدنى بيع">
+    <input id="maxSell" type="number" placeholder="أقصى بيع">
+    <input id="qty" type="number" placeholder="الكمية">
+
+    <div class="modal-actions">
+      <button onclick="save()">💾 حفظ</button>
+      <button class="cancel" onclick="closeModal()">إلغاء</button>
+    </div>
   </div>
 </div>
 
-<!-- Excel -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-
 <script type="module" src="js/firebase-init.js"></script>
 <script type="module" src="js/products.js"></script>
 </body>
