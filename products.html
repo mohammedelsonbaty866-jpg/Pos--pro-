@@ -1,44 +1,45 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>الأصناف</title>
+<meta charset="UTF-8">
+<title>الأصناف</title>
 
-  <link rel="stylesheet" href="css/products.css">
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="css/products.css">
+<link rel="stylesheet"
+ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+
 <body>
 
 <header class="top">
   <h2>الأصناف</h2>
   <div class="actions">
     <button onclick="openModal()">➕ إضافة صنف</button>
-    <button onclick="exportExcel()">📤 تصدير</button>
-    <input type="file" id="importFile" hidden onchange="importExcel(event)">
-    <button onclick="document.getElementById('importFile').click()">📥 استيراد</button>
+    <button onclick="exportExcel()">📤 تصدير Excel</button>
+    <button onclick="triggerImport()">📥 استيراد Excel</button>
     <button onclick="window.print()">🖨 طباعة</button>
+    <input type="file" id="importFile" hidden>
   </div>
 </header>
 
 <table>
-  <thead>
-    <tr>
-      <th>الاسم</th>
-      <th>الباركود</th>
-      <th>الوحدات</th>
-      <th>سعر الشراء</th>
-      <th>البيع</th>
-      <th>إجراءات</th>
-    </tr>
-  </thead>
-  <tbody id="productsBody"></tbody>
+<thead>
+<tr>
+  <th>اسم الصنف</th>
+  <th>الباركود</th>
+  <th>الوحدات</th>
+  <th>سعر الشراء</th>
+  <th>البيع</th>
+  <th>إجراءات</th>
+</tr>
+</thead>
+<tbody id="productsBody"></tbody>
 </table>
 
 <!-- Modal -->
 <div class="modal" id="productModal">
   <div class="box">
-    <h3>إضافة / تعديل صنف</h3>
+    <h3>إضافة صنف</h3>
 
     <input id="name" placeholder="اسم الصنف">
     <input id="barcode" placeholder="الباركود">
@@ -55,7 +56,10 @@
   </div>
 </div>
 
+<!-- Excel Library -->
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+<!-- Products Logic -->
 <script type="module" src="js/products.js"></script>
 </body>
 </html>
