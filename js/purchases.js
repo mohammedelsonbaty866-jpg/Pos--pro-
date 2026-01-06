@@ -1,15 +1,10 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  deleteDoc,
-  doc
+  getFirestore, collection, addDoc, getDocs,
+  deleteDoc, doc, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-import * as XLSX from "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm";
-
+// نفس إعدادات مشروعك
 const firebaseConfig = {
   apiKey: "AIzaSyBZwWxWIIE0exAPoL9P8pbmp19gnBFxQq0",
   authDomain: "pos-pro-996f0.firebaseapp.com",
@@ -25,84 +20,73 @@ const productsRef = collection(db, "products");
 
 const body = document.getElementById("productsBody");
 const addBtn = document.getElementById("addBtn");
-const exportBtn = document.getElementById("exportBtn");
-const importBtn = document.getElementById("importBtn");
-const importExcel = document.getElementById("importExcel");
 
-async function loadProducts() {
+async function loadProducts(){
   body.innerHTML = "";
   const snap = await getDocs(productsRef);
-
-  snap.forEach(d => {
+  snap.forEach(d=>{
     const p = d.data();
     const tr = document.createElement("tr");
-
     tr.innerHTML = `
       <td>${p.name}</td>
-      <td>${p.unit}</td>
+      <td><span class="badge">${p.unit}</span></td>
       <td>${p.buyPrice}</td>
       <td>${p.minPrice}</td>
       <td>${p.maxPrice}</td>
       <td class="actions">
+        <button onclick="editProduct('${d.id}','${p.name}','${p.unit}',${p.buyPrice},${p.minPrice},${p.maxPrice})">تعديل</button>
         <button onclick="deleteProduct('${d.id}')">حذف</button>
       </td>
     `;
-
     body.appendChild(tr);
   });
 }
 
-addBtn.onclick = async () => {
-  const name = nameInput.value;
-  if (!name) return alert("اكتب اسم الصنف");
+addBtn.addEventListener("click", async ()=>{
+  const name = nameInput.value.trim();
+  const unit = unitSelect.value;
+  const buyPrice = +buyPriceInput.value;
+  const minPrice = +minPriceInput.value;
+  const maxPrice = +maxPriceInput.value;
 
-  await addDoc(productsRef, {
-    name,
-    unit: unit.value,
-    buyPrice: +buyPrice.value,
-    minPrice: +minPrice.value,
-    maxPrice: +maxPrice.value,
+  if(!name) return alert("اكتب اسم الصنف");
+  if(minPrice > maxPrice) return alert("الحد الأدنى أكبر من الأقصى");
+
+  await addDoc(productsRef,{
+    name, unit, buyPrice, minPrice, maxPrice,
     createdAt: Date.now()
   });
 
-  document.querySelectorAll("#productForm input").forEach(i => i.value = "");
+  document.querySelectorAll("input").forEach(i=>i.value="");
   loadProducts();
-};
+});
 
-window.deleteProduct = async (id) => {
-  if (confirm("حذف الصنف؟")) {
-    await deleteDoc(doc(db, "products", id));
+window.deleteProduct = async(id)=>{
+  if(confirm("تأكيد الحذف؟")){
+    await deleteDoc(doc(db,"products",id));
     loadProducts();
   }
 };
 
-// تصدير Excel
-exportBtn.onclick = async () => {
-  const snap = await getDocs(productsRef);
-  const data = [];
-  snap.forEach(d => data.push(d.data()));
+window.editProduct = async(id,n,u,b,min,max)=>{
+  const name = prompt("اسم الصنف", n);
+  if(!name) return;
+  const buyPrice = +prompt("سعر الشراء", b);
+  const minPrice = +prompt("أقل سعر بيع", min);
+  const maxPrice = +prompt("أقصى سعر بيع", max);
+  if(minPrice > maxPrice) return alert("الحد الأدنى أكبر من الأقصى");
 
-  const ws = XLSX.utils.json_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Products");
-  XLSX.writeFile(wb, "products.xlsx");
-};
-
-// استيراد Excel
-importBtn.onclick = () => importExcel.click();
-
-importExcel.onchange = async (e) => {
-  const file = e.target.files[0];
-  const data = await file.arrayBuffer();
-  const wb = XLSX.read(data);
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet);
-
-  for (const r of rows) {
-    await addDoc(productsRef, r);
-  }
-
+  await updateDoc(doc(db,"products",id),{
+    name, unit:u, buyPrice, minPrice, maxPrice
+  });
   loadProducts();
 };
+
+// عناصر
+const nameInput = document.getElementById("name");
+const unitSelect = document.getElementById("unit");
+const buyPriceInput = document.getElementById("buyPrice");
+const minPriceInput = document.getElementById("minPrice");
+const maxPriceInput = document.getElementById("maxPrice");
 
 loadProducts();
