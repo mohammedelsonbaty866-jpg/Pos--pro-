@@ -1,172 +1,178 @@
-import { db, auth } from "./firebase-init.js";
+import { initializeApp } from
+  "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+
 import {
+  getFirestore,
   collection,
+  getDocs,
   addDoc,
-  serverTimestamp,
-  doc,
-  getDoc,
-  updateDoc
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  Timestamp
+} from
+  "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ====== State ====== */
-window.cart = [];
-let paymentType = "cash";
-let transferData = null;
-
-/* ====== Helpers ====== */
-function $(id){ return document.getElementById(id); }
-
-/* ====== Product Search (Mock – مربوط بعدين بالأصناف) ====== */
-window.searchProduct = function(value){
-  // هنا لاحقًا نربط بالأصناف من Firestore
-  // دلوقتي مجرد مثال
-  if(value.length < 2) return;
+/* ===== Firebase Config ===== */
+const firebaseConfig = {
+  apiKey: "AIzaSyBZwWxWIIE0exAPoL9P8pbmp19gnBFxQq0",
+  authDomain: "pos-pro-996f0.firebaseapp.com",
+  projectId: "pos-pro-996f0",
+  storageBucket: "pos-pro-996f0.appspot.com",
+  messagingSenderId: "591451935128",
+  appId: "1:591451935128:web:683495139e62fb9b1e1bed"
 };
 
-/* ====== Cart ====== */
-function renderCart(){
-  const body = $("cartBody");
-  body.innerHTML = "";
-  let total = 0;
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  cart.forEach((item,i)=>{
-    total += item.price * item.qty;
+/* ===== DOM ===== */
+const productsGrid = document.getElementById("productsGrid");
+const searchInput  = document.getElementById("searchProduct");
+const invoiceBody  = document.getElementById("invoiceBody");
+const totalEl      = document.getElementById("total");
+const saveBtn      = document.getElementById("saveSaleBtn");
+const printBtn     = document.getElementById("printBtn");
 
-    body.innerHTML += `
-      <tr>
-        <td>${item.name}</td>
-        <td>${item.unit}</td>
-        <td>
-          <input type="number" min="1" value="${item.qty}"
-            onchange="updateQty(${i},this.value)">
-        </td>
-        <td>
-          <input type="number" value="${item.price}"
-            onchange="updatePrice(${i},this.value)">
-        </td>
-        <td>
-          <button onclick="removeItem(${i})">❌</button>
-        </td>
-      </tr>
-    `;
+const customerInput = document.getElementById("customerName");
+const paymentType   = document.getElementById("paymentType");
+
+/* ===== State ===== */
+let products = [];
+let cart = [];
+
+/* ===== Load Products ===== */
+async function loadProducts() {
+  productsGrid.innerHTML = "";
+  const snap = await getDocs(collection(db, "products"));
+
+  products = [];
+  snap.forEach(doc => {
+    products.push({ id: doc.id, ...doc.data() });
   });
 
-  $("totalAmount").innerText = total.toFixed(2);
+  renderProducts(products);
 }
 
-window.updateQty = (i,val)=>{
-  cart[i].qty = Number(val);
-  renderCart();
+/* ===== Render Products ===== */
+function renderProducts(list) {
+  productsGrid.innerHTML = "";
+
+  list.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "product-card";
+    div.innerHTML = `
+      <h4>${p.name}</h4>
+      <span>${p.minPrice} - ${p.maxPrice}</span>
+    `;
+    div.onclick = () => addToCart(p);
+    productsGrid.appendChild(div);
+  });
+}
+
+/* ===== Search ===== */
+searchInput.oninput = () => {
+  const val = searchInput.value.toLowerCase();
+  const filtered = products.filter(p =>
+    p.name.toLowerCase().includes(val)
+  );
+  renderProducts(filtered);
 };
 
-window.updatePrice = (i,val)=>{
-  const price = Number(val);
-
-  const min = cart[i].minPrice;
-  const max = cart[i].maxPrice;
-
-  if(price < min || price > max){
-    alert(`⚠️ السعر خارج النطاق (${min} - ${max})`);
+/* ===== Add To Cart ===== */
+function addToCart(product) {
+  const exist = cart.find(i => i.id === product.id);
+  if (exist) {
+    exist.qty++;
+  } else {
+    cart.push({
+      id: product.id,
+      name: product.name,
+      price: product.minPrice,
+      min: product.minPrice,
+      max: product.maxPrice,
+      qty: 1
+    });
   }
+  renderInvoice();
+}
 
-  cart[i].price = price;
-  renderCart();
-};
+/* ===== Render Invoice ===== */
+function renderInvoice() {
+  invoiceBody.innerHTML = "";
+  let total = 0;
 
-window.removeItem = (i)=>{
-  cart.splice(i,1);
-  renderCart();
-};
+  cart.forEach((item, index) => {
+    total += item.price * item.qty;
 
-window.clearCart = ()=>{
-  cart = [];
-  renderCart();
-};
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${item.name}</td>
+      <td>
+        <input type="number" min="${item.min}" max="${item.max}"
+          value="${item.price}"
+          onchange="updatePrice(${index}, this.value)">
+      </td>
+      <td>
+        <input type="number" min="1" value="${item.qty}"
+          onchange="updateQty(${index}, this.value)">
+      </td>
+      <td>${item.price * item.qty}</td>
+      <td><button onclick="removeItem(${index})">✖</button></td>
+    `;
+    invoiceBody.appendChild(tr);
+  });
 
-/* ====== Sale Type ====== */
-window.handleSaleType = ()=>{
-  if($("saleType").value === "credit"){
-    $("customerName").placeholder = "اسم العميل (إجباري)";
-  }else{
-    $("customerName").value = "";
+  totalEl.textContent = total.toFixed(2);
+}
+
+/* ===== Global Functions ===== */
+window.updatePrice = (i, val) => {
+  val = +val;
+  if (val < cart[i].min || val > cart[i].max) {
+    alert("السعر خارج المسموح");
+    return;
   }
+  cart[i].price = val;
+  renderInvoice();
 };
 
-/* ====== Payment ====== */
-window.handlePaymentType = ()=>{
-  paymentType = $("paymentType").value;
-  if(paymentType === "transfer"){
-    $("transferModal").classList.remove("hidden");
-  }
+window.updateQty = (i, val) => {
+  cart[i].qty = +val;
+  renderInvoice();
 };
 
-window.closeTransfer = ()=>{
-  $("transferModal").classList.add("hidden");
+window.removeItem = (i) => {
+  cart.splice(i, 1);
+  renderInvoice();
 };
 
-window.confirmTransfer = ()=>{
-  transferData = {
-    type: $("transferType").value,
-    account: $("transferAccount").value,
-    ref: $("transferRef").value || ""
-  };
-  closeTransfer();
-};
-
-/* ====== Save Invoice (ONLINE + OFFLINE) ====== */
-window.saveInvoice = async ()=>{
-  if(cart.length === 0){
+/* ===== Save Sale ===== */
+saveBtn.onclick = async () => {
+  if (cart.length === 0) {
     alert("الفاتورة فاضية");
     return;
   }
 
-  if($("saleType").value === "credit" && !$("customerName").value){
+  if (paymentType.value === "credit" && !customerInput.value) {
     alert("اسم العميل إجباري في البيع الآجل");
     return;
   }
 
-  const user = auth.currentUser;
-  if(!user){
-    alert("يجب تسجيل الدخول");
-    return;
-  }
-
-  const invoice = {
+  await addDoc(collection(db, "sales"), {
+    customer: customerInput.value || "نقدي",
+    paymentType: paymentType.value,
     items: cart,
-    total: Number($("totalAmount").innerText),
-    customer: $("customerName").value || "نقدي",
-    saleType: $("saleType").value,
-    paymentType,
-    transfer: transferData,
-    cashierId: user.uid,
-    createdAt: serverTimestamp()
-  };
+    total: +totalEl.textContent,
+    createdAt: Timestamp.now()
+  });
 
-  try{
-    await addDoc(collection(db,"sales"), invoice);
-    alert("✅ تم حفظ الفاتورة");
-    clearCart();
-  }catch(e){
-    // Offline fallback
-    const offline = JSON.parse(localStorage.getItem("offlineSales")||"[]");
-    offline.push(invoice);
-    localStorage.setItem("offlineSales",JSON.stringify(offline));
-    alert("⚠️ تم الحفظ أوفلاين – سيُزامن عند الاتصال");
-  }
+  alert("تم حفظ الفاتورة");
+  cart = [];
+  renderInvoice();
 };
 
-/* ====== Print ====== */
-window.printInvoice = ()=>{
+/* ===== Print ===== */
+printBtn.onclick = () => {
   window.print();
 };
 
-/* ====== Sync Offline ====== */
-window.addEventListener("online", async ()=>{
-  const offline = JSON.parse(localStorage.getItem("offlineSales")||"[]");
-  if(!offline.length) return;
-
-  for(const inv of offline){
-    await addDoc(collection(db,"sales"), inv);
-  }
-  localStorage.removeItem("offlineSales");
-});
+/* ===== Init ===== */
+loadProducts();
