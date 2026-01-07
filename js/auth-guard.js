@@ -25,6 +25,15 @@ onAuthStateChanged(auth, async (user) => {
   if (nameEl) {
     nameEl.innerText = snap.data().name || "مستخدم";
   }
+  import { auth } from "./firebase-init.js";
+import { onAuthStateChanged } from
+"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    window.location.href = "login.html";
+  }
+});
 });
 
 // زر تسجيل الخروج
