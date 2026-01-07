@@ -176,3 +176,76 @@ printBtn.onclick = () => {
 
 /* ===== Init ===== */
 loadProducts();
+// =====================
+// الدفع
+// =====================
+const paymentType = document.getElementById("paymentType");
+const paymentDetails = document.getElementById("paymentDetails");
+const confirmPayment = document.getElementById("confirmPayment");
+
+// تغيير نوع الدفع
+paymentType.onchange = renderPaymentDetails;
+
+function renderPaymentDetails() {
+  const type = paymentType.value;
+  paymentDetails.innerHTML = "";
+
+  if (type === "cash") {
+    paymentDetails.innerHTML = `<p>الدفع نقدي بالكامل</p>`;
+  }
+
+  if (type === "credit") {
+    paymentDetails.innerHTML = `
+      <input id="customerName" placeholder="اسم العميل">
+    `;
+  }
+
+  if (type === "transfer") {
+    paymentDetails.innerHTML = `
+      <input id="transferRef" placeholder="رقم التحويل / Vodafone / InstaPay">
+    `;
+  }
+
+  if (type === "mixed") {
+    paymentDetails.innerHTML = `
+      <input id="cashAmount" type="number" placeholder="مبلغ نقدي">
+      <input id="transferAmount" type="number" placeholder="مبلغ تحويل">
+    `;
+  }
+}
+
+// تأكيد البيع
+confirmPayment.onclick = () => {
+  if (invoiceItems.length === 0) {
+    alert("الفاتورة فارغة");
+    return;
+  }
+
+  const total = Number(finalTotalEl.textContent);
+  const type = paymentType.value;
+
+  if (type === "credit") {
+    const name = document.getElementById("customerName")?.value;
+    if (!name) {
+      alert("اكتب اسم العميل");
+      return;
+    }
+  }
+
+  if (type === "mixed") {
+    const cash = Number(document.getElementById("cashAmount")?.value || 0);
+    const transfer = Number(document.getElementById("transferAmount")?.value || 0);
+
+    if (cash + transfer !== total) {
+      alert("مجموع المبالغ لا يساوي الإجمالي");
+      return;
+    }
+  }
+
+  alert("تم تسجيل البيع بنجاح ✅");
+
+  // تصفير الفاتورة
+  invoiceItems = [];
+  renderInvoice();
+  renderPaymentDetails();
+};
