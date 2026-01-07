@@ -124,51 +124,81 @@ function renderInvoice() {
 }
 
 /* ===== Global Functions ===== */
-window.updatePrice = (i, val) => {
-  val = +val;
-  if (val < cart[i].min || val > cart[i].max) {
-    alert("السعر خارج المسموح");
-    return;
-  }
-  cart[i].price = val;
-  renderInvoice();
-};
+confirmPayment.onclick = async () => {
 
-window.updateQty = (i, val) => {
-  cart[i].qty = +val;
-  renderInvoice();
-};
-
-window.removeItem = (i) => {
-  cart.splice(i, 1);
-  renderInvoice();
-};
-
-/* ===== Save Sale ===== */
-saveBtn.onclick = async () => {
-  if (cart.length === 0) {
-    alert("الفاتورة فاضية");
+  if (invoiceItems.length === 0) {
+    alert("الفاتورة فارغة");
     return;
   }
 
-  if (paymentType.value === "credit" && !customerInput.value) {
-    alert("اسم العميل إجباري في البيع الآجل");
-    return;
+  const total = Number(finalTotalEl.textContent);
+  const type = paymentType.value;
+
+  let cash = 0;
+  let transfer = 0;
+  let customerName = "";
+
+  if (type === "cash") {
+    cash = total;
   }
 
+  if (type === "transfer") {
+    transfer = total;
+  }
+
+  if (type === "credit") {
+    customerName = document.getElementById("customerName").value;
+    if (!customerName) {
+      alert("اكتب اسم العميل");
+      return;
+    }
+  }
+
+  if (type === "mixed") {
+    cash = Number(document.getElementById("cashAmount").value || 0);
+    transfer = Number(document.getElementById("transferAmount").value || 0);
+
+    if (cash + transfer !== total) {
+      alert("مجموع المبالغ لا يساوي الإجمالي");
+      return;
+    }
+  }
+
+  // 1️⃣ حفظ الفاتورة
   await addDoc(collection(db, "sales"), {
-    customer: customerInput.value || "نقدي",
-    paymentType: paymentType.value,
-    items: cart,
-    total: +totalEl.textContent,
-    createdAt: Timestamp.now()
+    items: invoiceItems,
+    total,
+    paymentType: type,
+    cashAmount: cash,
+    transferAmount: transfer,
+    customerName,
+    createdAt: new Date()
   });
 
-  alert("تم حفظ الفاتورة");
-  cart = [];
-  renderInvoice();
-};
+  // 2️⃣ تحديث الخزنة
+  const treasuryRef = doc(db, "treasury", "main");
 
+  await updateDoc(treasuryRef, {
+    cash: increment(cash),
+    transfer: increment(transfer),
+    updatedAt: new Date()
+  });
+
+  // 3️⃣ الآجل على العميل
+  if (type === "credit") {
+    await addDoc(collection(db, "customers"), {
+      name: customerName,
+      balance: total,
+      createdAt: new Date()
+    });
+  }
+
+  alert("✔ تم تسجيل البيع والخزنة");
+
+  invoiceItems = [];
+  renderInvoice();
+  renderPaymentDetails();
+};
 /* ===== Print ===== */
 printBtn.onclick = () => {
   window.print();
