@@ -1,29 +1,715 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <title>تسجيل الدخول</title>
-  <link rel="stylesheet" href="css/login.css">
-</head>
-<body>
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  LayoutDashboard, 
+  ShoppingCart, 
+  Package, 
+  Users, 
+  BarChart3, 
+  Settings, 
+  Truck, 
+  MapPin, 
+  Plus, 
+  Search, 
+  Sun, 
+  Moon, 
+  LogOut, 
+  Printer, 
+  Save, 
+  AlertTriangle,
+  CreditCard,
+  UserPlus
+} from 'lucide-react';
+import { initializeApp } from 'firebase/app';
+import { 
+  getFirestore, 
+  collection, 
+  doc, 
+  setDoc, 
+  addDoc, 
+  onSnapshot, 
+  updateDoc, 
+  query, 
+  orderBy,
+  where,
+  serverTimestamp,
+  increment
+} from 'firebase/firestore';
+import { 
+  getAuth, 
+  signInAnonymously, 
+  signInWithCustomToken,
+  onAuthStateChanged 
+} from 'firebase/auth';
 
-<div class="login-box">
-  <h2>POS System</h2>
+// --- Configuration & Firebase Setup ---
+const firebaseConfig = JSON.parse(__firebase_config);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'sales-pos-saas-001';
 
-  <input type="email" id="email" placeholder="البريد الإلكتروني">
-  <input type="password" id="password" placeholder="كلمة المرور">
+// --- Main App Component ---
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [darkMode, setDarkMode] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [cart, setCart] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  <label class="remember">
-    <input type="checkbox" id="remember">
-    تذكرني
-  </label>
+  // --- RULE 3: Auth Before Queries ---
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (err) {
+        console.error("Auth Error:", err);
+      }
+    };
+    initAuth();
+    
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
-  <button id="loginBtn">تسجيل الدخول</button>
-  <button id="registerBtn" class="secondary">إنشاء حساب</button>
+  // --- Data Fetching (Guarded by User State) ---
+  useEffect(() => {
+    // Crucial: Guard every Firestore operation with if (!user) return;
+    if (!user) return;
 
-  <p id="msg"></p>
-</div>
+    // Use Rule 1 Paths: /artifacts/{appId}/public/data/{collectionName}
+    const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
+    const ordersRef = collection(db, 'artifacts', appId, 'public', 'data', 'orders');
+    const customersRef = collection(db, 'artifacts', appId, 'public', 'data', 'customers');
 
-<script type="module" src="js/login.js"></script>
-</body>
-</html>
+    // Add error callbacks to onSnapshot to prevent silent failures
+    const unsubProducts = onSnapshot(productsRef, 
+      (snapshot) => {
+        setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      },
+      (error) => console.error("Products error:", error)
+    );
+
+    const unsubOrders = onSnapshot(ordersRef, 
+      (snapshot) => {
+        setOrders(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      },
+      (error) => console.error("Orders error:", error)
+    );
+
+    const unsubCustomers = onSnapshot(customersRef, 
+      (snapshot) => {
+        setCustomers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      },
+      (error) => console.error("Customers error:", error)
+    );
+
+    return () => {
+      unsubProducts();
+      unsubOrders();
+      unsubCustomers();
+    };
+  }, [user]);
+
+  // Actions
+  const addToCart = (product) => {
+    if (product.stock <= 0) return;
+    setCart(prev => {
+      const existing = prev.find(item => item.id === product.id);
+      if (existing) {
+        return prev.map(item => item.id === product.id ? { ...item, qty: item.qty + 1 } : item);
+      }
+      return [...prev, { ...product, qty: 1 }];
+    });
+  };
+
+  const processSale = async (customerName = "عميل نقدي") => {
+    if (!user || cart.length === 0) return;
+    const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    
+    const orderData = {
+      items: cart,
+      total,
+      customer: customerName,
+      timestamp: serverTimestamp(),
+      status: 'completed',
+      type: 'pos_sale',
+      userId: user.uid
+    };
+
+    try {
+      const ordersRef = collection(db, 'artifacts', appId, 'public', 'data', 'orders');
+      await addDoc(ordersRef, orderData);
+      
+      // Update Stock
+      for (const item of cart) {
+        const productRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', item.id);
+        await updateDoc(productRef, { stock: increment(-item.qty) });
+      }
+
+      setCart([]);
+      alert("تمت العملية بنجاح وطباعة الفاتورة...");
+    } catch (err) {
+      console.error("Sale error:", err);
+    }
+  };
+
+  if (loading) return (
+    <div className="h-screen flex items-center justify-center bg-gray-100 dark:bg-slate-900">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+        <p className="text-gray-600 dark:text-gray-400 font-bold">جاري المصادقة والاتصال...</p>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className={`${darkMode ? 'dark' : ''} font-sans`} dir="rtl">
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100 flex overflow-hidden">
+        
+        {/* Sidebar - Desktop */}
+        <aside className="w-64 bg-white dark:bg-slate-800 border-l border-gray-200 dark:border-slate-700 hidden lg:flex flex-col shadow-sm">
+          <div className="p-6 border-b border-gray-100 dark:border-slate-700 flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">S</div>
+            <div>
+              <h1 className="font-bold text-lg leading-tight">سمارت سيستم</h1>
+              <span className="text-xs text-blue-500 font-medium">SaaS Cloud POS</span>
+            </div>
+          </div>
+          
+          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+            <NavItem icon={<LayoutDashboard size={20}/>} label="لوحة التحكم" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
+            <NavItem icon={<ShoppingCart size={20}/>} label="نقطة البيع (POS)" active={activeTab === 'pos'} onClick={() => setActiveTab('pos')} />
+            <NavItem icon={<Package size={20}/>} label="المخزون والأصناف" active={activeTab === 'inventory'} onClick={() => setActiveTab('inventory')} />
+            <NavItem icon={<Users size={20}/>} label="العملاء والموردين" active={activeTab === 'customers'} onClick={() => setActiveTab('customers')} />
+            <NavItem icon={<Truck size={20}/>} label="تطبيق المندوبين" active={activeTab === 'mobile-agent'} onClick={() => setActiveTab('mobile-agent')} />
+            <NavItem icon={<BarChart3 size={20}/>} label="التقارير المالية" active={activeTab === 'reports'} onClick={() => setActiveTab('reports')} />
+            <div className="pt-4 mt-4 border-t border-gray-100 dark:border-slate-700">
+              <NavItem icon={<Settings size={20}/>} label="الإعدادات" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
+              <NavItem icon={<CreditCard size={20}/>} label="الاشتراك" active={activeTab === 'billing'} onClick={() => setActiveTab('billing')} />
+            </div>
+          </nav>
+
+          <div className="p-4 border-t border-gray-100 dark:border-slate-700">
+            <button 
+              onClick={() => setDarkMode(!darkMode)}
+              className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+            >
+              {darkMode ? <Sun size={20}/> : <Moon size={20}/>}
+              <span>{darkMode ? 'الوضع الفاتح' : 'الوضع الداكن'}</span>
+            </button>
+          </div>
+        </aside>
+
+        {/* Main Content Area */}
+        <main className="flex-1 flex flex-col h-screen relative overflow-hidden">
+          
+          {/* Top Header */}
+          <header className="h-16 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-6 flex items-center justify-between sticky top-0 z-10">
+            <div className="flex items-center gap-4">
+              <h2 className="font-semibold text-xl">
+                {activeTab === 'dashboard' && 'نظرة عامة'}
+                {activeTab === 'pos' && 'نقطة البيع السريع'}
+                {activeTab === 'inventory' && 'إدارة المستودع'}
+                {activeTab === 'mobile-agent' && 'محاكي تطبيق المندوبين'}
+                {activeTab === 'reports' && 'التقارير والأرباح'}
+              </h2>
+              <div className="hidden md:flex bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-bold">
+                متصل مباشر (EGP)
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="text-left hidden sm:block">
+                <p className="text-sm font-bold">أحمد علي (المدير)</p>
+                <p className="text-xs text-gray-500">مؤسسة الحلول التقنية</p>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                <Users size={20}/>
+              </div>
+            </div>
+          </header>
+
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+            {activeTab === 'dashboard' && <DashboardView orders={orders} products={products} />}
+            {activeTab === 'pos' && (
+              <POSView 
+                products={products} 
+                cart={cart} 
+                addToCart={addToCart} 
+                setCart={setCart} 
+                processSale={processSale} 
+              />
+            )}
+            {activeTab === 'inventory' && <InventoryView products={products} db={db} appId={appId} user={user} />}
+            {activeTab === 'mobile-agent' && <MobileAgentApp products={products} db={db} appId={appId} user={user} />}
+            {activeTab === 'reports' && <ReportsView orders={orders} />}
+            {activeTab === 'settings' && <SettingsView />}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+// --- Sub-Components ---
+
+function NavItem({ icon, label, active, onClick }) {
+  return (
+    <button 
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+        active 
+          ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none' 
+          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700'
+      }`}
+    >
+      {icon}
+      <span className="font-medium">{label}</span>
+    </button>
+  );
+}
+
+function DashboardView({ orders, products }) {
+  const stats = useMemo(() => {
+    const totalSales = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+    const lowStock = products.filter(p => (p.stock || 0) < 10).length;
+    return { totalSales, orderCount: orders.length, lowStock };
+  }, [orders, products]);
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard title="إجمالي المبيعات" value={`${stats.totalSales.toLocaleString()} ج.م`} icon={<BarChart3 className="text-blue-500"/>} trend="+12%" />
+        <StatCard title="عدد العمليات" value={stats.orderCount} icon={<ShoppingCart className="text-green-500"/>} trend="+5%" />
+        <StatCard title="أصناف قاربت للنفاذ" value={stats.lowStock} icon={<AlertTriangle className="text-orange-500"/>} color="text-orange-600" />
+        <StatCard title="العملاء النشطون" value="152" icon={<Users className="text-purple-500"/>} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
+          <h3 className="font-bold mb-4">أحدث العمليات</h3>
+          <div className="space-y-4">
+            {orders.slice(0, 5).map(order => (
+              <div key={order.id} className="flex items-center justify-between p-3 border-b border-gray-50 dark:border-slate-700 last:border-0">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gray-100 dark:bg-slate-700 rounded-lg"><ShoppingCart size={16}/></div>
+                  <div>
+                    <p className="text-sm font-bold">{order.customer || 'عميل نقدي'}</p>
+                    <p className="text-xs text-gray-500">
+                      {order.timestamp ? new Date(order.timestamp.seconds * 1000).toLocaleString('ar-EG') : 'جاري المعالجة...'}
+                    </p>
+                  </div>
+                </div>
+                <p className="font-bold text-blue-600">{order.total} ج.م</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
+          <h3 className="font-bold mb-4">تنبيهات المخزون</h3>
+          <div className="space-y-4">
+            {products.filter(p => (p.stock || 0) < 10).slice(0, 5).map(product => (
+              <div key={product.id} className="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-900/20 rounded-xl">
+                <span className="font-medium">{product.name}</span>
+                <span className="px-3 py-1 bg-white dark:bg-slate-800 rounded-full text-xs font-bold text-orange-600">
+                  متبقي {product.stock} قطع
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ title, value, icon, trend, color = "text-gray-900 dark:text-white" }) {
+  return (
+    <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
+      <div className="flex justify-between items-start mb-4">
+        <div className="p-3 bg-gray-50 dark:bg-slate-700 rounded-xl">{icon}</div>
+        {trend && <span className="text-green-500 text-xs font-bold">{trend}</span>}
+      </div>
+      <p className="text-gray-500 dark:text-gray-400 text-sm mb-1">{title}</p>
+      <h4 className={`text-2xl font-bold ${color}`}>{value}</h4>
+    </div>
+  );
+}
+
+function POSView({ products, cart, addToCart, setCart, processSale }) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+  return (
+    <div className="flex h-full gap-6 flex-col lg:flex-row">
+      <div className="flex-[2] flex flex-col gap-4">
+        <div className="relative">
+          <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" size={20}/>
+          <input 
+            type="text" 
+            placeholder="ابحث عن صنف أو كود باركود..." 
+            className="w-full pr-12 pl-4 py-3 rounded-xl border-0 ring-1 ring-gray-200 dark:ring-slate-700 bg-white dark:bg-slate-800"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto">
+          {filteredProducts.map(p => (
+            <button 
+              key={p.id}
+              onClick={() => addToCart(p)}
+              disabled={(p.stock || 0) <= 0}
+              className={`p-4 bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 text-right hover:shadow-md transition-all group ${(p.stock || 0) <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <div className="h-24 bg-gray-50 dark:bg-slate-700 rounded-xl mb-3 flex items-center justify-center text-gray-300">
+                <Package size={40}/>
+              </div>
+              <h4 className="font-bold text-sm mb-1 line-clamp-1 group-hover:text-blue-600">{p.name}</h4>
+              <p className="text-blue-600 font-bold">{p.price} ج.م</p>
+              <p className="text-[10px] text-gray-500 mt-1">المخزون: {p.stock || 0}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex-1 bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col shadow-xl">
+        <div className="p-4 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center">
+          <h3 className="font-bold flex items-center gap-2">
+            <ShoppingCart size={18}/> السلة الحالية
+          </h3>
+          <button onClick={() => setCart([])} className="text-xs text-red-500 font-bold">إفراغ</button>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {cart.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-gray-400 opacity-50">
+              <ShoppingCart size={48} className="mb-2"/>
+              <p>السلة فارغة</p>
+            </div>
+          ) : (
+            cart.map(item => (
+              <div key={item.id} className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-bold">{item.name}</p>
+                  <p className="text-xs text-gray-500">{item.qty} × {item.price} ج.م</p>
+                </div>
+                <div className="flex items-center gap-3">
+                   <button onClick={() => {
+                     setCart(prev => prev.map(i => i.id === item.id ? {...i, qty: Math.max(0, i.qty - 1)} : i).filter(i => i.qty > 0))
+                   }} className="w-6 h-6 rounded bg-gray-100 dark:bg-slate-700 flex items-center justify-center">-</button>
+                   <span className="text-sm font-bold">{item.qty}</span>
+                   <button onClick={() => {
+                     setCart(prev => prev.map(i => i.id === item.id ? {...i, qty: i.qty + 1} : i))
+                   }} className="w-6 h-6 rounded bg-gray-100 dark:bg-slate-700 flex items-center justify-center">+</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="p-6 bg-gray-50 dark:bg-slate-700/50 rounded-b-2xl border-t border-gray-100 dark:border-slate-700">
+          <div className="flex justify-between text-lg font-bold mb-4">
+            <span>الإجمالي:</span>
+            <span className="text-blue-600">{total.toLocaleString()} ج.م</span>
+          </div>
+          <button 
+            disabled={cart.length === 0}
+            onClick={() => processSale()}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-200 dark:shadow-none"
+          >
+            <Printer size={20}/> تأكيد ودفع
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function InventoryView({ products, db, appId, user }) {
+  const [isAdding, setIsAdding] = useState(false);
+  const [newProd, setNewProd] = useState({ name: "", price: "", stock: "", category: "عام" });
+
+  const saveProduct = async () => {
+    if (!user || !newProd.name || !newProd.price) return;
+    try {
+      const prodRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
+      await addDoc(prodRef, {
+        ...newProd,
+        price: Number(newProd.price),
+        stock: Number(newProd.stock),
+        timestamp: serverTimestamp(),
+        createdBy: user.uid
+      });
+      setIsAdding(false);
+      setNewProd({ name: "", price: "", stock: "", category: "عام" });
+    } catch (e) { console.error("Error adding product:", e); }
+  };
+
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 overflow-hidden shadow-sm">
+      <div className="p-6 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center">
+        <h3 className="font-bold">مخزون المستودع الرئيسي</h3>
+        <button 
+          onClick={() => setIsAdding(true)}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2"
+        >
+          <Plus size={16}/> إضافة صنف جديد
+        </button>
+      </div>
+
+      {isAdding && (
+        <div className="p-6 bg-gray-50 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600 grid grid-cols-1 md:grid-cols-4 gap-4 animate-in fade-in duration-300">
+          <input placeholder="اسم المنتج" className="p-2 rounded border dark:bg-slate-800 dark:border-slate-600" value={newProd.name} onChange={e => setNewProd({...newProd, name: e.target.value})} />
+          <input placeholder="السعر (ج.م)" type="number" className="p-2 rounded border dark:bg-slate-800 dark:border-slate-600" value={newProd.price} onChange={e => setNewProd({...newProd, price: e.target.value})} />
+          <input placeholder="الكمية الافتتاحية" type="number" className="p-2 rounded border dark:bg-slate-800 dark:border-slate-600" value={newProd.stock} onChange={e => setNewProd({...newProd, stock: e.target.value})} />
+          <div className="flex gap-2">
+            <button onClick={saveProduct} className="flex-1 bg-green-600 text-white rounded p-2"><Save size={16} className="inline ml-1"/> حفظ</button>
+            <button onClick={() => setIsAdding(false)} className="px-4 bg-gray-300 dark:bg-slate-600 rounded">إلغاء</button>
+          </div>
+        </div>
+      )}
+
+      <table className="w-full text-right">
+        <thead className="bg-gray-50 dark:bg-slate-700 text-gray-500 text-sm">
+          <tr>
+            <th className="p-4 font-semibold">الصنف</th>
+            <th className="p-4 font-semibold">الفئة</th>
+            <th className="p-4 font-semibold text-center">المخزون</th>
+            <th className="p-4 font-semibold">السعر</th>
+            <th className="p-4 font-semibold">الحالة</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+          {products.map(p => (
+            <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-slate-700/50">
+              <td className="p-4 font-bold">{p.name}</td>
+              <td className="p-4 text-sm text-gray-500">{p.category}</td>
+              <td className="p-4 text-center">
+                <span className={`px-3 py-1 rounded-full text-xs font-bold ${p.stock < 10 ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'}`}>
+                  {p.stock || 0}
+                </span>
+              </td>
+              <td className="p-4 font-bold text-blue-600">{p.price} ج.م</td>
+              <td className="p-4">
+                {(p.stock || 0) <= 0 ? (
+                  <span className="text-red-500 text-xs font-bold flex items-center gap-1"><AlertTriangle size={12}/> نفذ</span>
+                ) : (
+                  <span className="text-green-500 text-xs font-bold">متوفر</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function MobileAgentApp({ products, db, appId, user }) {
+  const [view, setView] = useState('home');
+  const [agentCart, setAgentCart] = useState([]);
+  const [location, setLocation] = useState("جاري جلب الموقع...");
+
+  useEffect(() => {
+    const locations = ["القاهرة - الدقي", "الجيزة - شارع الهرم", "القاهرة - مدينة نصر"];
+    setLocation(locations[Math.floor(Math.random() * locations.length)]);
+  }, []);
+
+  const total = agentCart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+  const submitOrder = async () => {
+    if (!user) return;
+    const orderData = {
+      items: agentCart,
+      total,
+      agent: "مندوب 01",
+      location,
+      timestamp: serverTimestamp(),
+      status: 'pending',
+      type: 'agent_order',
+      userId: user.uid
+    };
+    try {
+      const ordersRef = collection(db, 'artifacts', appId, 'public', 'data', 'orders');
+      await addDoc(ordersRef, orderData);
+      setAgentCart([]);
+      setView('home');
+      alert("تم إرسال الطلب للمخزن بنجاح!");
+    } catch (e) { console.error("Agent order error:", e); }
+  };
+
+  return (
+    <div className="flex justify-center">
+      <div className="w-full max-w-[380px] h-[700px] bg-slate-100 dark:bg-slate-900 rounded-[3rem] border-[8px] border-slate-800 relative overflow-hidden shadow-2xl flex flex-col">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-slate-800 rounded-b-2xl z-20"></div>
+        <div className="bg-blue-600 p-6 pt-10 text-white shrink-0">
+          <div className="flex justify-between items-center mb-2">
+            <h4 className="font-bold">تطبيق المندوبين</h4>
+            <div className="flex items-center gap-1 text-[10px] bg-white/20 px-2 py-0.5 rounded-full">
+              <MapPin size={10}/> {location}
+            </div>
+          </div>
+          <p className="text-xs opacity-80">أهلاً، {user?.uid.substring(0, 6) || 'مندوب 01'}</p>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 bg-white dark:bg-slate-800">
+          {view === 'home' && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <button onClick={() => setView('new-order')} className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex flex-col items-center gap-2 border border-blue-100 dark:border-blue-800">
+                  <Plus className="text-blue-600"/>
+                  <span className="text-xs font-bold">طلب جديد</span>
+                </button>
+                <button className="p-4 bg-purple-50 dark:bg-purple-900/30 rounded-2xl flex flex-col items-center gap-2 border border-purple-100 dark:border-purple-800">
+                  <UserPlus className="text-purple-600"/>
+                  <span className="text-xs font-bold">إضافة عميل</span>
+                </button>
+              </div>
+              <h5 className="font-bold text-sm">أحدث الطلبات المرسلة</h5>
+              <div className="space-y-2">
+                {[1, 2].map(i => (
+                  <div key={i} className="p-3 bg-gray-50 dark:bg-slate-700 rounded-xl flex justify-between items-center">
+                    <div>
+                      <p className="text-xs font-bold">عميل #024{i}</p>
+                      <p className="text-[10px] text-gray-500">منذ ساعتين</p>
+                    </div>
+                    <span className="text-xs font-bold text-green-600">تم الاستلام</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {view === 'new-order' && (
+            <div className="flex flex-col h-full">
+              <div className="flex-1 space-y-4">
+                <h5 className="font-bold text-sm">اختر المنتجات</h5>
+                {products.slice(0, 5).map(p => (
+                  <div key={p.id} className="flex justify-between items-center p-3 border rounded-xl dark:border-slate-700">
+                    <div>
+                      <p className="text-[10px] font-bold">{p.name}</p>
+                      <p className="text-[10px] text-blue-600 font-bold">{p.price} ج.م</p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        const exists = agentCart.find(i => i.id === p.id);
+                        if(exists) setAgentCart(prev => prev.map(i => i.id === p.id ? {...i, qty: i.qty + 1} : i));
+                        else setAgentCart(prev => [...prev, {...p, qty: 1}]);
+                      }}
+                      className="bg-blue-600 text-white p-1 rounded"
+                    >
+                      <Plus size={14}/>
+                    </button>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="pt-4 border-t sticky bottom-0 bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700 mt-4">
+                <div className="flex justify-between mb-2">
+                  <span className="text-xs">الإجمالي:</span>
+                  <span className="font-bold text-xs">{total} ج.م</span>
+                </div>
+                <button 
+                  onClick={submitOrder}
+                  disabled={agentCart.length === 0}
+                  className="w-full bg-blue-600 text-white py-2 rounded-xl font-bold text-xs disabled:opacity-50"
+                >
+                  إرسال الطلب (أونلاين)
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="h-16 border-t border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 flex justify-around items-center px-4">
+          <button onClick={() => setView('home')} className={`flex flex-col items-center ${view === 'home' ? 'text-blue-600' : 'text-gray-400'}`}>
+            <LayoutDashboard size={20}/>
+            <span className="text-[10px] font-bold">الرئيسية</span>
+          </button>
+          <button onClick={() => setView('new-order')} className={`flex flex-col items-center ${view === 'new-order' ? 'text-blue-600' : 'text-gray-400'}`}>
+            <ShoppingCart size={20}/>
+            <span className="text-[10px] font-bold">الطلبات</span>
+          </button>
+          <button className="flex flex-col items-center text-gray-400">
+            <Users size={20}/>
+            <span className="text-[10px] font-bold">العملاء</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ReportsView({ orders }) {
+  const totalIncome = orders.reduce((s, o) => s + (o.total || 0), 0);
+  return (
+    <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm space-y-8">
+      <div className="flex justify-between items-end">
+        <div>
+          <h2 className="text-2xl font-bold mb-1">التقرير المالي العام</h2>
+          <p className="text-gray-500">الفترة: آخر 30 يوم</p>
+        </div>
+        <div className="text-left">
+          <p className="text-sm text-gray-500">إجمالي الإيرادات</p>
+          <h3 className="text-3xl font-black text-blue-600">{totalIncome.toLocaleString()} <span className="text-lg">ج.م</span></h3>
+        </div>
+      </div>
+
+      <div className="h-48 bg-gray-50 dark:bg-slate-700 rounded-3xl flex items-end justify-around p-6 gap-2">
+        {[40, 70, 45, 90, 65, 80, 50].map((h, i) => (
+          <div key={i} className="w-full flex flex-col items-center gap-2">
+            <div 
+              style={{ height: `${h}%` }} 
+              className="w-full max-w-[40px] bg-blue-500 rounded-t-lg shadow-inner"
+            />
+            <span className="text-[10px] text-gray-400">اليوم {i+1}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SettingsView() {
+  return (
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
+        <h3 className="font-bold text-lg mb-6 pb-2 border-b border-gray-100 dark:border-slate-700">إعدادات المتجر</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">اسم المؤسسة</label>
+            <input className="w-full p-2 rounded-lg border dark:bg-slate-700 dark:border-slate-600" defaultValue="مؤسسة الحلول التقنية" />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">الرقم الضريبي</label>
+            <input className="w-full p-2 rounded-lg border dark:bg-slate-700 dark:border-slate-600" defaultValue="123-456-789" />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">العملة الافتراضية</label>
+            <select className="w-full p-2 rounded-lg border dark:bg-slate-700 dark:border-slate-600">
+              <option>الجنيه المصري (EGP)</option>
+              <option>الدولار الأمريكي (USD)</option>
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">تنبيه المخزون المنخفض</label>
+            <input type="number" className="w-full p-2 rounded-lg border dark:bg-slate-700 dark:border-slate-600" defaultValue="10" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
